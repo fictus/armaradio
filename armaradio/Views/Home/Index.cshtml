@@ -1,19 +1,57 @@
-﻿@inject armaradio.Repositories.IMusicRepo _musicRepo
-
+﻿
 @{
     ViewData["Title"] = "Arma Radio";
-
-    List<armaradio.Models.TrackDataItem> topTracks = _musicRepo.Tracks_GetTop50Songs();
 }
 
-<div class="text-center">
-    <h1 class="display-4">Arma Radio</h1>
+<link href="~/css/home.css" rel="stylesheet" asp-append-version="true" />
+
+<div class="text-left">
+    <h1 class="display-6">Arma Radio</h1>
 </div>
 <div class="mb-4">
-    <strong>Top 50 user-picked Songs</strong>
+    <button id="btnMain_PlayTop50UserPicked" class="btn btn-primary mr-3">Top 50 user-picked Songs</button>
+    <button id="btnMain_UploadPlaylist" type="button" class="btn btn-primary mr-3">Paste Playlist</button>
 </div>
 
-@foreach (var track in topTracks)
-{
-    <div>@($"{track.artist_name} - {track.track_name}")</div>
-}
+<div class="spacer-bottom"></div>
+<div class="bottom-controls">
+    <div class="bottom-backcolor"></div>
+    <div class="container relative">
+        <div class="row">
+            <div class="col-md-5">
+                <div id="dvMainPlay_currentlyPlaying">
+                    <div class="iframe-holder"></div>
+                </div>
+            </div>
+            <div class="col-md-7">
+                <div class="relative">
+                    <div class="list-container p-4">
+                        <table id="tblMainPlayList"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="dvPopupPastePlaylist" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Paste Playlist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Separated "artist" and "song" by "--" (example "Beatles -- Yesterday"):</p>
+                <textarea id="txtPastedPlaylist" class="form-control"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button id="btnPopup_Apply" type="button" class="btn btn-primary">Apply</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script src="~/js/home.js" defer asp-append-version="true"></script>

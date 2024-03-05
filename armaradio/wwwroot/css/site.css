@@ -20,3 +20,23 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.align-left {
+    text-align: left;
+}
+.align-right {
+    text-align: right;
+}
+.align-center {
+    text-align: center;
+}
+.relative {
+    position: relative;
+}
+
+.font-sz-0 {
+    font-size: 0;
+}
+.font-sz-11pt {
+    font-size: 11pt;
+}
