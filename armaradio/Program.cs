@@ -1,7 +1,12 @@
+using armaradio.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddTransient<IDapperHelper, DapperHelper>();
+builder.Services.AddTransient<IMusicRepo, MusicRepo>();
 
 var app = builder.Build();
 

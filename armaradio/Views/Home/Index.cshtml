@@ -1,8 +1,19 @@
-﻿@{
+﻿@inject armaradio.Repositories.IMusicRepo _musicRepo
+
+@{
     ViewData["Title"] = "Arma Radio";
+
+    List<armaradio.Models.TrackDataItem> topTracks = _musicRepo.Tracks_GetTop50Songs();
 }
 
 <div class="text-center">
     <h1 class="display-4">Arma Radio</h1>
-    <p>(coming soon)</p>
 </div>
+<div class="mb-4">
+    <strong>Top 50 user-picked Songs</strong>
+</div>
+
+@foreach (var track in topTracks)
+{
+    <div>@($"{track.artist_name} - {track.track_name}")</div>
+}
