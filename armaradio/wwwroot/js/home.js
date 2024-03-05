@@ -6,6 +6,8 @@ function mainload_attacheEvents() {
     $("#dvPopupPastePlaylist").modal();
 
     $("#btnMain_PlayTop50UserPicked").on("click", function () {
+        armaradio.masterPageWait(true);
+
         armaradio.masterAJAXGet({}, "Music", "GetTop50UserPickedSongs")
             .then(function (response) {
                 attachListToTable(response);
@@ -21,6 +23,8 @@ function mainload_attacheEvents() {
         let playlistTxt = $.trim($("#txtPastedPlaylist").val());
 
         if (playlistTxt != "") {
+            armaradio.masterPageWait(true);
+
             armaradio.masterAJAXPost({
                 PlayList: playlistTxt
             }, "Music", "UploadCustomPlaylist")
@@ -60,12 +64,16 @@ function attachListToTable(response) {
 
         $("#tblMainPlayList").replaceWith(tblPlaylist);
         topSongsAttachClickEvents(true);
+    } else {
+        armaradio.masterPageWait(false);
     }
 }
 
 function topSongsAttachClickEvents(startPlaying) {
     $("#tblMainPlayList").find("button.btn-play-top-song").each(function () {
         $(this).on("click", function () {
+            armaradio.masterPageWait(true);
+
             let currentRow = $(this).closest("tr");
             let artistName = currentRow.attr("data-artist");
             let songName = currentRow.attr("data-song");
@@ -79,7 +87,6 @@ function topSongsAttachClickEvents(startPlaying) {
             }, "Music", "GetUrlByArtistSongName")
                 .then(function (response) {
                     if (response) {
-
                         if (response.hasVideo) {
                             let newIframe = $("<iframe></iframe");
                             newIframe.attr({
@@ -102,6 +109,8 @@ function topSongsAttachClickEvents(startPlaying) {
                                     "onStateChange": onPlayerStateChange
                                 }
                             });
+
+                            armaradio.masterPageWait(false);
                         } else {
                             let newIframe = $("<div></div");
                             newIframe.attr({
@@ -117,6 +126,8 @@ function topSongsAttachClickEvents(startPlaying) {
                             setTimeout(function () {
                                 playerPlayNext();
                             }, 1500);
+
+                            armaradio.masterPageWait(false);
                         }
                     }
                 });
@@ -126,6 +137,8 @@ function topSongsAttachClickEvents(startPlaying) {
     if (startPlaying) {
         $("#tblMainPlayList").find("button.btn-play-top-song").first().trigger("click");
     }
+
+    armaradio.masterPageWait(false);
 }
 
 function onPlayerReady(e) {
@@ -135,6 +148,8 @@ function onPlayerReady(e) {
 function onPlayerStateChange(e) {
     if (e.data == YT.PlayerState.ENDED) {
         playerPlayNext();
+    } else {
+        console.log(e);
     }
 }
 

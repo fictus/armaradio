@@ -21,6 +21,32 @@ body {
   margin-bottom: 60px;
 }
 
+div.master-page-wait {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+div.master-page-wait .spinner-backcolor {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    opacity: 0.5;
+}
+
+div.master-page-wait .spinner-border {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -22px;
+    margin-left: -22px;
+}
+
 .align-left {
     text-align: left;
 }

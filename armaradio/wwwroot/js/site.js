@@ -121,6 +121,16 @@ function isJSON(str) {
 
 var armaradio = {
     /************************************************
+        masterPageWait
+    ************************************************/
+    masterPageWait: function (show) {
+        if (show) {
+            $("div.master-page-wait").css("display", "");
+        } else {
+            $("div.master-page-wait").css("display", "none");
+        }
+    },
+    /************************************************
         isValidJsonObject
     ************************************************/
     isValidJsonObject: function (data) {
