@@ -106,7 +106,8 @@ function topSongsAttachClickEvents(startPlaying) {
                             let player = new YT.Player("armaMainPlayer", {
                                 events: {
                                     "onReady": onPlayerReady,
-                                    "onStateChange": onPlayerStateChange
+                                    "onStateChange": onPlayerStateChange,
+                                    "onError": onPlayerError
                                 }
                             });
 
@@ -151,6 +152,12 @@ function onPlayerStateChange(e) {
     } else {
         console.log(e);
     }
+}
+
+function onPlayerError(e) {
+    console.log(e);
+
+    playerPlayNext();
 }
 
 function playerPlayNext() {
