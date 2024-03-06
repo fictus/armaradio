@@ -1,4 +1,6 @@
-﻿using armaradio.Models;
+﻿using AngleSharp.Dom;
+using AngleSharp.Html.Parser;
+using armaradio.Models;
 using armaradio.Models.Youtube;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -27,6 +29,62 @@ namespace armaradio.Repositories
         public List<TrackDataItem> Tracks_GetTop50Songs()
         {
             return _dapper.GetList<TrackDataItem>("radioconn", "Tracks_GetTop50UserFavorites");
+        }
+
+        public List<TrackDataItem> GetCurrentTop100()
+        {
+            List<TrackDataItem> returnItem = new List<TrackDataItem>();
+
+            string url = "https://www.billboard.com/charts/hot-100/";
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
+
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    string htmlContent;
+                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    {
+                        htmlContent = sr.ReadToEnd();
+                    }
+
+                    if (!string.IsNullOrEmpty(htmlContent))
+                    {
+                        var parser = new HtmlParser();
+                        var document = parser.ParseDocument(htmlContent);
+
+                        var chartHolder = document.QuerySelector("div.chart-results-list");
+
+                        var allDivs = chartHolder.QuerySelectorAll("div.o-chart-results-list-row-container");
+
+                        foreach (var div in allDivs)
+                        {
+                            try
+                            {
+                                var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
+                                string songName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
+                                string artistName = (dataHolder.QuerySelector("span").Text() ?? "").Trim();
+
+                                returnItem.Add(new TrackDataItem()
+                                {
+                                    artist_name = artistName,
+                                    track_name = songName,
+                                    tid = -1,
+                                    usability_score = 0
+                                });
+                            }
+                            catch (Exception ex)
+                            {
+
+                            }
+                        }
+                    }
+                }
+            }
+
+            return returnItem;
         }
 
         public string Youtube_GetUrlByArtistNameSongName(string artistName, string songName)

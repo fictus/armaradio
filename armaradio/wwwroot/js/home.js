@@ -5,6 +5,20 @@ $(document).ready(function () {
 function mainload_attacheEvents() {
     $("#dvPopupPastePlaylist").modal();
 
+    armaradio.masterAJAXGet({}, "Music", "GetCurrentTop100")
+        .then(function (response) {
+            attachListToTable(response, true);
+        });
+
+    $("#btnMain_PlayTop100").on("click", function () {
+        armaradio.masterPageWait(true);
+
+        armaradio.masterAJAXGet({}, "Music", "GetCurrentTop100")
+            .then(function (response) {
+                attachListToTable(response);
+            });
+    });
+
     $("#btnMain_PlayTop50UserPicked").on("click", function () {
         armaradio.masterPageWait(true);
 
@@ -75,7 +89,7 @@ function performGeneralSearch() {
     }
 }
 
-function attachListToTable(response) {
+function attachListToTable(response, isPageLoad) {
     if (response && response.length) {
         let tblPlaylist = $("<table id=\"tblMainPlayList\"></table>");
 
@@ -100,7 +114,7 @@ function attachListToTable(response) {
         }
 
         $("#tblMainPlayList").replaceWith(tblPlaylist);
-        topSongsAttachClickEvents(true);
+        topSongsAttachClickEvents(!isPageLoad ? true : false);
     } else {
         armaradio.masterPageWait(false);
     }

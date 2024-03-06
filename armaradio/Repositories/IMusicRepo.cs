@@ -5,6 +5,7 @@ namespace armaradio.Repositories
 {
     public interface IMusicRepo
     {
+        List<TrackDataItem> GetCurrentTop100();
         List<ArtistDataItem> Artist_GetArtistList(string search);
         List<TrackDataItem> Tracks_GetTop50Songs();
         string Youtube_GetUrlByArtistNameSongName(string artistName, string songName);
