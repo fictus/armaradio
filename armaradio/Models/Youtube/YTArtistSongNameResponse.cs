@@ -43,5 +43,29 @@
     public class VideoRenderer
     {
         public string videoId { get; set; }
+        public Thumbnail thumbnail { get; set; }
+        public Title title { get; set; }
+    }
+
+    public class Thumbnail
+    {
+        public List<Thumbnails> thumbnails { get; set; }
+    }
+
+    public class Thumbnails
+    {
+        public string url { get; set; }
+        public int? width { get; set; }
+        public int? height { get; set; }
+    }
+
+    public class Title
+    {
+        public List<Runs> runs { get; set; }
+    }
+    
+    public class Runs
+    {
+        public string text { get; set; }
     }
 }

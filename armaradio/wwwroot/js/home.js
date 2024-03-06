@@ -36,6 +36,43 @@ function mainload_attacheEvents() {
                 });
         }
     });
+
+    $("#txtMainGeneralSearch").on("keyup", function (e) {
+        if (e.keyCode === 13) {
+            performGeneralSearch();
+        }
+    });
+
+    $("#btnMain_GeneralSearch").on("click", function () {
+        performGeneralSearch();
+    });
+
+    //armaradio.masterAJAXGet({
+    //    search: ""
+    //}, "Music", "GetArtistList")
+    //    .then(function (response) {
+    //        if (response && response.length) {
+                
+    //        }
+    //    });
+}
+
+function performGeneralSearch() {
+    let searchText = $.trim($("#txtMainGeneralSearch").val());
+
+    if (searchText != "") {
+        armaradio.masterPageWait(true);
+
+        armaradio.masterAJAXGet({
+            SearchText: searchText
+        }, "Music", "GeneralSearch")
+            .then(function (response) {
+                $("#dvPopupPastePlaylist").modal("hide");
+                $("#txtPastedPlaylist").val("");
+
+                attachListToTableFromGeneralSearch(response);
+            });
+    }
 }
 
 function attachListToTable(response) {
@@ -69,69 +106,130 @@ function attachListToTable(response) {
     }
 }
 
+function attachListToTableFromGeneralSearch(response) {
+    if (response && response.length) {
+        let tblPlaylist = $("<table id=\"tblMainPlayList\"></table>");
+
+        for (let i = 0; i < response.length; i++) {
+            tblPlaylist.append(
+                $("<tr></tr>").attr({
+                    "data-tid": "-1",
+                    "data-artist": response[i].artistName,
+                    "data-song": response[i].songName,
+                    "data-videoid": response[i].videoId,
+                    "data-thumbnailurl": JSON.stringify(response[i].thumbNail || "")
+                })
+            );
+
+            tblPlaylist.find("tr").last().append(
+                $("<td></td>").html(response[i].artistName)
+            );
+            tblPlaylist.find("tr").last().append(
+                $("<td></td>").html(response[i].songName)
+            );
+            tblPlaylist.find("tr").last().append(
+                $("<td></td>").append($("<button class=\"btn btn-primary font-sz-0 pt-0 pb-0 btn-play-top-song\"><span class=\"font-sz-11pt\">Play</span></button>"))
+            );
+        }
+
+        $("#tblMainPlayList").replaceWith(tblPlaylist);
+        topSongsAttachClickEvents(true);
+    } else {
+        armaradio.masterPageWait(false);
+    }
+}
+
 function topSongsAttachClickEvents(startPlaying) {
     $("#tblMainPlayList").find("button.btn-play-top-song").each(function () {
         $(this).on("click", function () {
             armaradio.masterPageWait(true);
 
             let currentRow = $(this).closest("tr");
-            let artistName = currentRow.attr("data-artist");
-            let songName = currentRow.attr("data-song");
+            let artistName = $.trim(currentRow.attr("data-artist"));
+            let songName = $.trim(currentRow.attr("data-song"));
+            let videoId = $.trim(currentRow.attr("data-videoid"));
 
             $("#tblMainPlayList").find("tr.now-playing").removeClass("now-playing");
             currentRow.addClass("now-playing");
 
-            armaradio.masterAJAXPost({
-                artistName: artistName,
-                songName: songName
-            }, "Music", "GetUrlByArtistSongName")
-                .then(function (response) {
-                    if (response) {
-                        if (response.hasVideo) {
-                            let newIframe = $("<iframe></iframe");
-                            newIframe.attr({
-                                "id": "armaMainPlayer",
-                                "class": "iframe-holder",
-                                "src": response.embedUrl,
-                                "width": "356", //560
-                                "height": "200", //315
-                                "frameborder": "0",
-                                "allow": "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
-                                "allowfullscreen": ""
-                            });
+            if (videoId != "") {
+                let newIframe = $("<iframe></iframe");
+                newIframe.attr({
+                    "id": "armaMainPlayer",
+                    "class": "iframe-holder",
+                    "src": "https://www.youtube.com/embed/" + videoId + "?enablejsapi=1",
+                    "width": "356", //560
+                    "height": "200", //315
+                    "frameborder": "0",
+                    "allow": "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
+                    "allowfullscreen": ""
+                });
 
-                            $("#dvMainPlay_currentlyPlaying").find(".iframe-holder").remove();
-                            $("#dvMainPlay_currentlyPlaying").append(newIframe);
+                $("#dvMainPlay_currentlyPlaying").find(".iframe-holder").remove();
+                $("#dvMainPlay_currentlyPlaying").append(newIframe);
 
-                            let player = new YT.Player("armaMainPlayer", {
-                                events: {
-                                    "onReady": onPlayerReady,
-                                    "onStateChange": onPlayerStateChange,
-                                    "onError": onPlayerError
-                                }
-                            });
-
-                            armaradio.masterPageWait(false);
-                        } else {
-                            let newIframe = $("<div></div");
-                            newIframe.attr({
-                                "id": "armaMainPlayer",
-                                "class": "iframe-holder"
-                            });
-
-                            newIframe.append($("<span class=\"lbl-not-found\"></span>").html("Song not found"));
-
-                            $("#dvMainPlay_currentlyPlaying").find(".iframe-holder").remove();
-                            $("#dvMainPlay_currentlyPlaying").append(newIframe);
-
-                            setTimeout(function () {
-                                playerPlayNext();
-                            }, 1500);
-
-                            armaradio.masterPageWait(false);
-                        }
+                let player = new YT.Player("armaMainPlayer", {
+                    events: {
+                        "onReady": onPlayerReady,
+                        "onStateChange": onPlayerStateChange,
+                        "onError": onPlayerError
                     }
                 });
+
+                armaradio.masterPageWait(false);
+            } else {
+                armaradio.masterAJAXPost({
+                    artistName: artistName,
+                    songName: songName
+                }, "Music", "GetUrlByArtistSongName")
+                    .then(function (response) {
+                        if (response) {
+                            if (response.hasVideo) {
+                                let newIframe = $("<iframe></iframe");
+                                newIframe.attr({
+                                    "id": "armaMainPlayer",
+                                    "class": "iframe-holder",
+                                    "src": response.embedUrl,
+                                    "width": "356", //560
+                                    "height": "200", //315
+                                    "frameborder": "0",
+                                    "allow": "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
+                                    "allowfullscreen": ""
+                                });
+
+                                $("#dvMainPlay_currentlyPlaying").find(".iframe-holder").remove();
+                                $("#dvMainPlay_currentlyPlaying").append(newIframe);
+
+                                let player = new YT.Player("armaMainPlayer", {
+                                    events: {
+                                        "onReady": onPlayerReady,
+                                        "onStateChange": onPlayerStateChange,
+                                        "onError": onPlayerError
+                                    }
+                                });
+
+                                armaradio.masterPageWait(false);
+                            } else {
+                                let newIframe = $("<div></div");
+                                newIframe.attr({
+                                    "id": "armaMainPlayer",
+                                    "class": "iframe-holder"
+                                });
+
+                                newIframe.append($("<span class=\"lbl-not-found\"></span>").html("Song not found"));
+
+                                $("#dvMainPlay_currentlyPlaying").find(".iframe-holder").remove();
+                                $("#dvMainPlay_currentlyPlaying").append(newIframe);
+
+                                setTimeout(function () {
+                                    playerPlayNext();
+                                }, 1500);
+
+                                armaradio.masterPageWait(false);
+                            }
+                        }
+                    });
+            }
         });
     });
 

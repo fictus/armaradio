@@ -1,5 +1,6 @@
 ﻿using armaradio.Models;
 using armaradio.Models.Request;
+using armaradio.Models.Youtube;
 using armaradio.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -14,6 +15,29 @@ namespace armaradio.Controllers
         )
         {
             _musicRepo = musicRepo;
+        }
+
+        [HttpGet]
+        public IActionResult GetArtistList(string seach)
+        {
+            try
+            {
+                List<ArtistDataItem> returnItem = _musicRepo.Artist_GetArtistList(seach) ?? new List<ArtistDataItem>();
+                var finalList = returnItem.Select(a =>
+                {
+                    return new
+                    {
+                        label = a.artist_name,
+                        value = a.id
+                    };
+                });
+
+                return new JsonResult(finalList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
         }
 
         [HttpGet]
@@ -54,6 +78,21 @@ namespace armaradio.Controllers
                     embedUrl = $"https://www.youtube.com/embed/{currentVideoId}?enablejsapi=1", //&autoplay=1
                     videoId = currentVideoId
                 });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GeneralSearch(string SearchText)
+        {
+            try
+            {
+                List<YTGeneralSearchDataItem> returnItem = _musicRepo.Youtube_PerformGeneralSearch(SearchText);
+
+                return new JsonResult(returnItem);
             }
             catch (Exception ex)
             {
