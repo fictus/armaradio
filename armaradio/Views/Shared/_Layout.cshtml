@@ -44,6 +44,32 @@
         </div>
     </div>
 
+    <div class="modal" id="dvMasterWarning" tabindex="99999" role="dialog">
+        <div class="modal-dialog master-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title error-main-title">Error</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table>
+                        <tr>
+                            <td>
+                                <img class="master-warning-image-type" src="../images/checkmark.png" />
+                            </td>
+                            <td>
+                                <span class="master-warning-message regular-font"></span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="master-warning-button-close btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @* <footer class="border-top footer text-muted">
         <div class="container">
             &copy; 2024 - armaradio  - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>

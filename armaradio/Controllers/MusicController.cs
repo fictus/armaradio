@@ -139,17 +139,19 @@ namespace armaradio.Controllers
 
                 for (int i = 0; i < allLines.Count; i++)
                 {
-                    string currentLine = allLines[i].Replace("--", "^");
-                    List<string> parts = currentLine.Split('^', StringSplitOptions.RemoveEmptyEntries).ToList();
-
-                    if (parts.Count >= 2)
+                    if (allLines[i].Contains("|"))
                     {
-                        returnItem.Add(new TrackDataItem()
+                        List<string> parts = allLines[i].Split('|', StringSplitOptions.RemoveEmptyEntries).ToList();
+
+                        if (parts.Count >= 2)
                         {
-                            tid = i,
-                            artist_name = parts[0].Trim(),
-                            track_name = parts[1].Trim()
-                        });
+                            returnItem.Add(new TrackDataItem()
+                            {
+                                tid = i,
+                                artist_name = parts[0].Trim(),
+                                track_name = parts[1].Trim()
+                            });
+                        }
                     }
                 }
 

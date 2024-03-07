@@ -1,4 +1,11 @@
-﻿
+﻿$(document).ready(function () {
+    pageMainAttachEvents();
+});
+
+function pageMainAttachEvents() {
+    $("#dvMasterWarning").modal();
+}
+
 function masterFixResponseErrorMessage(errorMsg) {
     let returnItem = "";
 
@@ -120,6 +127,93 @@ function isJSON(str) {
 }
 
 var armaradio = {
+    warningMsg: function(option, fadeoutTime, showCloseButton, onCloseEvent) {
+        /*
+        valid options:
+        -------------
+    
+        msg = (pass string value)
+        captionMsg = (pasas string value)
+        typeLayout = (red, green)
+    
+        */
+
+        let currentWarning = $("#dvMasterWarning");
+
+        if (showCloseButton) {
+            currentWarning.find(".master-warning-button-close").off("click");
+            currentWarning.find(".master-warning-button-close").on("click", function () {
+                currentWarning.stop().css({
+                    "opacity": "0"
+                });
+
+                currentWarning.modal("hide");
+
+                if (onCloseEvent) {
+                    onCloseEvent();
+                }
+
+                return false;
+            });
+
+            currentWarning.find(".master-warning-buttons").css("display", "");
+        } else {
+            currentWarning.attr("data-enableclickoutsidetohide", "1");
+
+            currentWarning.find(".master-warning-buttons").css("display", "none");
+        }
+
+        let isError = true;
+        if (currentWarning.data("timeOut")) {
+            clearTimeout(currentWarning.data("timeOut"));
+        }
+        if ("typeLayout" in option) {
+            if (option.typeLayout == "green") {
+                isError = false;
+                currentWarning.find(".master-warning-image-type").attr("src", ajaxPointCall + "/images/checkmark.png");
+            } else {
+                currentWarning.find(".master-warning-image-type").attr("src", ajaxPointCall + "/images/exclamation.png");
+            }
+        } else {
+            currentWarning.find(".master-warning-image-type").attr("src", ajaxPointCall + "/images/exclamation.png");
+        }
+        if (!("captionMsg" in option)) {
+            if (isError) {
+                currentWarning.find(".error-main-title").html("Error");
+            } else {
+                currentWarning.find(".error-main-title").html("Success");
+            }
+        } else {
+            currentWarning.find(".error-main-title").html(option.captionMsg);
+        }
+        currentWarning.find(".master-warning-message").html(option.msg.replace(/\n/g, "<br />"));
+        currentWarning.modal("show");
+
+        //currentWarning.stop().css({
+        //    "opacity": "0.5"
+        //});
+        currentWarning.stop().css({
+            "opacity": "1"
+        });
+
+        if (!showCloseButton) {
+            let fadeOut = (fadeoutTime && !isNaN(fadeoutTime) ? fadeoutTime : 3500);
+            currentWarning.data("timeOut", setTimeout(function () {
+                //currentWarning.animate({
+                //    "opacity": "0"
+                //}, { duration: "slow", queue: false });
+                currentWarning.animate({
+                    "opacity": "0"
+                }, {
+                    duration: "slow",
+                    queue: false,
+                    complete: function () {
+                        currentWarning.modal("hide");
+                    }
+                });
+            }, fadeOut));
+        }
+    },
     /************************************************
         masterPageWait
     ************************************************/

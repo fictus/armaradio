@@ -37,17 +37,25 @@ function mainload_attacheEvents() {
         let playlistTxt = $.trim($("#txtPastedPlaylist").val());
 
         if (playlistTxt != "") {
-            armaradio.masterPageWait(true);
-
-            armaradio.masterAJAXPost({
-                PlayList: playlistTxt
-            }, "Music", "UploadCustomPlaylist")
-                .then(function (response) {
-                    $("#dvPopupPastePlaylist").modal("hide");
-                    $("#txtPastedPlaylist").val("");
-
-                    attachListToTable(response);
+            if (playlistTxt.indexOf("|") == -1) {
+                armaradio.warningMsg({
+                    msg: "\"Artists\", \"Songs\" need to be separated by \"|\"",
+                    captionMsg: "Required",
+                    typeLayout: "red"
                 });
+            } else {
+                armaradio.masterPageWait(true);
+
+                armaradio.masterAJAXPost({
+                    PlayList: playlistTxt
+                }, "Music", "UploadCustomPlaylist")
+                    .then(function (response) {
+                        $("#dvPopupPastePlaylist").modal("hide");
+                        $("#txtPastedPlaylist").val("");
+
+                        attachListToTable(response);
+                    });
+            }
         }
     });
 

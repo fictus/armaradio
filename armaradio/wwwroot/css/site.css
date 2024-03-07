@@ -55,6 +55,29 @@ div.master-page-wait .spinner-border {
     margin-left: -22px;
 }
 
+#dvMasterWarning {
+    z-index: 99999;
+}
+
+#dvMasterWarning.show ~ div.modal-backdrop.show:last-child {
+    z-index: 8888 !important;
+}
+
+#dvMasterWarning table {
+    border-collapse: collapse;
+    width: 100%;
+}
+#dvMasterWarning table td {
+    vertical-align: top;
+}
+#dvMasterWarning table td:first-child {
+    width: 65px;
+}
+#dvMasterWarning table td:last-child {
+    padding-top: 20px;
+    padding-left: 20px;
+}
+
 .align-left {
     text-align: left;
 }
