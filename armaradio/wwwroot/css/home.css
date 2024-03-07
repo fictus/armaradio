@@ -54,6 +54,7 @@ div.div-thumbnail {
 
 #tblMainPlayList td:first-child {
     border-left: 1px solid #EAEAEA;
+    width: 100px;
 }
 
 #tblMainPlayList td:last-child {

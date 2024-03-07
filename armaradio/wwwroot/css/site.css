@@ -12,6 +12,27 @@ body {
     background-color: #EAEDF6;
 }
 
+/*div.main-body-layout {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: -2;
+    filter: drop-shadow(16px 16px 20px #cdd1dd);
+}*/
+
+/*div.main-body-layout {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: url(../images/back-main-2.png) no-repeat center center / cover;
+    z-index: -2;
+    filter: sepia(200%) brightness(82%) contrast(142%) blur(2px);
+}*/
+
 div.main-background-color {
     background-color: white;
 }
