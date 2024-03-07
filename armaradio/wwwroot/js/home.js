@@ -291,14 +291,18 @@ function onPlayerStateChange(e) {
 function onPlayerError(e) {
     console.log(e);
 
-    playerPlayNext();
+    playerPlayNext(true);
 }
 
-function playerPlayNext() {
+function playerPlayNext(fromError) {
     let lastPlayedRow = $("#tblMainPlayList").find("tr.now-playing");
     let nextPlay;
 
     if (lastPlayedRow.length) {
+        if (fromError) {
+            lastPlayedRow.attr("data-videoid", "");
+        }
+
         let indexRow = lastPlayedRow.index() + 1;
         nextPlay = $("#tblMainPlayList").find("tr").eq(indexRow);
 
