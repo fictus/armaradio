@@ -10,7 +10,7 @@ div.bottom-backcolor {
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: darkslategray;
+    background-color: black;
     opacity: 0.9;
 }
 
@@ -33,13 +33,31 @@ span.lbl-not-found {
 
 #tblMainPlayList {
     border-collapse: collapse;
+    width: 100%;
+}
+
+div.div-thumbnail {
+    display: block;
+    width: 65px;
+    height: 50px;
+    filter: blur(3px);
+    margin: 5px;
 }
 
 #tblMainPlayList td {
     padding-left: 8px;
     padding-right: 8px;
-    vertical-align: top;
-    border-bottom: 1px solid #85b7b7;
+    vertical-align: middle;
+    border-top: 1px solid #EAEAEA;
+    border-bottom: 1px solid #EAEAEA;
+}
+
+#tblMainPlayList td:first-child {
+    border-left: 1px solid #EAEAEA;
+}
+
+#tblMainPlayList td:last-child {
+    border-right: 1px solid #EAEAEA;
 }
 
 #tblMainPlayList tr td:last-child {
@@ -48,8 +66,9 @@ span.lbl-not-found {
 
 #tblMainPlayList button.btn-play-top-song {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 50%;
+    right: 8px;
+    margin-top: -12px;
 }
 
 #tblMainPlayList button.btn-play-top-song {
@@ -58,9 +77,12 @@ span.lbl-not-found {
 #tblMainPlayList tr:hover button.btn-play-top-song {
     display: block;
 }
+#tblMainPlayList tr:not(.now-playing):hover td {
+    background-color: #f4f8fb;
+}
 
 #tblMainPlayList tr.now-playing td {
-    color: #2b8ce1;
+    background-color: #D1EBFF;
 }
 
 #tblMainPlayList tr.now-playing td:last-child {

@@ -103,6 +103,12 @@ function attachListToTable(response, isPageLoad) {
             );
 
             tblPlaylist.find("tr").last().append(
+                $("<td></td>").append(
+                    $("<div class=\"div-thumbnail\"></div>")
+                        .attr("style", "background: url(https://picsum.photos/id/" + Math.floor(Math.random() * 900) + "/65/50) no-repeat center center / cover;")
+                )
+            );
+            tblPlaylist.find("tr").last().append(
                 $("<td></td>").html(response[i].artistName)
             );
             tblPlaylist.find("tr").last().append(
@@ -135,6 +141,12 @@ function attachListToTableFromGeneralSearch(response) {
                 })
             );
 
+            tblPlaylist.find("tr").last().append(
+                $("<td></td>").append(
+                    $("<div class=\"div-thumbnail\"></div>")
+                        .attr("style", "background: url(https://picsum.photos/id/" + Math.floor(Math.random() * 900) + "/65/50) no-repeat center center / cover;")
+                )
+            );
             tblPlaylist.find("tr").last().append(
                 $("<td></td>").html(response[i].artistName)
             );
