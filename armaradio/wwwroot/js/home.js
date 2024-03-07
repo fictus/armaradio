@@ -219,6 +219,8 @@ function topSongsAttachClickEvents(startPlaying) {
                     .then(function (response) {
                         if (response) {
                             if (response.hasVideo) {
+                                currentRow.attr("data-videoid", response.videoId);
+
                                 let newIframe = $("<iframe></iframe");
                                 newIframe.attr({
                                     "id": "armaMainPlayer",
