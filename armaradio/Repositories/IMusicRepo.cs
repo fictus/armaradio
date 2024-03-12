@@ -10,5 +10,11 @@ namespace armaradio.Repositories
         List<TrackDataItem> Tracks_GetTop50Songs();
         string Youtube_GetUrlByArtistNameSongName(string artistName, string songName);
         List<YTGeneralSearchDataItem> Youtube_PerformGeneralSearch(string searchText);
+        bool CheckIfPlaylistExists(string PlaylistName, string UserId);
+        int? InsertPlaylistName(string PlaylistName, string UserId);
+        void InsertSongToPlaylist(int PlaylistId, string Artist, string Song);
+        List<ArmaPlaylistDataItem> GetPlaylistByName(string PlaylistName, string UserId);
+        List<ArmaPlaylistDataItem> GetPlaylistById(int PlaylistId);
+        List<ArmaUserPlaylistDataItem> GetUserPlaylists(string UserId);
     }
 }

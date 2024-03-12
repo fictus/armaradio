@@ -219,5 +219,68 @@ namespace armaradio.Repositories
 
             return returnItem;
         }
+
+        public bool CheckIfPlaylistExists(string PlaylistName, string UserId)
+        {
+            return _dapper.GetFirstOrDefault<bool>("radioconn", "ArmaPlayList_CheckIfPlaylistExists", new
+            {
+                playlist_name = PlaylistName,
+                user_id = UserId
+            });
+        }
+
+        public int? InsertPlaylistName(
+            string PlaylistName,
+            string UserId
+        )
+        {
+            return _dapper.GetFirstOrDefault<int?>("radioconn", "ArmaPlayList_InsertPlaylist", new
+            {
+                playlist_name = PlaylistName,
+                user_id = UserId
+            });
+        }
+
+        public void InsertSongToPlaylist(
+            int PlaylistId,
+            string Artist,
+            string Song
+        )
+        {
+            _dapper.ExecuteNonQuery("radioconn", "ArmaPlayList_InsertSongToPlaylist", new
+            {
+                PlaylistId = PlaylistId,
+                Artist = Artist,
+                Song = Song
+            });
+        }
+
+        public List<ArmaPlaylistDataItem> GetPlaylistByName(
+            string PlaylistName,
+            string UserId
+        )
+        {
+            return _dapper.GetList<ArmaPlaylistDataItem>("radioconn", "ArmaPlayList_GetPlaylistByName", new
+            {
+                playlist_name = PlaylistName,
+                user_id = UserId
+            });
+        }
+
+        public List<ArmaPlaylistDataItem> GetPlaylistById(int PlaylistId)
+        {
+            return _dapper.GetList<ArmaPlaylistDataItem>("radioconn", "ArmaPlayList_GetPlaylistById", new
+            {
+                playlist_id = PlaylistId
+            });
+        }
+
+        public List<ArmaUserPlaylistDataItem> GetUserPlaylists(string UserId)
+        {
+            return _dapper.GetList<ArmaUserPlaylistDataItem>("radioconn", "ArmaPlayList_GetUserPlaylists", new
+            {
+                user_id = UserId
+            });
+        }
     }
 }

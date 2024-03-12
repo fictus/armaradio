@@ -1,9 +1,176 @@
 ﻿$(document).ready(function () {
     pageMainAttachEvents();
+    attachLoginRegisterEvents();
 });
 
-function pageMainAttachEvents() {
+function pageMainAttachEvents() {    
     $("#dvMasterWarning").modal();
+}
+
+function attachLoginRegisterEvents() {
+    $("#dvMasterLogin").modal();
+
+    $("#lnkMainLogin").on("click", function (e) {
+        e.preventDefault();
+
+        $("#dvMasterLogin").modal("show");
+    });
+
+    $("#dvMasterLogin").find("button[data-bs-toggle='tab']").on("shown.bs.tab", function (e) {
+        let targetType = $.trim($(e.target).attr("data-targettype"));
+
+        $(".login-register-btn").css("display", "none");
+
+        if (targetType == "login") {
+            $("#btnMasterLogin_Login").css("display", "");
+        } else {
+            $("#btnMasterLogin_Register").css("display", "");
+        }
+    });
+
+    $("#dvMasterLogin").on("show.bs.modal", function (e) {
+        $(".login-reg-forclear").val("");
+        $(".login-register-btn").css("display", "none");
+        $("#btnMasterLogin_Login").css("display", "");
+
+        let firstTab = new bootstrap.Tab($("#dvControlsLogin-tab")[0]);
+
+        firstTab.show();
+
+        setTimeout(function () {
+            $("#txtMainLoginEmail")[0].focus();
+        }, 500);
+    });
+
+    $("#btnMasterLogin_Login").on("click", function () {
+        armaradio.masterPageWait(true);
+
+        armaradio.masterAJAXPostByEndPoint({
+            email: $.trim($("#txtMainLoginEmail").val()),
+            password: $("#txtMainLoginPassword").val()
+        }, ajaxPointCall + "/login?useCookies=true")
+            .then(function (response) {
+                if (response && response.error) {
+                    armaradio.masterPageWait(false);
+
+                    armaradio.warningMsg({
+                        msg: response.errorMsg,
+                        captionMsg: "Error",
+                        typeLayout: "red"
+                    });
+                } else {
+                    location.reload(true);
+                }
+            });
+    });
+
+    $("#btnMasterLogin_Register").on("click", function () {
+        let userEmail = $.trim($("#txtMainRegisterEmail").val());
+        let password1 = $("#txtMainRegisterPassword").val();
+        let password2 = $("#txtMainRegisterConfirmPassword").val();
+
+        //if (userEmail == "") {
+        //    armaradio.warningMsg({
+        //        msg: "'Email' is required",
+        //        captionMsg: "Email Error",
+        //        typeLayout: "red"
+        //    });
+
+        //    return false;
+        //}
+        if ($.trim(password1) != "" && $.trim(password2) != "") {
+            if (password1 != password2) {
+                armaradio.warningMsg({
+                    msg: "'Confirm Password' does not match Password",
+                    captionMsg: "Password Error",
+                    typeLayout: "red"
+                });
+
+                return false;
+            }
+        }
+        
+        armaradio.masterPageWait(true);
+
+        armaradio.masterAJAXPostByEndPoint({
+            email: userEmail,
+            password: password1
+        }, ajaxPointCall + "/register")
+            .then(function (response) {
+                if (response && response.errors) {
+                    let errorsCombined = [];
+
+                    $.each(response.errors, function (key, val) {
+                        if (response.errors[key].length) {
+                            errorsCombined.push(response.errors[key].join("<br/>"));
+                        }
+                    });
+
+                    //if ("PasswordRequiresNonAlphanumeric" in response.errors) {
+                    //    if (response.errors.PasswordRequiresNonAlphanumeric.length) {
+                    //        errorsCombined.push(response.errors.PasswordRequiresNonAlphanumeric.join("<br/>"));
+                    //    }
+                    //}
+                    //if ("PasswordRequiresUpper" in response.errors) {
+                    //    if (response.errors.PasswordRequiresUpper.length) {
+                    //        errorsCombined.push(response.errors.PasswordRequiresUpper.join("<br/>"));
+                    //    }
+                    //}
+                    //if ("PasswordRequiresUpper" in response.errors) {
+                    //    if (response.errors.PasswordRequiresUpper.length) {
+                    //        errorsCombined.push(response.errors.PasswordRequiresUpper.join("<br/>"));
+                    //    }
+                    //}
+                    //if ("PasswordRequiresDigit" in response.errors) {
+                    //    if (response.errors.PasswordRequiresDigit.length) {
+                    //        errorsCombined.push(response.errors.PasswordRequiresDigit.join("<br/>"));
+                    //    }
+                    //}
+                    //if ("PasswordTooShort" in response.errors) {
+                    //    if (response.errors.PasswordTooShort.length) {
+                    //        errorsCombined.push(response.errors.PasswordTooShort.join("<br/>"));
+                    //    }
+                    //}
+
+                    let errorMsg = "Unable to create account. Please try again";
+
+                    if (errorsCombined.length) {
+                        errorMsg = "Unable to create account:<br/><br/>" + errorsCombined.join("<br/>");
+                    }
+
+                    armaradio.masterPageWait(false);
+
+                    armaradio.warningMsg({
+                        msg: errorMsg,
+                        captionMsg: "Error",
+                        typeLayout: "red"
+                    });
+                } else {
+                    location.reload(true);
+                }
+            });
+    });
+
+    $("#lnkMainLogout").on("click", function (e) {
+        e.preventDefault();
+
+        armaradio.masterPageWait(true);
+
+        armaradio.masterAJAXPostByEndPoint({}, ajaxPointCall + "/logout")
+            .then(function (response) {
+                if (response && response.error) {
+                    armaradio.masterPageWait(false);
+
+                    armaradio.warningMsg({
+                        msg: response.errorMsg,
+                        captionMsg: "Error",
+                        typeLayout: "red"
+                    });
+                } else {
+                    location.reload(true);
+                }
+            });
+    });
 }
 
 function masterFixResponseErrorMessage(errorMsg) {
@@ -292,7 +459,9 @@ var armaradio = {
                         if (response.status >= 500) {
                             return response.text();
                         } else {
-                            return response.json();
+                            return response.json().catch(function () {
+                                return {};
+                            });
                         }
                     }
                 })
@@ -351,7 +520,9 @@ var armaradio = {
                         if (response.status >= 500) {
                             return response.text();
                         } else {
-                            return response.json();
+                            return response.json().catch(function () {
+                                return {};
+                            });
                         }
                     }
                 })
@@ -419,7 +590,9 @@ var armaradio = {
                         if (response.status >= 500) {
                             return response.text();
                         } else {
-                            return response.json();
+                            return response.json().catch(function () {
+                                return {};
+                            });
                         }
                     }
                 })
@@ -473,7 +646,9 @@ var armaradio = {
                     if (response.status >= 500) {
                         return response.text();
                     } else {
-                        return response.json();
+                        return response.json().catch(function () {
+                            return {};
+                        });
                     }
                 })
                 .then(function (jsonData) {

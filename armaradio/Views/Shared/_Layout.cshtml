@@ -13,17 +13,30 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">armaradio</a>
+                @* <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">armaradio</a> *@                
+                
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
+                <div class="navbar-collapse collapse">
+                    <ul class="navbar-nav  ms-auto">
+                        @if (!(this.Context.User?.Identity?.IsAuthenticated ?? false))
+                        {
+                            <li class="nav-item">
+                                <a id="lnkMainLogin" class="nav-link text-dark" href="#">Login</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a id="lnkMainLogout" class="nav-link text-dark" href="#">Logout</a>
+                            </li>
+                        }
+                        @* <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        @* <li class="nav-item">
+                        <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li> *@
                     </ul>
@@ -42,6 +55,78 @@
         <div class="spinner-backcolor"></div>
         <div class="spinner-border" role="status">
             <span class="sr-only"></span>
+        </div>
+    </div>
+
+    <div class="modal" id="dvMasterLogin" tabindex="-1" data-bs-backdrop="static" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs" id="tbLoginRegister" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="dvControlsLogin-tab" data-bs-toggle="tab" data-targettype="login" data-bs-target="#dvControlsLogin" type="button" role="tab" aria-controls="dvControlsLogin" aria-selected="true">Login</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="dvControlsRegister-tab" data-bs-toggle="tab" data-targettype="register" data-bs-target="#dvControlsRegister" type="button" role="tab" aria-controls="dvControlsRegister" aria-selected="false">Register</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content pt-3" id="tbLoginRegisterContent">
+                        <div class="tab-pane fade show active" id="dvControlsLogin" role="tabpanel" aria-labelledby="dvControlsLogin-tab">
+                            <div>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend" style="width:110px;">
+                                        <span class="input-group-text" id="inputGroup-sizing-default">Email:</span>
+                                    </div>
+                                    <input id="txtMainLoginEmail" type="text" class="form-control login-reg-forclear" aria-label="" aria-describedby="inputGroup-sizing-default">
+                                </div>
+                            </div>
+                            <div>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend" style="width:110px;">
+                                        <span class="input-group-text" id="inputGroup-sizing-default">Password:</span>
+                                    </div>
+                                    <input id="txtMainLoginPassword" type="password" class="form-control login-reg-forclear" aria-label="" aria-describedby="inputGroup-sizing-default">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="dvControlsRegister" role="tabpanel" aria-labelledby="dvControlsRegister-tab">
+                            <div>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend" style="width:153px;">
+                                        <span class="input-group-text" id="inputGroup-sizing-default">Email:</span>
+                                    </div>
+                                    <input id="txtMainRegisterEmail" type="text" class="form-control login-reg-forclear" aria-label="" aria-describedby="inputGroup-sizing-default">
+                                </div>
+                            </div>
+                            <div>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend" style="width:153px;">
+                                        <span class="input-group-text" id="inputGroup-sizing-default">Password:</span>
+                                    </div>
+                                    <input id="txtMainRegisterPassword" type="password" class="form-control login-reg-forclear" aria-label="" aria-describedby="inputGroup-sizing-default">
+                                </div>
+                            </div>
+                            <div>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend" style="width:153px;">
+                                        <span class="input-group-text" id="inputGroup-sizing-default">Confirm Password:</span>
+                                    </div>
+                                    <input id="txtMainRegisterConfirmPassword" type="password" class="form-control login-reg-forclear" aria-label="" aria-describedby="inputGroup-sizing-default">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnMasterLogin_Login" type="button" class="login-register-btn btn btn-primary mr-5">Login</button>
+                    <button id="btnMasterLogin_Register" type="button" class="login-register-btn btn btn-primary mr-5">Register</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
         </div>
     </div>
 

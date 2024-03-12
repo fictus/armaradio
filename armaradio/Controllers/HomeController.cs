@@ -1,4 +1,8 @@
 using armaradio.Models;
+using armaradio.Models.ArmaAuth;
+using armaradio.Models.Home;
+using armaradio.Repositories;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -7,16 +11,116 @@ namespace armaradio.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IArmaAuth _authControl;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(
+            ILogger<HomeController> logger,
+            IArmaAuth authControl
+        )
         {
             _logger = logger;
+            _authControl = authControl;
         }
 
         public IActionResult Index()
         {
             return View();
         }
+
+        [HttpGet]
+        public IActionResult SessionState()
+        {
+            bool userIsLoggedIn = false;
+
+            try
+            {
+                userIsLoggedIn = _authControl.UserIsLoggedIn();
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return new JsonResult(new
+            {
+                web_static = userIsLoggedIn
+            });
+        }
+
+        [HttpPost]
+        public IActionResult Login([FromBody] LoginRequest value)
+        {
+            try
+            {
+                if (value == null)
+                {
+                    throw new Exception("Invalid request");
+                }
+                if (string.IsNullOrEmpty(value.UserName))
+                {
+                    throw new Exception("'Email' is required");
+                }
+                if (string.IsNullOrEmpty(value.Password))
+                {
+                    throw new Exception("'Password' is required");
+                }
+
+                AuthLoginResponse loginResults = _authControl.Login(value.UserName, value.Password);
+
+
+
+                return new JsonResult(loginResults);
+            }
+            catch (Exception ex)
+            {
+                string errorMessage = ex.Message.ToString() == "Unauthorized" ? "Incorrect Email or Password" : ex.Message.ToString();
+                return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
+            }
+        }
+
+        [HttpPost]
+        public IActionResult Register([FromBody] RegisterRequest value)
+        {
+            try
+            {
+                if (value == null)
+                {
+                    throw new Exception("Invalid request");
+                }
+                if (string.IsNullOrEmpty(value.UserName))
+                {
+                    throw new Exception("'Email' is required");
+                }
+                if (!_authControl.IsValidEmailAddress(value.UserName))
+                {
+                    throw new Exception("'Email' is incorrect");
+                }
+                if (string.IsNullOrEmpty(value.Password) || string.IsNullOrEmpty(value.ConfirmPassword))
+                {
+                    throw new Exception("'Password' is required");
+                }
+                if (value.Password != value.ConfirmPassword)
+                {
+                    throw new Exception("'Confirm Password' does not match Password");
+                }
+
+                AuthRegisterResponse registerResults = _authControl.Register(value.UserName, value.Password);
+
+                return new JsonResult(registerResults);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        //public async Task<IActionResult> Logout()
+        //{
+        //    await this.HttpContext.SignOutAsync("oauth2");
+        //    //Response.Cookies.Delete(".AspNetCore.Identity.Application", new CookieOptions { HttpOnly = true });
+
+        //    return RedirectToAction("Index", "Home");
+        //}
+
 
         public IActionResult Privacy()
         {

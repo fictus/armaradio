@@ -1,7 +1,9 @@
 ﻿using armaradio.Models;
+using armaradio.Models.ArmaAuth;
 using armaradio.Models.Request;
 using armaradio.Models.Youtube;
 using armaradio.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 
@@ -10,11 +12,14 @@ namespace armaradio.Controllers
     public class MusicController : Controller
     {
         private readonly IMusicRepo _musicRepo;
+        private readonly IArmaAuth _authControl;
         public MusicController(
-            IMusicRepo musicRepo    
+            IMusicRepo musicRepo,
+            IArmaAuth authControl
         )
         {
             _musicRepo = musicRepo;
+            _authControl = authControl;
         }
 
         [HttpGet]
@@ -53,6 +58,55 @@ namespace armaradio.Controllers
                     {
                         label = a.artist_name,
                         value = a.id
+                    };
+                });
+
+                return new JsonResult(finalList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult GetUserPlaylists()
+        {
+            try
+            {
+                ArmaUser currentUser = _authControl.GetCurrentUser();
+
+                if (currentUser == null)
+                {
+                    throw new Exception("Invalid request");
+                }
+
+                List<ArmaUserPlaylistDataItem> returnItem = _musicRepo.GetUserPlaylists(currentUser.UserId);
+
+                return new JsonResult(returnItem);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult LoadUserSelectedPlaylist(int PlaylistId)
+        {
+            try
+            {
+                List<ArmaPlaylistDataItem> returnItem = _musicRepo.GetPlaylistById(PlaylistId);
+                var finalList = returnItem.Select(sg =>
+                {
+                    return new
+                    {
+                        tid = sg.Id,
+                        artistName = sg.Artist,
+                        songName = sg.Song,
+                        videoId = sg.VideoId
                     };
                 });
 
@@ -124,6 +178,8 @@ namespace armaradio.Controllers
             }
         }
 
+        //[Authorize]
+        //[AllowAnonymous]
         [HttpPost]
         public IActionResult UploadCustomPlaylist([FromBody] MusicCustomPlaylistRequest value)
         {
@@ -134,38 +190,87 @@ namespace armaradio.Controllers
                     throw new Exception("Playlist is required");
                 }
 
+                ArmaUser currentUser = _authControl.GetCurrentUser();
+
+                if (currentUser != null)
+                {
+                    if (string.IsNullOrWhiteSpace(value.PlaylistName))
+                    {
+                        throw new Exception("'Playlist Name' is required");
+                    }
+
+                    bool playlistExists = _musicRepo.CheckIfPlaylistExists(value.PlaylistName, currentUser.UserId);
+
+                    if (playlistExists)
+                    {
+                        throw new Exception($"Playlist '{value.PlaylistName.Trim()}' already exists. Please specify a different name");
+                    }
+                }
+
                 List<TrackDataItem> returnItem = new List<TrackDataItem>();
                 List<string> allLines = value.PlayList.Split('\n', StringSplitOptions.RemoveEmptyEntries).ToList();
+                int? playlistId = null;
 
-                for (int i = 0; i < allLines.Count; i++)
+                if (allLines.Count > 0)
                 {
-                    if (allLines[i].Contains("|"))
+                    if (currentUser != null)
                     {
-                        List<string> parts = allLines[i].Split('|', StringSplitOptions.RemoveEmptyEntries).ToList();
+                        playlistId = _musicRepo.InsertPlaylistName(value.PlaylistName.Trim(), currentUser.UserId);
+                    }
 
-                        if (parts.Count >= 2)
+                    for (int i = 0; i < allLines.Count; i++)
+                    {
+                        if (allLines[i].Contains("|"))
                         {
-                            returnItem.Add(new TrackDataItem()
+                            List<string> parts = allLines[i].Split('|', StringSplitOptions.RemoveEmptyEntries).ToList();
+
+                            if (parts.Count >= 2)
                             {
-                                tid = i,
-                                artist_name = parts[0].Trim(),
-                                track_name = parts[1].Trim()
-                            });
+                                returnItem.Add(new TrackDataItem()
+                                {
+                                    tid = i,
+                                    artist_name = parts[0].Trim(),
+                                    track_name = parts[1].Trim()
+                                });
+
+                                if (currentUser != null && playlistId.HasValue)
+                                {
+                                    _musicRepo.InsertSongToPlaylist(playlistId.Value, returnItem.Last().artist_name, returnItem.Last().track_name);
+                                }
+                            }
                         }
                     }
                 }
 
-                var finalList = returnItem.Select(sg =>
+                if (currentUser != null && playlistId.HasValue)
                 {
-                    return new
+                    var finalList = _musicRepo.GetPlaylistById(playlistId.Value).Select(sg =>
                     {
-                        tid = sg.tid,
-                        artistName = sg.artist_name,
-                        songName = sg.track_name
-                    };
-                });
+                        return new
+                        {
+                            tid = sg.Id,
+                            artistName = sg.Artist,
+                            songName = sg.Song,
+                            videoId = sg.VideoId
+                        };
+                    });
 
-                return new JsonResult(finalList);
+                    return new JsonResult(finalList);
+                }
+                else
+                {
+                    var finalList = returnItem.Select(sg =>
+                    {
+                        return new
+                        {
+                            tid = sg.tid,
+                            artistName = sg.artist_name,
+                            songName = sg.track_name
+                        };
+                    });
+
+                    return new JsonResult(finalList);
+                }
             }
             catch (Exception ex)
             {

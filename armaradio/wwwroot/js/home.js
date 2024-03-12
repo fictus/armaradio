@@ -4,28 +4,37 @@ $(document).ready(function () {
 
 function mainload_attacheEvents() {
     $("#dvPopupPastePlaylist").modal();
+    $("#dvPopupLoadPlaylists").modal();
 
     armaradio.masterAJAXGet({}, "Music", "GetCurrentTop100")
         .then(function (response) {
             attachListToTable(response, true);
         });
 
-    $("#btnMain_PlayTop100").on("click", function () {
-        armaradio.masterPageWait(true);
+    $("#cmbMainOptions").on("change", function () {
+        let selectedId = $.trim($(this).find("option:selected").val());
 
-        armaradio.masterAJAXGet({}, "Music", "GetCurrentTop100")
-            .then(function (response) {
-                attachListToTable(response);
-            });
-    });
+        if (selectedId == "1") {
+            armaradio.masterPageWait(true);
 
-    $("#btnMain_PlayTop50UserPicked").on("click", function () {
-        armaradio.masterPageWait(true);
+            armaradio.masterAJAXGet({}, "Music", "GetCurrentTop100")
+                .then(function (response) {
+                    attachListToTable(response);
+                });
+        } else if (selectedId == "2") {
+            armaradio.masterPageWait(true);
 
-        armaradio.masterAJAXGet({}, "Music", "GetTop50UserPickedSongs")
-            .then(function (response) {
-                attachListToTable(response);
-            });
+            armaradio.masterAJAXGet({}, "Music", "GetTop50UserPickedSongs")
+                .then(function (response) {
+                    attachListToTable(response);
+                });
+        } else if (selectedId == "3") {
+            if ($("#dvPopupLoadPlaylists").length) {
+                $("#dvPopupLoadPlaylists").modal("show");
+
+                $("#cmbMainOptions").val("1"); //("option").first().attr("selected", "selected");
+            }
+        }
     });
 
     $("#btnMain_UploadPlaylist").on("click", function () {
@@ -35,6 +44,7 @@ function mainload_attacheEvents() {
 
     $("#btnPopup_Apply").on("click", function () {
         let playlistTxt = $.trim($("#txtPastedPlaylist").val());
+        let playlistName = $.trim($("#txtPasterPlaylistName").val());
 
         if (playlistTxt != "") {
             if (playlistTxt.indexOf("|") == -1) {
@@ -47,7 +57,8 @@ function mainload_attacheEvents() {
                 armaradio.masterPageWait(true);
 
                 armaradio.masterAJAXPost({
-                    PlayList: playlistTxt
+                    PlayList: playlistTxt,
+                    PlaylistName: playlistName
                 }, "Music", "UploadCustomPlaylist")
                     .then(function (response) {
                         $("#dvPopupPastePlaylist").modal("hide");
@@ -69,14 +80,66 @@ function mainload_attacheEvents() {
         performGeneralSearch();
     });
 
-    //armaradio.masterAJAXGet({
-    //    search: ""
-    //}, "Music", "GetArtistList")
-    //    .then(function (response) {
-    //        if (response && response.length) {
-                
-    //        }
-    //    });
+    $("#cmbLoadPlaylistNames").on("change", function () {
+        let optionsSelected = $(this).find("option:selected");
+
+        if (optionsSelected.length) {
+            $("#btnPopupLoadPlaylist").removeAttr("disabled");
+        } else {
+            $("#btnPopupLoadPlaylist").attr("disabled", "disabled");
+        }
+    });
+
+    $("#dvPopupLoadPlaylists").on("show.bs.modal", function (e) {
+        armaradio.masterPageWait(true);
+
+        $("#btnPopupLoadPlaylist").attr("disabled", "disabled");
+        $("#cmbLoadPlaylistNames").find("option").remove();
+
+        armaradio.masterAJAXGet({}, "Music", "GetUserPlaylists")
+            .then(function (response) {
+                if (response && response.error) {
+                    armaradio.masterPageWait(false);
+
+                    armaradio.warningMsg({
+                        msg: response.errorMsg,
+                        captionMsg: "Error",
+                        typeLayout: "red"
+                    });
+                } else {
+                    if (response && response.length) {
+                        for (let i = 0; i < response.length; i++) {
+                            $("#cmbLoadPlaylistNames").append(
+                                $("<option></option>")
+                                    .attr("value", response[i].id)
+                                    .html(response[i].playlistName)
+                            );
+                        }
+                    }
+
+                    $("#cmbLoadPlaylistNames").trigger("change");
+
+                    armaradio.masterPageWait(false);
+                }
+            });
+    });
+
+    $("#btnPopupLoadPlaylist").on("click", function () {
+        let selectedPlaylistId = $.trim($("#cmbLoadPlaylistNames option:selected").val());
+
+        if (selectedPlaylistId != "") {
+            armaradio.masterPageWait(true);
+
+            armaradio.masterAJAXGet({
+                PlaylistId: selectedPlaylistId
+            }, "Music", "LoadUserSelectedPlaylist")
+                .then(function (response) {
+                    $("#dvPopupLoadPlaylists").modal("hide");
+
+                    attachListToTable(response);
+                });
+        }
+    });
 }
 
 function performGeneralSearch() {

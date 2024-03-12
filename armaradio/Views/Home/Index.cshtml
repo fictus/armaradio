@@ -1,6 +1,8 @@
 ﻿
 @{
     ViewData["Title"] = "Arma Radio";
+
+    bool userIsAuthenticated = (this.Context.User?.Identity?.IsAuthenticated ?? false);
 }
 
 <link href="~/css/home.css" rel="stylesheet" asp-append-version="true" />
@@ -8,11 +10,27 @@
 <div class="text-left">
     <h1 class="display-6">Arma Radio</h1>
 </div>
-<div class="row mb-4">
-    <div class="col-md-6">
-        <button id="btnMain_PlayTop100" class="btn btn-primary mr-4">Top 100</button>
-        <button id="btnMain_PlayTop50UserPicked" class="btn btn-primary mr-4">Top 50 user-picked Songs</button>
-        <button id="btnMain_UploadPlaylist" type="button" class="btn btn-primary mr-3">Paste Playlist</button>
+<div class="row">
+    <div class="col-md-4">
+        <div class="row">
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroup-sizing-default">Options:</span>
+                    </div>
+                    <select id="cmbMainOptions" class="form-select">
+                        <option value="1" selected="selected">Top 100</option>
+                        <option value="2">Top 50 user-picked Songs</option>
+                        @if (userIsAuthenticated)
+                        {
+                            <option value="3">Load Playlist</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
     </div>
     <div class="col-md-6">
         <div class="row">
@@ -30,8 +48,15 @@
         </div>
     </div>
 </div>
+<div class="row">
+    <div class="col-md-4">
+        <button id="btnMain_UploadPlaylist" type="button" class="btn btn-primary mr-3">Paste Playlist</button>
+    </div>
+    <div class="col-md-6">        
+    </div>
+</div>
 
-<div class="row mt-4">
+<div class="row mt-5">
     <div class="col-md-12">
         <table id="tblMainPlayList"></table>
     </div>
@@ -64,8 +89,23 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>example: "Beatles | Yesterday"</p>
-                <textarea id="txtPastedPlaylist" class="form-control"></textarea>
+                <div>
+                    <span>example: "Beatles | Yesterday"</span>
+                </div>
+                <div class="mt-2">
+                    <textarea id="txtPastedPlaylist" class="form-control"></textarea>
+                </div>
+                @if (userIsAuthenticated)
+                {
+                    <div class="mt-2">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="inputGroup-sizing-default">Playlist Name:</span>
+                            </div>
+                            <input id="txtPasterPlaylistName" type="text" class="form-control" aria-label="" aria-describedby="inputGroup-sizing-default" atocomplete="off_hack3463453453">
+                        </div>
+                    </div>
+                }
             </div>
             <div class="modal-footer">
                 <button id="btnPopup_Apply" type="button" class="btn btn-primary mr-5">Apply</button>
@@ -74,6 +114,36 @@
         </div>
     </div>
 </div>
+
+@if (userIsAuthenticated)
+{
+    <div class="modal" id="dvPopupLoadPlaylists" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Load Playlists</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <div class="col">
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="inputGroup-sizing-default">Load:</span>
+                                </div>
+                                <select id="cmbLoadPlaylistNames" class="form-select"></select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnPopupLoadPlaylist" type="button" class="btn btn-primary mr-5">Load Selected</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script src="~/js/home.js" defer asp-append-version="true"></script>
