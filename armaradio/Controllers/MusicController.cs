@@ -171,6 +171,38 @@ namespace armaradio.Controllers
             }
         }
 
+        [HttpPost]
+        [Authorize]
+        public IActionResult AddSongToPlaylist([FromBody] MusicAddSongToPlaylistRequest value)
+        {
+            try
+            {
+                if (value == null)
+                {
+                    throw new Exception("Invalid request");
+                }
+                if (!(!string.IsNullOrWhiteSpace(value.Artist) || !string.IsNullOrWhiteSpace(value.Song)))
+                {
+                    throw new Exception("Invalid request");
+                }
+
+                ArmaUser currentUser = _authControl.GetCurrentUser();
+
+                if (currentUser == null)
+                {
+                    throw new Exception("Invalid request");
+                }
+
+                _musicRepo.AddSongToPlaylist(value.PlaylistId, value.Artist, value.Song, value.VideoId);
+
+                return new JsonResult(Ok());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
         [HttpGet]
         public IActionResult GetTop50UserPickedSongs()
         {
@@ -308,7 +340,12 @@ namespace armaradio.Controllers
                         };
                     });
 
-                    return new JsonResult(finalList);
+                    return new JsonResult(new
+                    {
+                        playlistId = playlistId.Value,
+                        playlistName = value.PlaylistName,
+                        songList = finalList
+                    });
                 }
                 else
                 {
@@ -322,7 +359,12 @@ namespace armaradio.Controllers
                         };
                     });
 
-                    return new JsonResult(finalList);
+                    return new JsonResult(new
+                    {
+                        playlistId = (int?)null,
+                        playlistName = "",
+                        songList = finalList
+                    });
                 }
             }
             catch (Exception ex)

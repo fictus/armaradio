@@ -10,7 +10,7 @@
 <div class="text-left">
     <h1 class="display-6">Arma Radio</h1>
 </div>
-<div class="row">
+<div class="row mt-4">
     <div class="col-md-4">
         <div class="row">
             <div class="col">
@@ -122,6 +122,46 @@
 
 @if (userIsAuthenticated)
 {
+    <div id="offcanvasNonePlaylistOptions" class="offcanvas offcanvas-end" tabindex="-1" aria-labelledby="offcanvasNonePlaylistOptionsRightLabel">
+        <div class="offcanvas-header">
+            <h5 id="offcanvasNonePlaylistOptionsRightLabel">Options</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div>
+                <span id="lblNonePlaylistOptionsTitle"></span>
+            </div>
+            <div class="mt-4">
+                <div class="col">
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-sizing-default">Playlist:</span>
+                        </div>
+                        <select id="cmbAddToPlaylistNames" class="form-select"></select>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <button id="btnNonePlaylistOptions_AddToPlaylist" class="btn btn-primary">Add to Playlist</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="offcanvasSongOptions" class="offcanvas offcanvas-end" tabindex="-1" aria-labelledby="offcanvasSongOptionsRightLabel">
+        <div class="offcanvas-header">
+            <h5 id="offcanvasSongOptionsRightLabel">Song Options</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div>
+                <span id="lblSongOptionsTitle"></span>
+            </div>
+            <div class="mt-4">
+                <button id="btnSongOptions_RemoveFromPlaylist" type="button" class="btn btn-danger" data-id="" data-bs-toggle="popover" title="Confirm Delete" data-bs-content="">Remove from Playlist</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal" id="dvPopupLoadPlaylists" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">

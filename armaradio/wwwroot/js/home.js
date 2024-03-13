@@ -61,10 +61,27 @@ function mainload_attacheEvents() {
                     PlaylistName: playlistName
                 }, "Music", "UploadCustomPlaylist")
                     .then(function (response) {
-                        $("#dvPopupPastePlaylist").modal("hide");
-                        $("#txtPastedPlaylist").val("");
+                        if (response && response.error) {
+                            armaradio.masterPageWait(false);
 
-                        attachListToTable(response);
+                            armaradio.warningMsg({
+                                msg: response.errorMsg,
+                                captionMsg: "Error",
+                                typeLayout: "red"
+                            });
+                        } else {
+                            $("#dvPopupPastePlaylist").modal("hide");
+                            $("#txtPastedPlaylist").val("");
+
+                            if (response.playlistId) {
+                                attachListToTable(response, null, {
+                                    playlistId: response.playlistId,
+                                    playlistTitle: response.playlistName
+                                });
+                            } else {
+                                attachListToTable(response);
+                            }
+                        }
                     });
             }
         }
@@ -144,6 +161,145 @@ function mainload_attacheEvents() {
                 });
         }
     });
+
+    $("#cmbAddToPlaylistNames").on("change", function () {
+        let optionsSelected = $(this).find("option:selected");
+
+        if (optionsSelected.length) {
+            $("#btnNonePlaylistOptions_AddToPlaylist").removeAttr("disabled");
+        } else {
+            $("#btnNonePlaylistOptions_AddToPlaylist").attr("disabled", "disabled");
+        }
+    });
+
+    $("#offcanvasNonePlaylistOptions").on("show.bs.offcanvas", function () {
+        armaradio.masterPageWait(true);
+
+        $("#btnNonePlaylistOptions_AddToPlaylist").attr("disabled", "disabled");
+        $("#cmbAddToPlaylistNames").find("option").remove();
+
+        armaradio.masterAJAXGet({}, "Music", "GetUserPlaylists")
+            .then(function (response) {
+                if (response && response.error) {
+                    armaradio.masterPageWait(false);
+
+                    armaradio.warningMsg({
+                        msg: response.errorMsg,
+                        captionMsg: "Error",
+                        typeLayout: "red"
+                    });
+                } else {
+                    if (response && response.length) {
+                        for (let i = 0; i < response.length; i++) {
+                            $("#cmbAddToPlaylistNames").append(
+                                $("<option></option>")
+                                    .attr("value", response[i].id)
+                                    .html(response[i].playlistName)
+                            );
+                        }
+                    }
+
+                    $("#cmbAddToPlaylistNames").trigger("change");
+
+                    armaradio.masterPageWait(false);
+                }
+            });
+    });
+
+    $("#offcanvasNonePlaylistOptions").on("hidden.bs.offcanvas", function () {
+        $("#btnNonePlaylistOptions_AddToPlaylist").attr({
+            "data-artist": "",
+            "data-song": "",
+            "data-videoid": ""
+        });
+    });
+
+    $("#btnNonePlaylistOptions_AddToPlaylist").on("click", function () {
+        let currentPlaylistId = $.trim($("#cmbAddToPlaylistNames").find("option:selected").val());
+        let currentArtist = $.trim($("#btnNonePlaylistOptions_AddToPlaylist").attr("data-artist"));
+        let currentSong = $.trim($("#btnNonePlaylistOptions_AddToPlaylist").attr("data-song"));
+        let currentVideoId = $.trim($("#btnNonePlaylistOptions_AddToPlaylist").attr("data-videoid"));
+
+        if (currentPlaylistId != "" && (currentArtist != "" || currentSong != "")) {
+            armaradio.masterPageWait(true);
+
+            armaradio.masterAJAXPost({
+                PlaylistId: currentPlaylistId,
+                Artist: currentArtist,
+                Song: currentSong,
+                VideoId: currentVideoId
+            }, "Music", "AddSongToPlaylist")
+                .then(function (response) {
+                    if (response && response.error) {
+                        armaradio.masterPageWait(false);
+
+                        armaradio.warningMsg({
+                            msg: response.errorMsg,
+                            captionMsg: "Error",
+                            typeLayout: "red"
+                        });
+                    } else {
+                        $("#offcanvasNonePlaylistOptions").find("button.btn-close").trigger("click");
+
+                        armaradio.masterPageWait(false);
+                    }
+                });
+        }
+    });
+
+    if ($("#btnSongOptions_RemoveFromPlaylist").length) {
+        let removeButton = $("<button id='btnRemoveSongFromPlaylistConfirmed' class='btn btn-danger'>Remove</button>");
+        removeButton.on("click", function () {
+            let currentSongId = $.trim($("#btnSongOptions_RemoveFromPlaylist").attr("data-id"));
+
+            if (currentSongId != "") {
+                armaradio.masterPageWait(true);
+
+                armaradio.masterAJAXGet({
+                    SongId: currentSongId
+                }, "Music", "DeleteSongFromPlaylist")
+                    .then(function (response) {
+                        if (response && response.error) {
+                            armaradio.masterPageWait(false);
+
+                            armaradio.warningMsg({
+                                msg: response.errorMsg,
+                                captionMsg: "Error",
+                                typeLayout: "red"
+                            });
+                        } else {
+                            $("#tblMainPlayList").find("tr[data-tid='" + currentSongId + "']").remove();
+
+                            var popover = bootstrap.Popover.getInstance($("#btnSongOptions_RemoveFromPlaylist")[0]);
+                            popover.hide();
+
+                            $("#offcanvasSongOptions").find("button.btn-close").trigger("click");
+
+                            armaradio.masterPageWait(false);
+                        }
+                    });
+            }
+        });
+
+        let popoverContents = $("<div></div>");
+        popoverContents.append(
+            $("<div></div>")
+                .html("Are you sure you want to remove this song from your playlist?")
+        );
+        popoverContents.append(
+            $("<div class='mt-4 align-right'></div>")
+                .append(removeButton)
+        );
+
+        let confirmDeleteFromPlaylist = new bootstrap.Popover($("#btnSongOptions_RemoveFromPlaylist")[0], {
+            html: true,
+            content: popoverContents
+        });
+    }
+
+    $("#offcanvasSongOptions").on("hidden.bs.offcanvas", function () {
+        $("#btnSongOptions_RemoveFromPlaylist").attr("data-id", "");
+    });
 }
 
 function performGeneralSearch() {
@@ -182,7 +338,8 @@ function attachListToTable(response, isPageLoad, loadedPlaylist) {
                 $("<tr></tr>").attr({
                     "data-tid": response[i].tid,
                     "data-artist": response[i].artistName,
-                    "data-song": response[i].songName
+                    "data-song": response[i].songName,
+                    "data-videoid": response[i].videoId
                 })
             );
 
@@ -198,20 +355,22 @@ function attachListToTable(response, isPageLoad, loadedPlaylist) {
             tblPlaylist.find("tr").last().append(
                 $("<td></td>").html(response[i].songName)
             );
+            tblPlaylist.find("tr").last().append(
+                $("<td></td>").append($("<div class=\"row-actions-cotrols\"></div>"))
+            );
+            tblPlaylist.find("tr").last().find("td").last().find("div").append(
+                $("<button class=\"btn btn-primary font-sz-0 pt-0 pb-0 btn-play-inner-btn-play mr-3\"><span class=\"font-sz-11pt\">Play</span></button>")
+            );
             if (loadedPlaylist) {
-                tblPlaylist.find("tr").last().append(
-                    $("<td></td>").append($("<div class=\"row-actions-cotrols\"></div>"))
-                );
                 tblPlaylist.find("tr").last().find("td").last().find("div").append(
-                    $("<button class=\"btn btn-primary font-sz-0 pt-0 pb-0 btn-play-inner-btn-play mr-3\"><span class=\"font-sz-11pt\">Play</span></button>")
-                );
-                tblPlaylist.find("tr").last().find("td").last().find("div").append(
-                    $("<button class=\"btn btn-danger font-sz-0 pt-0 pb-0 btn-play-inner-btn-delete\"><i class='fas fa-trash-alt font-sz-11pt pt-1 pb-1'></i></button>")
+                    $("<a class=\"font-sz-11pt btn-inner-more-options\"><i class='fas fa-ellipsis-v pl-2 pr-2'></i></a>")
                 );
             } else {
-                tblPlaylist.find("tr").last().append(
-                    $("<td></td>").append($("<button class=\"btn btn-primary font-sz-0 pt-0 pb-0 btn-play-top-song\"><span class=\"font-sz-11pt\">Play</span></button>"))
-                );
+                if ($("#offcanvasNonePlaylistOptions").length) {
+                    tblPlaylist.find("tr").last().find("td").last().find("div").append(
+                        $("<a class=\"font-sz-11pt btn-inner-more-none-list-options\"><i class='fas fa-ellipsis-v pl-2 pr-2'></i></a>")
+                    );
+                }
             }
         }
 
@@ -254,8 +413,16 @@ function attachListToTableFromGeneralSearch(response) {
                 $("<td></td>").html(response[i].songName)
             );
             tblPlaylist.find("tr").last().append(
-                $("<td></td>").append($("<button class=\"btn btn-primary font-sz-0 pt-0 pb-0 btn-play-top-song\"><span class=\"font-sz-11pt\">Play</span></button>"))
+                $("<td></td>").append($("<div class=\"row-actions-cotrols\"></div>"))
             );
+            tblPlaylist.find("tr").last().find("td").last().find("div").append(
+                $("<button class=\"btn btn-primary font-sz-0 pt-0 pb-0 btn-play-inner-btn-play mr-3\"><span class=\"font-sz-11pt\">Play</span></button>")
+            );
+            if ($("#offcanvasNonePlaylistOptions").length) {
+                tblPlaylist.find("tr").last().find("td").last().find("div").append(
+                    $("<a class=\"font-sz-11pt btn-inner-more-none-list-options\"><i class='fas fa-ellipsis-v pl-2 pr-2'></i></a>")
+                );
+            }
         }
 
         $("#tblMainPlayList").replaceWith(tblPlaylist);
@@ -266,7 +433,7 @@ function attachListToTableFromGeneralSearch(response) {
 }
 
 function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
-    $("#tblMainPlayList").find((fromPlaylist ? "button.btn-play-inner-btn-play" : "button.btn-play-top-song")).each(function () {
+    $("#tblMainPlayList").find("button.btn-play-inner-btn-play").each(function () {
         $(this).on("click", function () {
             armaradio.masterPageWait(true);
 
@@ -362,20 +529,49 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
     });
 
     if (fromPlaylist) {
-        $("#tblMainPlayList").find("button.btn-play-inner-btn-delete").each(function () {
-            $(this).on("click", function () {
+        $("#tblMainPlayList").find("a.btn-inner-more-options").each(function () {
+            $(this).on("click", function (e) {
                 let currentRow = $(this).closest("tr");
                 let songId = $.trim(currentRow.attr("data-tid"));
+                let artistName = $.trim(currentRow.attr("data-artist"));
+                let songName = $.trim(currentRow.attr("data-song"));
+                let separator = (artistName != "" && songName != "" ? " - " : "");
 
                 if (songId != "") {
+                    $("#btnSongOptions_RemoveFromPlaylist").attr("data-id", songId);
+                    $("#lblSongOptionsTitle").html(artistName + separator + songName);
 
+                    let bsOffcanvas = new bootstrap.Offcanvas($("#offcanvasSongOptions")[0]);
+                    bsOffcanvas.show();
                 }
             });
         });
     }
 
+    if ($("#offcanvasNonePlaylistOptions").length) {
+        $("#tblMainPlayList").find("a.btn-inner-more-none-list-options").each(function () {
+            $(this).on("click", function (e) {
+                let currentRow = $(this).closest("tr");
+                let artistName = $.trim(currentRow.attr("data-artist"));
+                let songName = $.trim(currentRow.attr("data-song"));
+                let videoId = $.trim(currentRow.attr("data-videoid"));
+                let separator = (artistName != "" && songName != "" ? " - " : "");
+
+                $("#btnNonePlaylistOptions_AddToPlaylist").attr({
+                    "data-artist": artistName,
+                    "data-song": songName,
+                    "data-videoid": videoId
+                });
+                $("#lblNonePlaylistOptionsTitle").html(artistName + separator + songName);
+
+                let bsOffcanvas = new bootstrap.Offcanvas($("#offcanvasNonePlaylistOptions")[0]);
+                bsOffcanvas.show();
+            });
+        });
+    }
+
     if (startPlaying) {
-        $("#tblMainPlayList").find((fromPlaylist ? "button.btn-play-inner-btn-play" : "button.btn-play-top-song")).first().trigger("click");
+        $("#tblMainPlayList").find("button.btn-play-inner-btn-play").first().trigger("click");
     }
 
     armaradio.masterPageWait(false);
@@ -428,9 +624,6 @@ function playerPlayNext(fromError) {
             block: "start"
         });
 
-        if ($("button.btn-play-top-song").length) {
-            nextPlay.find("button.btn-play-top-song").trigger("click");
-        }
         if ($("button.btn-play-inner-btn-play").length) {
             nextPlay.find("button.btn-play-inner-btn-play").trigger("click");
         }

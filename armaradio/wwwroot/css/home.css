@@ -108,6 +108,12 @@ div.div-thumbnail {
 #tblMainPlayList tr.now-playing td:last-child {
     position: relative;
 }
+#tblMainPlayList a.btn-inner-more-options {
+    cursor: pointer;
+}
+#tblMainPlayList a.btn-inner-more-none-list-options {
+    cursor: pointer;
+}
 
 div.list-container {
     position: absolute;

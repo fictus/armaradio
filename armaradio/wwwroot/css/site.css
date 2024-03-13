@@ -35,6 +35,9 @@ body {
 
 div.main-background-color {
     background-color: white;
+    -webkit-box-shadow: 0px 0px 45px 30px rgba(195,195,195);
+    -moz-box-shadow: 0px 45px 30px rgba(195,195,195);
+    box-shadow: 0px 0px 45px 30px rgba(195,195,195);
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {

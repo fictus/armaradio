@@ -301,5 +301,16 @@ namespace armaradio.Repositories
                 user_id = UserId
             });
         }
+
+        public void AddSongToPlaylist(int PlaylistId, string Artist, string Song, string VideoId)
+        {
+            _dapper.ExecuteNonQuery("radioconn", "ArmaPlayList_AddSongToPlaylist", new
+            {
+                playlist_id = PlaylistId,
+                artist = Artist,
+                song = Song,
+                video_id = VideoId
+            });
+        }
     }
 }
