@@ -16,5 +16,7 @@ namespace armaradio.Repositories
         List<ArmaPlaylistDataItem> GetPlaylistByName(string PlaylistName, string UserId);
         List<ArmaPlaylistDataItem> GetPlaylistById(int PlaylistId, string UserId);
         List<ArmaUserPlaylistDataItem> GetUserPlaylists(string UserId);
+        void DeleteSongFromPlaylist(int SongId, string UserId);
+        void DeleteUserPlaylistAndData(int PlaylistId, string UserId);
     }
 }

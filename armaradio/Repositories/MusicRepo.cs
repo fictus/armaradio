@@ -283,5 +283,23 @@ namespace armaradio.Repositories
                 user_id = UserId
             });
         }
+
+        public void DeleteSongFromPlaylist(int SongId, string UserId)
+        {
+            _dapper.ExecuteNonQuery("radioconn", "ArmaPlayList_DeleteSongFromPlaylist", new
+            {
+                song_id = SongId,
+                user_id = UserId
+            });
+        }
+
+        public void DeleteUserPlaylistAndData(int PlaylistId, string UserId)
+        {
+            _dapper.ExecuteNonQuery("radioconn", "ArmaPlayList_DeleteUserPlaylistAndData", new
+            {
+                playlist_id = PlaylistId,
+                user_id = UserId
+            });
+        }
     }
 }

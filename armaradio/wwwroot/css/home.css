@@ -65,6 +65,25 @@ div.div-thumbnail {
     position: relative;
 }
 
+
+
+
+#tblMainPlayList div.row-actions-cotrols {
+    position: absolute;
+    /*width: 100px;*/
+    top: 50%;
+    right: 8px;
+    margin-top: -12px;
+    white-space: nowrap;
+}
+#tblMainPlayList div.row-actions-cotrols {
+    display: none;
+}
+#tblMainPlayList tr:hover div.row-actions-cotrols {
+    display: block;
+}
+
+
 #tblMainPlayList button.btn-play-top-song {
     position: absolute;
     top: 50%;

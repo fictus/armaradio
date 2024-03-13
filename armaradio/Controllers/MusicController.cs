@@ -126,6 +126,52 @@ namespace armaradio.Controllers
         }
 
         [HttpGet]
+        [Authorize]
+        public IActionResult DeleteSongFromPlaylist(int SongId)
+        {
+            try
+            {
+                ArmaUser currentUser = _authControl.GetCurrentUser();
+
+                if (currentUser == null)
+                {
+                    throw new Exception("Invalid request");
+                }
+
+                _musicRepo.DeleteSongFromPlaylist(SongId, currentUser.UserId);
+
+                return new JsonResult(Ok());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult DeleteUserPlaylistAndData(int PlaylistId)
+        {
+            try
+            {
+                ArmaUser currentUser = _authControl.GetCurrentUser();
+
+                if (currentUser == null)
+                {
+                    throw new Exception("Invalid request");
+                }
+
+                _musicRepo.DeleteUserPlaylistAndData(PlaylistId, currentUser.UserId);
+
+                return new JsonResult(Ok());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        [HttpGet]
         public IActionResult GetTop50UserPickedSongs()
         {
             try

@@ -126,6 +126,7 @@ function mainload_attacheEvents() {
 
     $("#btnPopupLoadPlaylist").on("click", function () {
         let selectedPlaylistId = $.trim($("#cmbLoadPlaylistNames option:selected").val());
+        let selectedPlayName = $.trim($("#cmbLoadPlaylistNames option:selected").text());
 
         if (selectedPlaylistId != "") {
             armaradio.masterPageWait(true);
@@ -136,7 +137,10 @@ function mainload_attacheEvents() {
                 .then(function (response) {
                     $("#dvPopupLoadPlaylists").modal("hide");
 
-                    attachListToTable(response);
+                    attachListToTable(response, null, {
+                        playlistId: selectedPlaylistId,
+                        playlistTitle: selectedPlayName
+                    });
                 });
         }
     });
@@ -160,7 +164,16 @@ function performGeneralSearch() {
     }
 }
 
-function attachListToTable(response, isPageLoad) {
+function attachListToTable(response, isPageLoad, loadedPlaylist) {
+    if (loadedPlaylist) {
+        $("#lblTblHeaderPlaylistName").attr("data-playlistid", loadedPlaylist.playlistId);
+        $("#lblTblHeaderPlaylistName").html("Playlist: " + loadedPlaylist.playlistTitle);
+    } else {
+        $("#lblTblHeaderPlaylistName")
+            .attr("data-playlistid", "")
+            .html("");
+    }
+
     if (response && response.length) {
         let tblPlaylist = $("<table id=\"tblMainPlayList\"></table>");
 
@@ -185,19 +198,35 @@ function attachListToTable(response, isPageLoad) {
             tblPlaylist.find("tr").last().append(
                 $("<td></td>").html(response[i].songName)
             );
-            tblPlaylist.find("tr").last().append(
-                $("<td></td>").append($("<button class=\"btn btn-primary font-sz-0 pt-0 pb-0 btn-play-top-song\"><span class=\"font-sz-11pt\">Play</span></button>"))
-            );
+            if (loadedPlaylist) {
+                tblPlaylist.find("tr").last().append(
+                    $("<td></td>").append($("<div class=\"row-actions-cotrols\"></div>"))
+                );
+                tblPlaylist.find("tr").last().find("td").last().find("div").append(
+                    $("<button class=\"btn btn-primary font-sz-0 pt-0 pb-0 btn-play-inner-btn-play mr-3\"><span class=\"font-sz-11pt\">Play</span></button>")
+                );
+                tblPlaylist.find("tr").last().find("td").last().find("div").append(
+                    $("<button class=\"btn btn-danger font-sz-0 pt-0 pb-0 btn-play-inner-btn-delete\"><i class='fas fa-trash-alt font-sz-11pt pt-1 pb-1'></i></button>")
+                );
+            } else {
+                tblPlaylist.find("tr").last().append(
+                    $("<td></td>").append($("<button class=\"btn btn-primary font-sz-0 pt-0 pb-0 btn-play-top-song\"><span class=\"font-sz-11pt\">Play</span></button>"))
+                );
+            }
         }
 
         $("#tblMainPlayList").replaceWith(tblPlaylist);
-        topSongsAttachClickEvents(!isPageLoad ? true : false);
+        rowSongsAttachClickEvents((!isPageLoad ? true : false), loadedPlaylist);
     } else {
         armaradio.masterPageWait(false);
     }
 }
 
 function attachListToTableFromGeneralSearch(response) {
+    $("#lblTblHeaderPlaylistName")
+        .attr("data-playlistid", "")
+        .html("Search Results");
+
     if (response && response.length) {
         let tblPlaylist = $("<table id=\"tblMainPlayList\"></table>");
 
@@ -230,14 +259,14 @@ function attachListToTableFromGeneralSearch(response) {
         }
 
         $("#tblMainPlayList").replaceWith(tblPlaylist);
-        topSongsAttachClickEvents(true);
+        rowSongsAttachClickEvents(true);
     } else {
         armaradio.masterPageWait(false);
     }
 }
 
-function topSongsAttachClickEvents(startPlaying) {
-    $("#tblMainPlayList").find("button.btn-play-top-song").each(function () {
+function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
+    $("#tblMainPlayList").find((fromPlaylist ? "button.btn-play-inner-btn-play" : "button.btn-play-top-song")).each(function () {
         $(this).on("click", function () {
             armaradio.masterPageWait(true);
 
@@ -332,8 +361,21 @@ function topSongsAttachClickEvents(startPlaying) {
         });
     });
 
+    if (fromPlaylist) {
+        $("#tblMainPlayList").find("button.btn-play-inner-btn-delete").each(function () {
+            $(this).on("click", function () {
+                let currentRow = $(this).closest("tr");
+                let songId = $.trim(currentRow.attr("data-tid"));
+
+                if (songId != "") {
+
+                }
+            });
+        });
+    }
+
     if (startPlaying) {
-        $("#tblMainPlayList").find("button.btn-play-top-song").first().trigger("click");
+        $("#tblMainPlayList").find((fromPlaylist ? "button.btn-play-inner-btn-play" : "button.btn-play-top-song")).first().trigger("click");
     }
 
     armaradio.masterPageWait(false);
@@ -386,6 +428,11 @@ function playerPlayNext(fromError) {
             block: "start"
         });
 
-        nextPlay.find("button.btn-play-top-song").trigger("click");
+        if ($("button.btn-play-top-song").length) {
+            nextPlay.find("button.btn-play-top-song").trigger("click");
+        }
+        if ($("button.btn-play-inner-btn-play").length) {
+            nextPlay.find("button.btn-play-inner-btn-play").trigger("click");
+        }
     }
 }
