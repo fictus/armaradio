@@ -277,7 +277,7 @@ namespace armaradio.Controllers
 
                 ArmaUser currentUser = _authControl.GetCurrentUser();
 
-                if (currentUser != null)
+                if (currentUser != null && value.CreateNewPlaylist)
                 {
                     if (string.IsNullOrWhiteSpace(value.PlaylistName))
                     {
@@ -298,7 +298,7 @@ namespace armaradio.Controllers
 
                 if (allLines.Count > 0)
                 {
-                    if (currentUser != null)
+                    if (currentUser != null && value.CreateNewPlaylist)
                     {
                         playlistId = _musicRepo.InsertPlaylistName(value.PlaylistName.Trim(), currentUser.UserId);
                     }
@@ -318,7 +318,7 @@ namespace armaradio.Controllers
                                     track_name = parts[1].Trim()
                                 });
 
-                                if (currentUser != null && playlistId.HasValue)
+                                if (currentUser != null && value.CreateNewPlaylist && playlistId.HasValue)
                                 {
                                     _musicRepo.InsertSongToPlaylist(playlistId.Value, returnItem.Last().artist_name, returnItem.Last().track_name);
                                 }
@@ -327,7 +327,7 @@ namespace armaradio.Controllers
                     }
                 }
 
-                if (currentUser != null && playlistId.HasValue)
+                if (currentUser != null && value.CreateNewPlaylist && playlistId.HasValue)
                 {
                     var finalList = _musicRepo.GetPlaylistById(playlistId.Value, currentUser.UserId).Select(sg =>
                     {

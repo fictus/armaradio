@@ -97,12 +97,14 @@
                 <div>
                     <span>example: "Beatles | Yesterday"</span>
                 </div>
-                <div class="mt-2">
-                    <textarea id="txtPastedPlaylist" class="form-control"></textarea>
-                </div>
                 @if (userIsAuthenticated)
                 {
                     <div class="mt-2">
+                        <label>
+                            <input id="chkPastePlaylist_CreateNewPlaylist" type="checkbox" /> Save to new playlist
+                        </label>
+                    </div>
+                    <div id="dvPastePlaylist_PlaylistNameHolder" class="mt-2" style="display:none;">
                         <div class="input-group mb-3">
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="inputGroup-sizing-default">Playlist Name:</span>
@@ -111,6 +113,9 @@
                         </div>
                     </div>
                 }
+                <div class="mt-2">
+                    <textarea id="txtPastedPlaylist" class="form-control"></textarea>
+                </div>
             </div>
             <div class="modal-footer">
                 <button id="btnPopup_Apply" type="button" class="btn btn-primary mr-5">Apply</button>

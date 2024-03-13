@@ -11,6 +11,15 @@ function mainload_attacheEvents() {
             attachListToTable(response, true);
         });
 
+    $("#chkPastePlaylist_CreateNewPlaylist").on("change", function () {
+        if ($(this).is(":checked")) {
+            $("#txtPasterPlaylistName").val("");
+            $("#dvPastePlaylist_PlaylistNameHolder").css("display", "");
+        } else {
+            $("#dvPastePlaylist_PlaylistNameHolder").css("display", "none");
+        }
+    });
+
     $("#cmbMainOptions").on("change", function () {
         let selectedId = $.trim($(this).find("option:selected").val());
 
@@ -39,12 +48,16 @@ function mainload_attacheEvents() {
 
     $("#btnMain_UploadPlaylist").on("click", function () {
         $("#txtPastedPlaylist").val("");
+        $("#chkPastePlaylist_CreateNewPlaylist").prop("checked", false);
+        $("#chkPastePlaylist_CreateNewPlaylist").trigger("change");
+
         $("#dvPopupPastePlaylist").modal("show");
     });
 
     $("#btnPopup_Apply").on("click", function () {
         let playlistTxt = $.trim($("#txtPastedPlaylist").val());
         let playlistName = $.trim($("#txtPasterPlaylistName").val());
+        let createNewPlaylist = ($("#chkPastePlaylist_CreateNewPlaylist").length ? $("#chkPastePlaylist_CreateNewPlaylist").is(":checked") : false);
 
         if (playlistTxt != "") {
             if (playlistTxt.indexOf("|") == -1) {
@@ -58,7 +71,8 @@ function mainload_attacheEvents() {
 
                 armaradio.masterAJAXPost({
                     PlayList: playlistTxt,
-                    PlaylistName: playlistName
+                    PlaylistName: playlistName,
+                    CreateNewPlaylist: createNewPlaylist
                 }, "Music", "UploadCustomPlaylist")
                     .then(function (response) {
                         if (response && response.error) {
@@ -79,7 +93,7 @@ function mainload_attacheEvents() {
                                     playlistTitle: response.playlistName
                                 });
                             } else {
-                                attachListToTable(response);
+                                attachListToTable(response.songList);
                             }
                         }
                     });
