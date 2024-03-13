@@ -267,11 +267,12 @@ namespace armaradio.Repositories
             });
         }
 
-        public List<ArmaPlaylistDataItem> GetPlaylistById(int PlaylistId)
+        public List<ArmaPlaylistDataItem> GetPlaylistById(int PlaylistId, string UserId)
         {
             return _dapper.GetList<ArmaPlaylistDataItem>("radioconn", "ArmaPlayList_GetPlaylistById", new
             {
-                playlist_id = PlaylistId
+                playlist_id = PlaylistId,
+                user_id = UserId
             });
         }
 

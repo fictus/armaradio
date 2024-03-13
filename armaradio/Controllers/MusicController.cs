@@ -98,7 +98,14 @@ namespace armaradio.Controllers
         {
             try
             {
-                List<ArmaPlaylistDataItem> returnItem = _musicRepo.GetPlaylistById(PlaylistId);
+                ArmaUser currentUser = _authControl.GetCurrentUser();
+
+                if (currentUser == null)
+                {
+                    throw new Exception("Invalid request");
+                }
+
+                List<ArmaPlaylistDataItem> returnItem = _musicRepo.GetPlaylistById(PlaylistId, currentUser.UserId);
                 var finalList = returnItem.Select(sg =>
                 {
                     return new
@@ -244,7 +251,7 @@ namespace armaradio.Controllers
 
                 if (currentUser != null && playlistId.HasValue)
                 {
-                    var finalList = _musicRepo.GetPlaylistById(playlistId.Value).Select(sg =>
+                    var finalList = _musicRepo.GetPlaylistById(playlistId.Value, currentUser.UserId).Select(sg =>
                     {
                         return new
                         {

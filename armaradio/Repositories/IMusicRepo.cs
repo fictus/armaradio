@@ -14,7 +14,7 @@ namespace armaradio.Repositories
         int? InsertPlaylistName(string PlaylistName, string UserId);
         void InsertSongToPlaylist(int PlaylistId, string Artist, string Song);
         List<ArmaPlaylistDataItem> GetPlaylistByName(string PlaylistName, string UserId);
-        List<ArmaPlaylistDataItem> GetPlaylistById(int PlaylistId);
+        List<ArmaPlaylistDataItem> GetPlaylistById(int PlaylistId, string UserId);
         List<ArmaUserPlaylistDataItem> GetUserPlaylists(string UserId);
     }
 }
