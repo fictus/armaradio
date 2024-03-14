@@ -365,8 +365,11 @@ function mainload_attacheEvents() {
         });
     }
 
-    $("#offcanvasSongOptions").on("hidden.bs.offcanvas", function () {
+    $("#offcanvasSongOptions").on("hide.bs.offcanvas", function () {
         $("#btnSongOptions_RemoveFromPlaylist").attr("data-id", "");
+
+        var popover = bootstrap.Popover.getInstance($("#btnSongOptions_RemoveFromPlaylist")[0]);
+        popover.hide();
     });
 }
 
