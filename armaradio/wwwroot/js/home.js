@@ -88,7 +88,7 @@ function mainload_attacheEvents() {
                             $("#txtPastedPlaylist").val("");
 
                             if (response.playlistId) {
-                                attachListToTable(response, null, {
+                                attachListToTable(response.songList, null, {
                                     playlistId: response.playlistId,
                                     playlistTitle: response.playlistName
                                 });
