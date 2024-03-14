@@ -203,6 +203,56 @@ namespace armaradio.Controllers
             }
         }
 
+        [HttpPost]
+        [Authorize]
+        public IActionResult AddSongToNewPlaylist([FromBody] MusicAddSongToPlaylistRequest value)
+        {
+            try
+            {
+                if (value == null)
+                {
+                    throw new Exception("Invalid request");
+                }
+                if (string.IsNullOrWhiteSpace(value.PlaylistName))
+                {
+                    throw new Exception("'Playlist Name' is required");
+                }
+                if (!(!string.IsNullOrWhiteSpace(value.Artist) || !string.IsNullOrWhiteSpace(value.Song)))
+                {
+                    throw new Exception("Invalid request");
+                }
+
+                ArmaUser currentUser = _authControl.GetCurrentUser();
+
+                if (currentUser == null)
+                {
+                    throw new Exception("Invalid request");
+                }
+
+                bool playlistExists = _musicRepo.CheckIfPlaylistExists(value.PlaylistName, currentUser.UserId);
+
+                if (playlistExists)
+                {
+                    throw new Exception($"Playlist '{value.PlaylistName.Trim()}' already exists. Please specify a different name");
+                }
+
+                int? playlistId = _musicRepo.InsertPlaylistName(value.PlaylistName.Trim(), currentUser.UserId);
+
+                if (!playlistId.HasValue)
+                {
+                    throw new Exception("An error occurred creating Playlist");
+                }
+
+                _musicRepo.AddSongToPlaylist(playlistId.Value, value.Artist, value.Song, value.VideoId);
+
+                return new JsonResult(Ok());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
         [HttpGet]
         public IActionResult GetTop50UserPickedSongs()
         {

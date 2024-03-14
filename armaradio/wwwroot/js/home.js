@@ -20,6 +20,17 @@ function mainload_attacheEvents() {
         }
     });
 
+    $("#chkAddToPlaylist_CreateNewPlaylist").on("change", function () {
+        $(".add-to-playlist-holder-dv").css("display", "none");
+
+        if ($(this).is(":checked")) {
+            $("#txtAddToPlaylistNewPlaylistName").val("");
+            $("#dvAddToPlaylistName_Holder").css("display", "");
+        } else {
+            $("#dvAddToPlaylistCmbList_Holder").css("display", "");
+        }
+    });
+
     $("#cmbMainOptions").on("change", function () {
         let selectedId = $.trim($(this).find("option:selected").val());
 
@@ -189,6 +200,9 @@ function mainload_attacheEvents() {
     $("#offcanvasNonePlaylistOptions").on("show.bs.offcanvas", function () {
         armaradio.masterPageWait(true);
 
+        $("#chkAddToPlaylist_CreateNewPlaylist").prop("checked", false);
+        $("#chkAddToPlaylist_CreateNewPlaylist").trigger("change");
+
         $("#btnNonePlaylistOptions_AddToPlaylist").attr("disabled", "disabled");
         $("#cmbAddToPlaylistNames").find("option").remove();
 
@@ -233,31 +247,71 @@ function mainload_attacheEvents() {
         let currentArtist = $.trim($("#btnNonePlaylistOptions_AddToPlaylist").attr("data-artist"));
         let currentSong = $.trim($("#btnNonePlaylistOptions_AddToPlaylist").attr("data-song"));
         let currentVideoId = $.trim($("#btnNonePlaylistOptions_AddToPlaylist").attr("data-videoid"));
+        let addToNewPlaylist = $("#chkAddToPlaylist_CreateNewPlaylist").is(":checked");
+        let newPlaylistName = $.trim($("#txtAddToPlaylistNewPlaylistName").val());
 
-        if (currentPlaylistId != "" && (currentArtist != "" || currentSong != "")) {
-            armaradio.masterPageWait(true);
-
-            armaradio.masterAJAXPost({
-                PlaylistId: currentPlaylistId,
-                Artist: currentArtist,
-                Song: currentSong,
-                VideoId: currentVideoId
-            }, "Music", "AddSongToPlaylist")
-                .then(function (response) {
-                    if (response && response.error) {
-                        armaradio.masterPageWait(false);
-
-                        armaradio.warningMsg({
-                            msg: response.errorMsg,
-                            captionMsg: "Error",
-                            typeLayout: "red"
-                        });
-                    } else {
-                        $("#offcanvasNonePlaylistOptions").find("button.btn-close").trigger("click");
-
-                        armaradio.masterPageWait(false);
-                    }
+        if (addToNewPlaylist) {
+            if (newPlaylistName == "") {
+                armaradio.warningMsg({
+                    msg: "'Playlist Name' is required",
+                    captionMsg: "Error",
+                    typeLayout: "red"
                 });
+            } else {
+                if ((currentArtist != "" || currentSong != "")) {
+                    armaradio.masterPageWait(true);
+
+                    armaradio.masterAJAXPost({
+                        PlaylistId: -1,
+                        PlaylistName: newPlaylistName,
+                        Artist: currentArtist,
+                        Song: currentSong,
+                        VideoId: currentVideoId
+                    }, "Music", "AddSongToNewPlaylist")
+                        .then(function (response) {
+                            if (response && response.error) {
+                                armaradio.masterPageWait(false);
+
+                                armaradio.warningMsg({
+                                    msg: response.errorMsg,
+                                    captionMsg: "Error",
+                                    typeLayout: "red"
+                                });
+                            } else {
+                                $("#offcanvasNonePlaylistOptions").find("button.btn-close").trigger("click");
+
+                                armaradio.masterPageWait(false);
+                            }
+                        });
+                }
+            }
+        } else {
+            if (currentPlaylistId != "" && (currentArtist != "" || currentSong != "")) {
+                armaradio.masterPageWait(true);
+
+                armaradio.masterAJAXPost({
+                    PlaylistId: currentPlaylistId,
+                    PlaylistName: "",
+                    Artist: currentArtist,
+                    Song: currentSong,
+                    VideoId: currentVideoId
+                }, "Music", "AddSongToPlaylist")
+                    .then(function (response) {
+                        if (response && response.error) {
+                            armaradio.masterPageWait(false);
+
+                            armaradio.warningMsg({
+                                msg: response.errorMsg,
+                                captionMsg: "Error",
+                                typeLayout: "red"
+                            });
+                        } else {
+                            $("#offcanvasNonePlaylistOptions").find("button.btn-close").trigger("click");
+
+                            armaradio.masterPageWait(false);
+                        }
+                    });
+            }
         }
     });
 

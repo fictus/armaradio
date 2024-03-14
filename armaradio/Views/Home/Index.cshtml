@@ -129,7 +129,7 @@
 {
     <div id="offcanvasNonePlaylistOptions" class="offcanvas offcanvas-end" tabindex="-1" aria-labelledby="offcanvasNonePlaylistOptionsRightLabel">
         <div class="offcanvas-header">
-            <h5 id="offcanvasNonePlaylistOptionsRightLabel">Options</h5>
+            <h5 id="offcanvasNonePlaylistOptionsRightLabel">Add to Playlist</h5>
             <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
@@ -137,6 +137,19 @@
                 <span id="lblNonePlaylistOptionsTitle"></span>
             </div>
             <div class="mt-4">
+                <label class="font-color-gray">
+                    <input id="chkAddToPlaylist_CreateNewPlaylist" type="checkbox" /> Save to new playlist
+                </label>
+            </div>
+            <div id="dvAddToPlaylistName_Holder" class="add-to-playlist-holder-dv mt-2" style="display:none;">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroup-sizing-default">Playlist Name:</span>
+                    </div>
+                    <input id="txtAddToPlaylistNewPlaylistName" type="text" class="form-control" aria-label="" aria-describedby="inputGroup-sizing-default" atocomplete="off_hack3463453453">
+                </div>
+            </div>
+            <div id="dvAddToPlaylistCmbList_Holder" class="add-to-playlist-holder-dv mt-2">
                 <div class="col">
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
