@@ -103,6 +103,10 @@ div.master-page-wait .spinner-border {
     padding-left: 20px;
 }
 
+.font-color-gray {
+    color: #7d7b7b;
+}
+
 .align-left {
     text-align: left;
 }
