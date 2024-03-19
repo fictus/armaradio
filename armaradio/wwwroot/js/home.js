@@ -11,6 +11,17 @@ function mainload_attacheEvents() {
             attachListToTable(response, true);
         });
 
+    $("#btnMainPlayerToggleRepeat").on("click", function () {
+        let btn = $("#btnMainPlayerToggleRepeat");
+        let currentStatus = $.trim(btn.attr("data-status"));
+
+        if (currentStatus == "1") {
+            btn.attr("data-status", "0");
+        } else {
+            btn.attr("data-status", "1");
+        }
+    });
+
     $("#chkPastePlaylist_CreateNewPlaylist").on("change", function () {
         if ($(this).is(":checked")) {
             $("#txtPasterPlaylistName").val("");
@@ -654,7 +665,13 @@ function onPlayerReady(e) {
 
 function onPlayerStateChange(e) {
     if (e.data == YT.PlayerState.ENDED) {
-        playerPlayNext();
+        let currentStatus = $.trim($("#btnMainPlayerToggleRepeat").attr("data-status"));
+
+        if (currentStatus == "1") {
+            e.target.playVideo();
+        } else {
+            playerPlayNext();
+        }
     } else {
         console.log(e);
     }

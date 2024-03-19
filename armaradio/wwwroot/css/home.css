@@ -66,7 +66,12 @@ div.div-thumbnail {
 }
 
 
-
+#btnMainPlayerToggleRepeat[data-status='0'] i {
+    color: #a1a1a1;
+}
+#btnMainPlayerToggleRepeat[data-status='1'] i {
+    color: #48fb47;
+}
 
 #tblMainPlayList div.row-actions-cotrols {
     position: absolute;
