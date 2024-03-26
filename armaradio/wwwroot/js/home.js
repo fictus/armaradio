@@ -16,9 +16,15 @@ function mainload_attacheEvents() {
         let currentStatus = $.trim(btn.attr("data-status"));
 
         if (currentStatus == "1") {
-            btn.attr("data-status", "0");
+            btn.attr({
+                "data-status": "0",
+                "title": "repeat off"
+            });
         } else {
-            btn.attr("data-status", "1");
+            btn.attr({
+                "data-status": "1",
+                "title": "repeat on"
+            });
         }
     });
 
@@ -37,8 +43,12 @@ function mainload_attacheEvents() {
         if ($(this).is(":checked")) {
             $("#txtAddToPlaylistNewPlaylistName").val("");
             $("#dvAddToPlaylistName_Holder").css("display", "");
+
+            $("#btnNonePlaylistOptions_AddToPlaylist").removeAttr("disabled");
         } else {
             $("#dvAddToPlaylistCmbList_Holder").css("display", "");
+
+            $("#cmbAddToPlaylistNames").trigger("change");
         }
     });
 
