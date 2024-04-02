@@ -21,10 +21,6 @@
                     <select id="cmbMainOptions" class="form-select">
                         <option value="1" selected="selected">Top 100</option>
                         <option value="2">Top 50 user-picked Songs</option>
-                        @if (userIsAuthenticated)
-                        {
-                            <option value="3">Load Playlist</option>
-                        }
                     </select>
                 </div>
             </div>
@@ -50,7 +46,7 @@
 </div>
 <div class="row">
     <div class="col-md-4">
-        <button id="btnMain_UploadPlaylist" type="button" class="btn btn-primary mr-3">Paste Playlist</button>
+        <button id="btnMain_LoadPlaylist" type="button" class="btn btn-primary mr-3">Load Playlist</button>
     </div>
     <div class="col-md-6">        
     </div>
@@ -189,7 +185,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Load Playlists</h5>
+                    <h5 class="modal-title">Load Playlist</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">

@@ -69,21 +69,33 @@ function mainload_attacheEvents() {
                 .then(function (response) {
                     attachListToTable(response);
                 });
-        } else if (selectedId == "3") {
-            if ($("#dvPopupLoadPlaylists").length) {
-                $("#dvPopupLoadPlaylists").modal("show");
-
-                $("#cmbMainOptions").val("1"); //("option").first().attr("selected", "selected");
-            }
         }
+        //else if (selectedId == "3") {
+        //    if ($("#dvPopupLoadPlaylists").length) {
+        //        $("#dvPopupLoadPlaylists").modal("show");
+
+        //        $("#cmbMainOptions").val("1"); //("option").first().attr("selected", "selected");
+        //    }
+        //}
     });
 
-    $("#btnMain_UploadPlaylist").on("click", function () {
-        $("#txtPastedPlaylist").val("");
-        $("#chkPastePlaylist_CreateNewPlaylist").prop("checked", false);
-        $("#chkPastePlaylist_CreateNewPlaylist").trigger("change");
+    $("#btnMain_LoadPlaylist").on("click", function () {
+        if ($("#lnkMainLogin").length) {
+            armaradio.warningMsg({
+                msg: "Please login or create a free account",
+                captionMsg: "Login Required",
+                typeLayout: "red"
+            });
+        } else {
+            if ($("#dvPopupLoadPlaylists").length) {
+                $("#dvPopupLoadPlaylists").modal("show");
+            }
+        }
+        //$("#txtPastedPlaylist").val("");
+        //$("#chkPastePlaylist_CreateNewPlaylist").prop("checked", false);
+        //$("#chkPastePlaylist_CreateNewPlaylist").trigger("change");
 
-        $("#dvPopupPastePlaylist").modal("show");
+        //$("#dvPopupPastePlaylist").modal("show");
     });
 
     $("#btnPopup_Apply").on("click", function () {
