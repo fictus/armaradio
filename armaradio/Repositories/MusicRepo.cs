@@ -2,6 +2,7 @@
 using AngleSharp.Html.Parser;
 using armaradio.Models;
 using armaradio.Models.Youtube;
+using System.Globalization;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -80,6 +81,134 @@ namespace armaradio.Repositories
 
                             }
                         }
+                    }
+                }
+            }
+
+            return returnItem;
+        }
+
+        public List<TrackDataItem> GetCurrentTop40DanceSingles()
+        {
+            List<TrackDataItem> returnItem = new List<TrackDataItem>();
+            DateTime dateNow = DateTime.Now;
+
+            string url = $"https://www.officialcharts.com/charts/dance-singles-chart/{dateNow.ToString("yyyyMMdd")}";
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
+
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    string htmlContent;
+                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    {
+                        htmlContent = sr.ReadToEnd();
+                    }
+
+                    if (!string.IsNullOrEmpty(htmlContent))
+                    {
+                        string pattern = @"id=""__NUXT_DATA__"" data-ssr=""true"">(.*?)</script>";
+                        Match match = Regex.Match(htmlContent, pattern);
+
+                        if (match.Success)
+                        {
+                            string currentVideoId = "";
+                            string jsonString = match.Groups[1].Value;
+                            //jsonString = jsonString.Replace("'", "\"");
+                            List<object> jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject<List<object>>(jsonString);
+                            List<object> cleanList = new List<object>();
+                            bool startAdding = false;
+
+                            cleanList.Add("player-3242342-0");
+
+                            foreach (var item in jsonObject)
+                            {
+                                if (!startAdding)
+                                {
+                                    if ((item ?? "").ToString() == "track-info")
+                                    {
+                                        startAdding = true;
+                                        continue;
+                                    }
+                                }
+                                else
+                                {
+                                    if (item != null)
+                                    {
+                                        string currentItem = item.ToString().Trim();
+
+                                        if (!currentItem.StartsWith("{") && !currentItem.EndsWith("}"))
+                                        {
+                                            cleanList.Add(item);
+                                        }
+                                    }
+                                }
+                            }
+
+                            var textinfo = new CultureInfo("en-US", false).TextInfo;
+
+                            for (int i= 0; i < cleanList.Count; i++)
+                            {
+                                if (cleanList[i].ToString().StartsWith("player-") && returnItem.Count < 40)
+                                {
+                                    returnItem.Add(new TrackDataItem()
+                                    {
+                                        artist_name = textinfo.ToTitleCase(cleanList[i + 4].ToString().ToLower()),
+                                        track_name = textinfo.ToTitleCase(cleanList[i + 2].ToString().ToLower()),
+                                        tid = -1,
+                                        usability_score = 0
+                                    });
+                                }
+                                //if (i == 0)
+                                //{
+                                //    returnItem.Add(new TrackDataItem()
+                                //    {
+                                //        artist_name = cleanList[i + 5].ToString(),
+                                //        track_name = cleanList[i + 3].ToString(),
+                                //        tid = -1,
+                                //        usability_score = 0
+                                //    });
+                                //}
+                                //else
+                                //{
+
+                                //}
+                            }
+                        }
+
+
+
+                        //var parser = new HtmlParser();
+                        //var document = parser.ParseDocument(htmlContent);
+
+                        //var chartHolder = document.QuerySelector("div.chart-content");
+
+                        //var allDivs = chartHolder.QuerySelectorAll("div.chart-item");
+
+                        //foreach (var div in allDivs)
+                        //{
+                        //    try
+                        //    {
+                        //        var dataHolder = div.QuerySelector("div.description");
+                        //        string songName = (dataHolder.QuerySelector("a.chart-name").Text() ?? "").Trim();
+                        //        string artistName = (dataHolder.QuerySelector("a.chart-artist").Text() ?? "").Trim();
+
+                        //        returnItem.Add(new TrackDataItem()
+                        //        {
+                        //            artist_name = artistName,
+                        //            track_name = songName,
+                        //            tid = -1,
+                        //            usability_score = 0
+                        //        });
+                        //    }
+                        //    catch (Exception ex)
+                        //    {
+
+                        //    }
+                        //}
                     }
                 }
             }

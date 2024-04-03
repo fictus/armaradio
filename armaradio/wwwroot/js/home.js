@@ -65,6 +65,13 @@ function mainload_attacheEvents() {
         } else if (selectedId == "2") {
             armaradio.masterPageWait(true);
 
+            armaradio.masterAJAXGet({}, "Music", "GetCurrentTop40DanceSingles")
+                .then(function (response) {
+                    attachListToTable(response);
+                });
+        } else if (selectedId == "3") {
+            armaradio.masterPageWait(true);
+
             armaradio.masterAJAXGet({}, "Music", "GetTop50UserPickedSongs")
                 .then(function (response) {
                     attachListToTable(response);

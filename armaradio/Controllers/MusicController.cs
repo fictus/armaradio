@@ -47,6 +47,30 @@ namespace armaradio.Controllers
         }
 
         [HttpGet]
+        public IActionResult GetCurrentTop40DanceSingles()
+        {
+            try
+            {
+                List<TrackDataItem> returnItem = _musicRepo.GetCurrentTop40DanceSingles();
+                var finalList = returnItem.Select(sg =>
+                {
+                    return new
+                    {
+                        tid = sg.tid,
+                        artistName = sg.artist_name,
+                        songName = sg.track_name
+                    };
+                });
+
+                return new JsonResult(finalList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        [HttpGet]
         public IActionResult GetArtistList(string seach)
         {
             try
