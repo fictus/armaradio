@@ -1,6 +1,7 @@
 ﻿using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 using armaradio.Models;
+using armaradio.Models.BeatPort;
 using armaradio.Models.Youtube;
 using System.Globalization;
 using System.Net;
@@ -209,6 +210,128 @@ namespace armaradio.Repositories
 
                         //    }
                         //}
+                    }
+                }
+            }
+
+            return returnItem;
+        }
+
+        public List<TrackDataItem> GetCurrentTranceTop100()
+        {
+            List<TrackDataItem> returnItem = new List<TrackDataItem>();
+
+            string url = "https://www.beatport.com/genre/trance-main-floor/7/top-100";
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
+
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    string htmlContent;
+                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    {
+                        htmlContent = sr.ReadToEnd();
+                    }
+
+                    if (!string.IsNullOrEmpty(htmlContent))
+                    {
+                        string pattern = @"id=""__NEXT_DATA__"" type=""application/json"">(.*?)</script>";
+                        Match match = Regex.Match(htmlContent, pattern);
+
+                        if (match.Success)
+                        {
+                            string jsonString = match.Groups[1].Value;
+                            //jsonString = jsonString.Replace("'", "\"");
+                            TranceTopSearchDataItem jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject<TranceTopSearchDataItem>(jsonString);
+
+                            if (jsonObject.props.pageProps.dehydratedState.queries.Count > 0)
+                            {
+                                foreach (var content in jsonObject.props.pageProps.dehydratedState.queries.First().state.data.results)
+                                {
+                                    List<string> artists = new List<string>();
+
+                                    foreach (var artist in content.artists)
+                                    {
+                                        artists.Add(artist.name);
+                                    }
+
+                                    string artistName = string.Join(", ", artists.ToArray());
+                                    string songName = $"{content.name}{(!string.IsNullOrWhiteSpace(content.mix_name) ? $" ({content.mix_name})" : "")}";
+
+                                    returnItem.Add(new TrackDataItem()
+                                    {
+                                        artist_name = artistName,
+                                        track_name = songName,
+                                        tid = -1,
+                                        usability_score = 0
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return returnItem;
+        }
+
+        public List<TrackDataItem> GetCurrentTranceHype100()
+        {
+            List<TrackDataItem> returnItem = new List<TrackDataItem>();
+
+            string url = "https://www.beatport.com/genre/trance-main-floor/7/hype-100";
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
+
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    string htmlContent;
+                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    {
+                        htmlContent = sr.ReadToEnd();
+                    }
+
+                    if (!string.IsNullOrEmpty(htmlContent))
+                    {
+                        string pattern = @"id=""__NEXT_DATA__"" type=""application/json"">(.*?)</script>";
+                        Match match = Regex.Match(htmlContent, pattern);
+
+                        if (match.Success)
+                        {
+                            string jsonString = match.Groups[1].Value;
+                            //jsonString = jsonString.Replace("'", "\"");
+                            TranceTopSearchDataItem jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject<TranceTopSearchDataItem>(jsonString);
+
+                            if (jsonObject.props.pageProps.dehydratedState.queries.Count > 0)
+                            {
+                                foreach (var content in jsonObject.props.pageProps.dehydratedState.queries.First().state.data.results)
+                                {
+                                    List<string> artists = new List<string>();
+
+                                    foreach (var artist in content.artists)
+                                    {
+                                        artists.Add(artist.name);
+                                    }
+
+                                    string artistName = string.Join(", ", artists.ToArray());
+                                    string songName = $"{content.name}{(!string.IsNullOrWhiteSpace(content.mix_name) ? $" ({content.mix_name})" : "")}";
+
+                                    returnItem.Add(new TrackDataItem()
+                                    {
+                                        artist_name = artistName,
+                                        track_name = songName,
+                                        tid = -1,
+                                        usability_score = 0
+                                    });
+                                }
+                            }
+                        }
                     }
                 }
             }

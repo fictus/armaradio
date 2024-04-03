@@ -71,6 +71,54 @@ namespace armaradio.Controllers
         }
 
         [HttpGet]
+        public IActionResult GetCurrentTranceTop100()
+        {
+            try
+            {
+                List<TrackDataItem> returnItem = _musicRepo.GetCurrentTranceTop100();
+                var finalList = returnItem.Select(sg =>
+                {
+                    return new
+                    {
+                        tid = sg.tid,
+                        artistName = sg.artist_name,
+                        songName = sg.track_name
+                    };
+                });
+
+                return new JsonResult(finalList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetCurrentTranceHype100()
+        {
+            try
+            {
+                List<TrackDataItem> returnItem = _musicRepo.GetCurrentTranceHype100();
+                var finalList = returnItem.Select(sg =>
+                {
+                    return new
+                    {
+                        tid = sg.tid,
+                        artistName = sg.artist_name,
+                        songName = sg.track_name
+                    };
+                });
+
+                return new JsonResult(finalList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        [HttpGet]
         public IActionResult GetArtistList(string seach)
         {
             try

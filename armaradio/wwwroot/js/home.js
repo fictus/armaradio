@@ -72,7 +72,14 @@ function mainload_attacheEvents() {
         } else if (selectedId == "3") {
             armaradio.masterPageWait(true);
 
-            armaradio.masterAJAXGet({}, "Music", "GetTop50UserPickedSongs")
+            armaradio.masterAJAXGet({}, "Music", "GetCurrentTranceTop100")
+                .then(function (response) {
+                    attachListToTable(response);
+                });
+        } else if (selectedId == "4") {
+            armaradio.masterPageWait(true);
+
+            armaradio.masterAJAXGet({}, "Music", "GetCurrentTranceHype100")
                 .then(function (response) {
                     attachListToTable(response);
                 });
