@@ -9,9 +9,12 @@ html {
 }
 
 body {
-    background-color: #EAEDF6;
+    background-color: #055472;
 }
 
+.bg-bluetitle {
+    background-color: #85B4C6;
+}
 /*div.main-body-layout {
     position: fixed;
     top: 0;
@@ -21,7 +24,6 @@ body {
     z-index: -2;
     filter: drop-shadow(16px 16px 20px #cdd1dd);
 }*/
-
 /*div.main-body-layout {
     position: fixed;
     top: 0;
@@ -32,12 +34,12 @@ body {
     z-index: -2;
     filter: sepia(200%) brightness(82%) contrast(142%) blur(2px);
 }*/
-
 div.main-background-color {
     background-color: white;
-    -webkit-box-shadow: 0px 0px 45px 30px rgba(195,195,195);
+    /*-webkit-box-shadow: 0px 0px 45px 30px rgba(195,195,195);
     -moz-box-shadow: 0px 45px 30px rgba(195,195,195);
-    box-shadow: 0px 0px 45px 30px rgba(195,195,195);
+    box-shadow: 0px 0px 45px 30px #1C5A56;*/
+    border-radius: 5px;
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {

@@ -1,4 +1,4 @@
-﻿.bottom-controls {
+.bottom-controls {
     position: fixed;
     bottom: 0;
     left: 0;
@@ -10,8 +10,8 @@ div.bottom-backcolor {
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: black;
-    opacity: 0.9;
+    background-color: #152210;
+    /* opacity: 0.9; */
 }
 
 div.spacer-bottom {
