@@ -10,8 +10,8 @@ div.bottom-backcolor {
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: #152210;
-    /* opacity: 0.9; */
+    background-color: #080707;
+    opacity: 0.9;
 }
 
 div.spacer-bottom {
@@ -67,7 +67,7 @@ div.div-thumbnail {
 
 
 #btnMainPlayerToggleRepeat[data-status='0'] i {
-    color: #a1a1a1;
+    color: #e5dcdc;
 }
 #btnMainPlayerToggleRepeat[data-status='1'] i {
     color: #48fb47;

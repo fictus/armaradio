@@ -6,45 +6,61 @@
     <title>@ViewData["Title"] - armaradio</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link href="~/css/bootstrap-extended.css" rel="stylesheet" asp-append-version="true" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anek+Gurmukhi:wght@100..800&family=Barlow+Condensed:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA==" crossorigin="anonymous" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/armaradio.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-bluetitle box-shadow mb-3">
-            <div class="container-fluid">
-                @* <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">armaradio</a> *@                
+    <header class="bg-bluetitle">
+        <div class="container">
+            <div class="row">
+                <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light box-shadow">
+                    <div class="container-fluid">
+                        @* <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">armaradio</a> *@                
                 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse">
-                    <ul class="navbar-nav  ms-auto">
-                        @if (!(this.Context.User?.Identity?.IsAuthenticated ?? false))
-                        {
-                            <li class="nav-item">
-                                <a id="lnkMainLogin" class="nav-link text-dark" href="#">Login</a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a id="lnkMainLogout" class="nav-link text-dark" href="#">Logout</a>
-                            </li>
-                        }
-                        @* <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li> *@
-                    </ul>
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                                aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="navbar-collapse collapse">
+                            <ul class="navbar-nav  ms-auto">
+                                @if (!(this.Context.User?.Identity?.IsAuthenticated ?? false))
+                                {
+                                    <li class="nav-item">
+                                        <a id="lnkMainLogin" class="nav-link text-white" href="#">Login</a>
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li class="nav-item">
+                                        <a id="lnkMainLogout" class="nav-link text-white" href="#">Logout</a>
+                                    </li>
+                                }
+                                @* <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                                </li> *@
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+    <div class="site-moniker">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1 class="display-6"><i class="site-icon-color fas fa-assistive-listening-systems"></i> <strong>Arma Radio</strong></h1>
                 </div>
             </div>
-        </nav>
-    </header>
+        </div>
+    </div>
     <div class="main-body-layout"></div>
     <div class="container main-background-color">
         <main role="main" class="pb-3">

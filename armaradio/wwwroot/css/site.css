@@ -1,3 +1,9 @@
+html, body, span, div, label, input[type=text], button, a {
+    font-family: "Barlow", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
 html {
   font-size: 14px;
 }
@@ -8,12 +14,53 @@ html {
   }
 }
 
+.site-icon-color {
+    color: #f75252;
+}
+
+html body .btn-primary {
+    background-color: #e14b4b;
+    border-color: #e14b4b;
+}
+
+html body .btn-primary:hover {
+    background-color: #e77c7c;
+    border-color: #e77c7c;
+}
+
+html body .btn-primary:focus {
+    background-color: #e77c7c;
+    border-color: #e77c7c;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #f2b5b5;
+}
+
+html body input[type=text]:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #f2b5b5;
+    border-color: #c4bcbc;
+}
+
+html body .form-select:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #f2b5b5;
+    border-color: #c4bcbc;
+}
+
+/***  Image downloaded from
+    https://unsplash.com/s/photos/soft-background?license=free **/
 body {
-    background-color: #055472;
+    background: url(../images/neutral-bkg-1.jpg) center center / cover no-repeat fixed;
 }
 
 .bg-bluetitle {
-    background-color: #85B4C6;
+    background-color: #230820;
+}
+
+.text-white {
+    color: white;
+}
+
+.site-moniker {
+    background-color: white;
+    opacity: 0.7;
 }
 /*div.main-body-layout {
     position: fixed;
