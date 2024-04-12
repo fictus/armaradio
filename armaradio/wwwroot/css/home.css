@@ -147,3 +147,30 @@ div.list-container {
     margin-top: 8px;
     left: 10px;
 }
+
+#offcanvasArtistAlbums {
+    visibility: visible !important;
+}
+#offcanvasArtistAlbums div.offcanvas-body {
+    overflow: visible;
+}
+
+#btnArtistAlbumsOpen {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-right: -53px;
+    z-index: 3333333;
+}
+
+#ulArtistsFound {
+    font-size: 9pt;
+}
+
+#dvTypeAheadSearch_Artists {
+    position: absolute;
+    top: 100%;
+    left: 60px;
+    right: 0;
+    background-color: white;
+}

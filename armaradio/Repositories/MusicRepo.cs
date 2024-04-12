@@ -20,6 +20,14 @@ namespace armaradio.Repositories
             _dapper = dapper;
         }
 
+        public List<ArmaArtistDataItem> Artist_FindArtists(string search)
+        {
+            return _dapper.GetList<ArmaArtistDataItem>("radioconn", "Arma_SearchArtists", new
+            {
+                artist_name = search
+            });
+        }
+
         public List<ArtistDataItem> Artist_GetArtistList(string search)
         {
             return _dapper.GetList<ArtistDataItem>("radioconn", "Artist_GetArtistList", new

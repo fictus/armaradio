@@ -118,6 +118,21 @@ namespace armaradio.Controllers
             }
         }
 
+        [HttpPost]
+        public IActionResult FindArtists([FromBody] MusicSearchArtistRequest value)
+        {
+            try
+            {
+                List<ArmaArtistDataItem> returnItem = _musicRepo.Artist_FindArtists(value.SearchPhrase) ?? new List<ArmaArtistDataItem>();
+
+                return new JsonResult(returnItem);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
         [HttpGet]
         public IActionResult GetArtistList(string seach)
         {

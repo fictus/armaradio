@@ -6,6 +6,7 @@ namespace armaradio.Repositories
     public interface IMusicRepo
     {
         List<TrackDataItem> GetCurrentTop100();
+        List<ArmaArtistDataItem> Artist_FindArtists(string search);
         List<ArtistDataItem> Artist_GetArtistList(string search);
         List<TrackDataItem> Tracks_GetTop50Songs();
         List<TrackDataItem> GetCurrentTop40DanceSingles();

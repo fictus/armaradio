@@ -1,3 +1,5 @@
+var arma_mainSearchSelectedType = "1";
+
 $(document).ready(function () {
     mainload_attacheEvents();
 });
@@ -22,6 +24,8 @@ function mainload_attacheEvents() {
             let currentA = $(this);
 
             if (!currentA.hasClass("active")) {
+                arma_mainSearchSelectedType = $.trim(currentA.attr("data-type"));
+
                 $("#cmbMasterSearchOptions").find("a.dropdown-item").removeClass("active");
                 currentA.addClass("active");
                 let iconHtml = currentA.find("i")[0].outerHTML;
@@ -30,8 +34,69 @@ function mainload_attacheEvents() {
 
                 $("#txtMainGeneralSearch").val("");
                 $("#txtMainGeneralSearch")[0].focus();
+
+                $("#ulArtistsFound").css("display", "none");
+                $("#btnArtistAlbumsOpen").css("display", "none");
+                //if (arma_mainSearchSelectedType == "3") {
+                //    $("#btnArtistAlbumsOpen").css("display", "");
+                //} else {
+                //    $("#btnArtistAlbumsOpen").css("display", "none");
+                //}
             }
         });
+    });
+
+    let mainSearchDeff;
+    $("#txtMainGeneralSearch").on("keydown", function (e) {
+        if (arma_mainSearchSelectedType == "3") {
+            if (mainSearchDeff) {
+                try {
+                    mainSearchDeff.cancel();
+                } catch {
+
+                }
+            }
+
+            clearTimeout($("#txtMainGeneralSearch").data("timeout"));
+
+            $("#txtMainGeneralSearch").data("timeout", setTimeout(function () {
+                let searchPhrase = $("#txtMainGeneralSearch").val();
+
+                if ($.trim(searchPhrase) != "") {
+                    mainSearchDeff = armaradio.masterAJAXPost({
+                        SearchPhrase: searchPhrase
+                    }, "Music", "FindArtists")
+                        .then(function (response) {
+                            attachArtistResponseFromSearch(response);
+                        });
+                } else {
+                    attachArtistResponseFromSearch([]);
+                }
+            }, 800));
+        }
+    });
+
+    $("#txtMainGeneralSearch").on("focus", function () {
+        if (arma_mainSearchSelectedType == "3" && $("#ulArtistsFound").find("li").length) {
+            setTimeout(function () {
+                $("#ulArtistsFound").css("display", "");
+            }, 10);
+        }
+    });
+
+    $("body").on("click", function (e) {
+        if (!(e.target.id == "ulArtistsFound" || e.target.id == "txtMainGeneralSearch")) {
+            $("#ulArtistsFound").css("display", "none");
+        }
+    });
+
+    $("#btnArtistAlbumsOpen").on("click", function () {
+        let isVisible = $("#offcanvasArtistAlbums").hasClass("show");
+        let bsOffcanvas = new bootstrap.Offcanvas($("#offcanvasArtistAlbums")[0]);
+
+        if (!isVisible) {
+            bsOffcanvas.show();
+        }
     });
 
     $("#btnMainPlayerToggleRepeat").on("click", function () {
@@ -443,8 +508,47 @@ function mainload_attacheEvents() {
     });
 }
 
-function performGeneralSearch() {
-    let searchText = $.trim($("#txtMainGeneralSearch").val());
+function attachArtistResponseFromSearch(response) {
+    console.log(response);
+    $("#ulArtistsFound").find("li").remove();
+
+    if (response && response.length) {
+
+        for (let i = 0; i < response.length; i++) {
+            $("#ulArtistsFound").append(
+                $("<li></li>")
+                    .append(
+                        $("<a></a>").attr({
+                            "class": "dropdown-item",
+                            "href": "#",
+                            "data-id": response[i].id,
+                            "data-artist": response[i].artistName,
+                            "data-artistflat": response[i].artistName_Flat,
+                        })
+                            .html(response[i].artistName_Flat)
+                    )
+            );
+        }
+
+        $("#ulArtistsFound").find("a").each(function () {
+            $(this).on("click", function (e) {
+                e.preventDefault();
+                let artistName = $(this).attr("data-artistflat");
+
+                performGeneralSearch(artistName);
+
+                $("#btnArtistAlbumsOpen").css("display", "");
+            });
+        });
+
+        $("#ulArtistsFound").css("display", "");
+    } else {
+        $("#ulArtistsFound").css("display", "none");
+    }
+}
+
+function performGeneralSearch(searchPhrase) {
+    let searchText = (searchPhrase || $.trim($("#txtMainGeneralSearch").val()));
 
     if (searchText != "") {
         armaradio.masterPageWait(true);
