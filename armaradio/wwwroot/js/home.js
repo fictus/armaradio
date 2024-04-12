@@ -11,6 +11,29 @@ function mainload_attacheEvents() {
             attachListToTable(response, true);
         });
 
+    //$("#cmbMasterSearchOptions").on("hide.bs.dropdown", function (e) {
+    //    console.log(e);
+    //});
+
+    $("#cmbMasterSearchOptions").find("a.dropdown-item").each(function () {
+        $(this).on("click", function (e) {
+            e.preventDefault();
+
+            let currentA = $(this);
+
+            if (!currentA.hasClass("active")) {
+                $("#cmbMasterSearchOptions").find("a.dropdown-item").removeClass("active");
+                currentA.addClass("active");
+                let iconHtml = currentA.find("i")[0].outerHTML;
+
+                $("#cmbMasterSearchOptions").find("button.dropdown-toggle").html(iconHtml);
+
+                $("#txtMainGeneralSearch").val("");
+                $("#txtMainGeneralSearch")[0].focus();
+            }
+        });
+    });
+
     $("#btnMainPlayerToggleRepeat").on("click", function () {
         let btn = $("#btnMainPlayerToggleRepeat");
         let currentStatus = $.trim(btn.attr("data-status"));

@@ -32,13 +32,34 @@
             <div class="col-9">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputGroup-sizing-default">Search:</span>
+                        <div id="cmbMasterSearchOptions" class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item active" href="#" data-type="1"><i class="fas fa-search"></i> General</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" data-type="2"><i class="fas fa-music"></i> Songs</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" data-type="3"><i class="fas fa-compact-disc"></i> Albums</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" data-type="4"><i class="fas fa-user"></i> Artists</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" data-type="5"><i class="fas fa-random"></i> Radio</a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                     <input id="txtMainGeneralSearch" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" autocomplete="off_hack_987dfa9df9" />
                 </div>
             </div>
             <div class="col">
-                <button id="btnMain_GeneralSearch" type="button" class="btn btn-primary mr-3 pl-3 pr-3"><i class="fas fa-search"></i></button>
+                <button id="btnMain_GeneralSearch" type="button" class="btn btn-primary mr-3 pl-3 pr-3">Search</button>
             </div>
         </div>
     </div>

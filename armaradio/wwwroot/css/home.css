@@ -135,3 +135,15 @@ div.list-container {
     padding: 8px;
     resize: none;
 }
+
+#cmbMasterSearchOptions li a {
+    position: relative;
+    padding-left: 40px;
+}
+
+#cmbMasterSearchOptions li a i {
+    position: absolute;
+    top: 0;
+    margin-top: 8px;
+    left: 10px;
+}
