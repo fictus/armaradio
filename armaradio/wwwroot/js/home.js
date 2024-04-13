@@ -70,7 +70,11 @@ function mainload_attacheEvents() {
                         SearchPhrase: searchPhrase
                     }, "Music", "FindArtists")
                         .then(function (response) {
-                            attachArtistResponseFromSearch(response);
+                            if (response && response.error) {
+                                
+                            } else {
+                                attachArtistResponseFromSearch(response || []);
+                            }
                         });
                 } else {
                     attachArtistResponseFromSearch([]);
@@ -512,7 +516,6 @@ function mainload_attacheEvents() {
 }
 
 function attachArtistResponseFromSearch(response) {
-    console.log(response);
     $("#ulArtistsFound").find("li").remove();
 
     if (response && response.length) {
