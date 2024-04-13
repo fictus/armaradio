@@ -37,6 +37,9 @@ function mainload_attacheEvents() {
 
                 $("#ulArtistsFound").css("display", "none");
                 $("#btnArtistAlbumsOpen").css("display", "none");
+
+                $("#ulArtistsFound").find("li").remove();
+
                 //if (arma_mainSearchSelectedType == "3") {
                 //    $("#btnArtistAlbumsOpen").css("display", "");
                 //} else {
