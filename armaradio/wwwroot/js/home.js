@@ -91,7 +91,7 @@ function mainload_attacheEvents() {
         }
     });
 
-    $("body").on("click", function (e) {
+    $("html, body").on("click", function (e) {
         if (!(e.target.id == "ulArtistsFound" || e.target.id == "txtMainGeneralSearch")) {
             $("#ulArtistsFound").css("display", "none");
         }
@@ -531,7 +531,7 @@ function attachArtistResponseFromSearch(response) {
                             "data-artist": response[i].artistName,
                             "data-artistflat": response[i].artistName_Flat,
                         })
-                            .html(response[i].artistName_Flat)
+                            .html(response[i].artistName)
                     )
             );
         }
