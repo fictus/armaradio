@@ -652,8 +652,8 @@ function getAlbumsForArtists(artistId, artistName) {
                                             "data-albumid": response.singles[i].id,
                                             "data-artistid": artistId,
                                             "data-artistname": artistName,
-                                            "data-albumname": response.albums[i].albumName_Flat,
-                                            "data-albumdetails": response.albums[i].albumDetails
+                                            "data-albumname": response.singles[i].albumName_Flat,
+                                            "data-albumdetails": response.singles[i].albumDetails
                                         })
                                         .append("<span class=\"font-sz-11pt\">Load</span>")
                                 )
@@ -679,6 +679,7 @@ function getAlbumsForArtists(artistId, artistName) {
                             .attr({
                                 "aria-hidden": "true"
                             })
+                            .css("visibility", "hidden")
                             .removeAttr("aria-modal")
                             .removeAttr("role");
 
