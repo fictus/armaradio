@@ -2,7 +2,11 @@
 using AngleSharp.Html.Parser;
 using armaradio.Models;
 using armaradio.Models.BeatPort;
+using armaradio.Models.Request;
+using armaradio.Models.Response;
 using armaradio.Models.Youtube;
+using Dapper;
+using System.Data;
 using System.Globalization;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -34,6 +38,25 @@ namespace armaradio.Repositories
             {
                 search = search
             });
+        }
+
+        public ArmaArtistAlbumsResponse Albums_GetArtistsAlbums(int artistId)
+        {
+            using (var con = _dapper.GetConnection("radioconn"))
+            {
+                var dataSet = con.QueryMultiple("Arma_GetAlbumsForArtist", new
+                {
+                    artist_id = artistId
+                }, commandType: CommandType.StoredProcedure);
+
+                ArmaArtistAlbumsResponse returnItem = new ArmaArtistAlbumsResponse()
+                {
+                    Albums = dataSet.Read<ArmaAlbumDataItem>().ToList(),
+                    Singles = dataSet.Read<ArmaAlbumDataItem>().ToList()
+                };
+
+                return returnItem;
+            }
         }
 
         public List<TrackDataItem> Tracks_GetTop50Songs()

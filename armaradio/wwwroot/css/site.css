@@ -175,3 +175,11 @@ div.master-page-wait .spinner-border {
 .font-sz-11pt {
     font-size: 11pt;
 }
+
+.overflow-auto {
+    overflow: auto;
+}
+
+.show-overflow {
+    overflow: visible;
+}

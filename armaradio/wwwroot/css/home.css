@@ -147,20 +147,17 @@ div.list-container {
     margin-top: 8px;
     left: 10px;
 }
-
+/*
 #offcanvasArtistAlbums {
     visibility: visible !important;
-}
-#offcanvasArtistAlbums div.offcanvas-body {
-    overflow: visible;
-}
+}*/
 
 #btnArtistAlbumsOpen {
-    position: absolute;
+    position: fixed;
     top: 0;
-    right: 0;
-    margin-right: -53px;
-    z-index: 3333333;
+    left: 0;
+    margin-right: -3px;
+    margin-top: 49px;
 }
 
 #ulArtistsFound {
@@ -170,7 +167,98 @@ div.list-container {
 #dvTypeAheadSearch_Artists {
     position: absolute;
     top: 100%;
-    left: 60px;
+    left: 52px;
     right: 0;
     background-color: white;
+}
+
+#tblArtistAlbums {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#tblArtistAlbums td {
+    padding-left: 8px;
+    padding-right: 8px;
+    vertical-align: top;
+    border-top: 1px solid #EAEAEA;
+    border-bottom: 1px solid #EAEAEA;
+}
+
+#tblArtistAlbums td:first-child {
+    border-left: 1px solid #EAEAEA;
+    width: 50px;
+    vertical-align: middle;
+    text-align: center;
+}
+
+#tblArtistAlbums td:last-child {
+    border-right: 1px solid #EAEAEA;
+}
+
+#tblArtistAlbums tr td:last-child {
+    position: relative;
+}
+
+#tblArtistAlbums button.btn-load-album {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    margin-top: -12px;
+}
+
+#tblArtistAlbums button.btn-load-album {
+    display: none;
+}
+
+#tblArtistAlbums tr:hover button.btn-load-album {
+    display: block;
+}
+
+
+
+
+
+
+#tblArtistSingles {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#tblArtistSingles td {
+    padding-left: 8px;
+    padding-right: 8px;
+    vertical-align: top;
+    border-top: 1px solid #EAEAEA;
+    border-bottom: 1px solid #EAEAEA;
+}
+
+#tblArtistSingles td:first-child {
+    border-left: 1px solid #EAEAEA;
+    width: 50px;
+    vertical-align: middle;
+    text-align: center;
+}
+
+#tblArtistSingles td:last-child {
+    border-right: 1px solid #EAEAEA;
+}
+
+#tblArtistSingles tr td:last-child {
+    position: relative;
+}
+
+#tblArtistSingles button.btn-load-album {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    margin-top: -12px;
+}
+
+#tblArtistSingles button.btn-load-album {
+    display: none;
+}
+
+#tblArtistSingles tr:hover button.btn-load-album {
+    display: block;
 }

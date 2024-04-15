@@ -7,6 +7,8 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Dapper;
+using System.Data;
 
 namespace armaradio_ops.Operations
 {
@@ -21,11 +23,29 @@ namespace armaradio_ops.Operations
                 artists = artists.Where(ar => ar.Id >= artistId.Value).ToList();
             }
 
-            foreach (var artist in artists)
+            using (var con = armaradio_ops.Data._SqlHelper.GetConnection(""))
             {
-                List<AlbumRawDataItem> data = GetAlbumsFromAlbumUrl(artist);
+                foreach (var artist in artists)
 
-                SaveAlbums(data);
+                {
+                    var dataSet = con.QueryMultiple("Arma_GetAlbumsForArtist", new
+                    {
+                        artist_id = artist.Id
+                    }, commandType: CommandType.StoredProcedure);
+
+                    ArmaArtistAlbumsResponse albums = new ArmaArtistAlbumsResponse()
+                    {
+                        Albums = dataSet.Read<ArmaAlbumDataItem>().ToList(),
+                        Singles = dataSet.Read<ArmaAlbumDataItem>().ToList()
+                    };
+
+                    if (albums == null || (albums.Albums.Count == 0 && albums.Singles.Count == 0))
+                    {
+                        List<AlbumRawDataItem> data = GetAlbumsFromAlbumUrl(artist);
+
+                        SaveAlbums(data);
+                    }
+                }
             }
         }
 
@@ -54,6 +74,7 @@ namespace armaradio_ops.Operations
                         {
                             var parser = new HtmlParser();
                             var document = parser.ParseDocument(htmlContent);
+                            bool anyFound = false;
 
                             var allPageHrefs = document.QuerySelectorAll("a");
 
@@ -63,6 +84,7 @@ namespace armaradio_ops.Operations
 
                                 if (name.ToLower() == "albums discography:" || name.ToLower() == "singles discography:")
                                 {
+                                    anyFound = true;
                                     bool isSingles = name.ToLower() == "singles discography:";
                                     var tblMain = href.ParentElement.NextElementSibling; //.Closest("table");
 
@@ -118,6 +140,81 @@ namespace armaradio_ops.Operations
                                                                 DBDesignator = artist.DBDesignator,
                                                                 IsSingle = isSingles
                                                             });
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (!anyFound)
+                            {
+                                var allPagePs= document.QuerySelectorAll("p");
+
+                                foreach (var pElmt in allPagePs)
+                                {
+                                    string name = pElmt.Text().Trim();
+
+                                    if (name.ToLower() == "albums discography:" || name.ToLower() == "singles discography:")
+                                    {
+                                        bool isSingles = name.ToLower() == "singles discography:";
+                                        var tblMain = pElmt.NextElementSibling; //.Closest("table");
+
+                                        if (tblMain != null)
+                                        {
+                                            var firstMainTr = tblMain.QuerySelectorAll("tr").Eq(0);
+
+                                            if (firstMainTr != null)
+                                            {
+                                                var albumsTbl = firstMainTr.QuerySelector("table");
+
+                                                if (albumsTbl != null)
+                                                {
+                                                    var allTrs = albumsTbl.QuerySelectorAll("tr");
+
+                                                    foreach (var tr in allTrs)
+                                                    {
+                                                        var allTds = tr.QuerySelectorAll("td");
+                                                        var firstTd = allTds.Eq(0);
+
+                                                        if (firstTd != null)
+                                                        {
+                                                            string trPosition = firstTd.Text().Trim();
+
+                                                            if (trPosition != "#")
+                                                            {
+                                                                var titleHolder = allTds.Eq(1).QuerySelector("b");
+
+                                                                allTds.Eq(1).QuerySelector("b").Remove();
+
+                                                                string albumTitle = (titleHolder != null ? titleHolder.Text().Trim() : "");
+                                                                string albumDetails = allTds.Eq(1).Text().Trim();
+                                                                string releaseDate = allTds.Eq(2).Text().Trim();
+                                                                string label = allTds.Eq(3).Text().Trim();
+
+                                                                if (albumDetails == albumTitle)
+                                                                {
+                                                                    albumDetails = "";
+                                                                }
+
+                                                                if (string.IsNullOrWhiteSpace(albumTitle) && !string.IsNullOrWhiteSpace(albumDetails))
+                                                                {
+                                                                    albumTitle = albumDetails;
+                                                                }
+
+                                                                returnItem.Add(new AlbumRawDataItem()
+                                                                {
+                                                                    ArtistId = artist.Id,
+                                                                    AlbumName = albumTitle,
+                                                                    AlbumDetails = albumDetails,
+                                                                    ReleaseDate = releaseDate,
+                                                                    Label = label,
+                                                                    DBDesignator = artist.DBDesignator,
+                                                                    IsSingle = isSingles
+                                                                });
+                                                            }
                                                         }
                                                     }
                                                 }

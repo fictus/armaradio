@@ -540,10 +540,10 @@ function attachArtistResponseFromSearch(response) {
             $(this).on("click", function (e) {
                 e.preventDefault();
                 let artistName = $(this).attr("data-artistflat");
+                let artistId = parseInt($(this).attr("data-id"));
 
                 performGeneralSearch(artistName);
-
-                $("#btnArtistAlbumsOpen").css("display", "");
+                getAlbumsForArtists(artistId, artistName);
             });
         });
 
@@ -569,6 +569,133 @@ function performGeneralSearch(searchPhrase) {
                 attachListToTableFromGeneralSearch(response);
             });
     }
+}
+
+function getAlbumsForArtists(artistId, artistName) {
+    armaradio.masterAJAXPost({
+        ArtistId: artistId
+    }, "Music", "FindAlbumsForArtists")
+        .then(function (response) {
+            if (!(response && response.error) && (response.albums || response.singles)) {
+                console.log(response);
+
+                $("#offcanvasArtistAlbumsRightLabel").html("Albums: " + artistName);
+                $("#tblArtistAlbums tr").remove();
+                $("#tblArtistSingles tr").remove();
+
+                if (response.albums) {
+                    for (let i = 0; i < response.albums.length; i++) {
+                        let tr = $("<tr></tr>");
+
+                        tr.append(
+                            $("<td></td>")
+                                .append("<i class=\"fas fa-compact-disc\"></i>")
+                        );
+                        tr.append(
+                            $("<td></td>")
+                                .append(
+                                    $("<div class=\"alb-name\"></div>").html(response.albums[i].albumName)
+                                )
+                                .append(
+                                    $("<div class=\"alb-details\"></div>").html(response.albums[i].albumDetails)
+                                )
+                        );
+                        tr.append(
+                            $("<td></td>")
+                                .html(response.albums[i].releaseDate)
+                        );
+                        tr.append(
+                            $("<td class=\"relative show-overflow\"></td>")
+                                .append(
+                                    $("<button class=\"btn btn-primary font-sz-0 pt-0 pb-0 btn-load-album mr-3\"></button>")
+                                        .attr({
+                                            "data-albumid": response.albums[i].id,
+                                            "data-artistid": artistId,
+                                            "data-artistname": artistName,
+                                            "data-albumname": response.albums[i].albumName_Flat,
+                                            "data-albumdetails": response.albums[i].albumDetails
+                                        })
+                                        .append("<span class=\"font-sz-11pt\">Load</span>")
+                                )
+                        );
+
+                        $("#tblArtistAlbums").append(tr);
+                    }
+                }
+
+                if (response.singles) {
+                    for (let i = 0; i < response.singles.length; i++) {
+                        let tr = $("<tr></tr>");
+
+                        tr.append(
+                            $("<td></td>")
+                                .append("<i class=\"fas fa-compact-disc\"></i>")
+                        );
+                        tr.append(
+                            $("<td></td>")
+                                .append(
+                                    $("<div class=\"alb-name\"></div>").html(response.singles[i].albumName)
+                                )
+                                .append(
+                                    $("<div class=\"alb-details\"></div>").html(response.singles[i].albumDetails)
+                                )
+                        );
+                        tr.append(
+                            $("<td></td>")
+                                .html(response.singles[i].releaseDate)
+                        );
+                        tr.append(
+                            $("<td class=\"relative show-overflow\"></td>")
+                                .append(
+                                    $("<button class=\"btn btn-primary font-sz-0 pt-0 pb-0 btn-load-album mr-3\"></button>")
+                                        .attr({
+                                            "data-albumid": response.singles[i].id,
+                                            "data-artistid": artistId,
+                                            "data-artistname": artistName,
+                                            "data-albumname": response.albums[i].albumName_Flat,
+                                            "data-albumdetails": response.albums[i].albumDetails
+                                        })
+                                        .append("<span class=\"font-sz-11pt\">Load</span>")
+                                )
+                        );
+
+                        $("#tblArtistSingles").append(tr);
+                    }
+                }
+
+                $("#offcanvasArtistAlbums").find("button.btn-load-album").each(function () {
+                    $(this).on("click", function () {
+                        let btn = $(this);
+                        let artistName = btn.attr("data-artistname");
+                        let albumName = btn.attr("data-albumname");
+                        let albumDetails = btn.attr("data-albumdetails");
+                        let albumToLoad = $.trim(artistName + " - " + albumName + " " + albumDetails);
+
+                        $("#txtMainGeneralSearch").val(albumToLoad);
+                        performGeneralSearch(albumToLoad);
+
+                        $("#offcanvasArtistAlbums")
+                            .removeClass("show")
+                            .attr({
+                                "aria-hidden": "true"
+                            })
+                            .removeAttr("aria-modal")
+                            .removeAttr("role");
+
+                        $("div.offcanvas-backdrop.fade.show").remove();
+                        $("body").removeAttr("style");
+
+                        //let bsOffcanvas = new bootstrap.Offcanvas($("#offcanvasArtistAlbums")[0]);
+                        //bsOffcanvas.hide();
+
+                    });
+                });
+
+                $("#btnArtistAlbumsOpen").css("display", "");
+            } else {
+                $("#btnArtistAlbumsOpen").css("display", "none");
+            }
+        });
 }
 
 function attachListToTable(response, isPageLoad, loadedPlaylist) {

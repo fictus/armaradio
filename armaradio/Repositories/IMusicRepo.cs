@@ -1,4 +1,6 @@
 ﻿using armaradio.Models;
+using armaradio.Models.Request;
+using armaradio.Models.Response;
 using armaradio.Models.Youtube;
 
 namespace armaradio.Repositories
@@ -7,6 +9,7 @@ namespace armaradio.Repositories
     {
         List<TrackDataItem> GetCurrentTop100();
         List<ArmaArtistDataItem> Artist_FindArtists(string search);
+        ArmaArtistAlbumsResponse Albums_GetArtistsAlbums(int artistId);
         List<ArtistDataItem> Artist_GetArtistList(string search);
         List<TrackDataItem> Tracks_GetTop50Songs();
         List<TrackDataItem> GetCurrentTop40DanceSingles();

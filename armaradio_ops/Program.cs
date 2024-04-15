@@ -4,6 +4,6 @@
 //var processor = new armaradio_ops.Operations.Processor();
 //processor.StartParsingArtistNames();  // insert artist names
 
-//var albumsProcessor = new armaradio_ops.Operations.AlbumsProcessor();
-//albumsProcessor.ProcessAlbums(234002);
+var albumsProcessor = new armaradio_ops.Operations.AlbumsProcessor();
+albumsProcessor.ProcessAlbums();
 

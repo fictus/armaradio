@@ -1,6 +1,7 @@
 ﻿using armaradio.Models;
 using armaradio.Models.ArmaAuth;
 using armaradio.Models.Request;
+using armaradio.Models.Response;
 using armaradio.Models.Youtube;
 using armaradio.Repositories;
 using Microsoft.AspNetCore.Authorization;
@@ -124,6 +125,21 @@ namespace armaradio.Controllers
             try
             {
                 List<ArmaArtistDataItem> returnItem = _musicRepo.Artist_FindArtists(value.SearchPhrase) ?? new List<ArmaArtistDataItem>();
+
+                return new JsonResult(returnItem);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        [HttpPost]
+        public IActionResult FindAlbumsForArtists([FromBody] ArtistAlbumResponse value)
+        {
+            try
+            {
+                ArmaArtistAlbumsResponse returnItem = _musicRepo.Albums_GetArtistsAlbums(value.ArtistId);
 
                 return new JsonResult(returnItem);
             }
