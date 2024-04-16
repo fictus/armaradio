@@ -90,6 +90,7 @@ div.main-background-color {
 }
 
 div.main-info-footer-color {
+    background: url(../images/corner-flowers.png) top left no-repeat;
     background-color: #00172f;
 }
 
