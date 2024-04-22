@@ -4,3 +4,5 @@ armaradio/obj/
 armaradio_ops/bin/
 armaradio_ops/obj/
 arma_miner/obj/
+/arma_miner/bin/Debug/net8.0
+/arma_miner/tempFiles
