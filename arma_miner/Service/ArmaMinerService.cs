@@ -2,6 +2,7 @@
 using AngleSharp.Html.Parser;
 using arma_miner.Data;
 using arma_miner.Models;
+using arma_miner.Operations;
 using Microsoft.Extensions.Hosting;
 using SharpCompress.Common;
 using SharpCompress.Compressors.Xz;
@@ -26,15 +27,21 @@ namespace arma_miner.Service
         private readonly IHostEnvironment _hostEnvironment;
         private readonly IDapperHelper _dapper;
         private readonly IConfiguration _configuration;
+        private readonly IArmaArtistsOperations _armaArtistsOps;
+        private readonly IArmaAlbumsOperations _armaAlbumsOps;
         public ArmaMinerService(
             IHostEnvironment hostEnvironment,
             IDapperHelper dapper,
-            IConfiguration configuration
+            IConfiguration configuration,
+            IArmaArtistsOperations armaArtistsOps,
+            IArmaAlbumsOperations armaAlbumsOps
         )
         {
             _hostEnvironment = hostEnvironment;
             _dapper = dapper;
             _configuration = configuration;
+            _armaArtistsOps = armaArtistsOps;
+            _armaAlbumsOps = armaAlbumsOps;
 
             IsLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         }
@@ -58,15 +65,17 @@ namespace arma_miner.Service
                     });
 
                     string tempFilesDir = EmptyFilesFromTempFolder();
-                    ProcessArtistFile(siteVersion.ArtistsFileUrl, tempFilesDir);
+                    bool artistErrors = _armaArtistsOps.ProcessArtistFile(siteVersion.ArtistsFileUrl, tempFilesDir, siteVersion.Version);
 
+                    tempFilesDir = EmptyFilesFromTempFolder();
+                    bool albumErrors = _armaAlbumsOps.ProcessAlbumsFile(siteVersion.AlbumsFileUrl, tempFilesDir, siteVersion.Version);
 
-
+                    EmptyFilesFromTempFolder();
 
                     _dapper.ExecuteNonQuery("radioconn", "Operations_Sync_AddVersionToCompleted", new
                     {
                         version_number = siteVersion.Version,
-                        errors_occurred = false
+                        errors_occurred = ((artistErrors || albumErrors) ? true : false)
                     });
                 }
             }
@@ -137,171 +146,18 @@ namespace arma_miner.Service
                System.IO.Directory.CreateDirectory(tempFiles);
             }
 
-            //var file = Directory.EnumerateFiles(tempFiles, "*")
-            //    .FirstOrDefault();
+            var file = Directory.EnumerateFiles(tempFiles, "*")
+                .FirstOrDefault();
 
-            //while (file != null)
-            //{
-            //    System.IO.File.Delete(file);
+            while (file != null)
+            {
+                System.IO.File.Delete(file);
 
-            //    file = Directory.EnumerateFiles(tempFiles, "*")
-            //        .FirstOrDefault();
-            //}
+                file = Directory.EnumerateFiles(tempFiles, "*")
+                    .FirstOrDefault();
+            }
 
             return tempFiles;
-        }
-
-        private void ProcessArtistFile(string Url, string tempFilesDir)
-        {
-            //Url = "https://data.metabrainz.org/pub/musicbrainz/data/json-dumps/20240420-001001/series.tar.xz";
-            string artistFile = $"{tempFilesDir}artist.tar.xz";
-
-            // using (WebClient webClient = new WebClient())
-            // {
-            //    webClient.Headers.Add("Accept: text/html, application/xhtml+xml, */*");
-            //    webClient.Headers.Add("User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)");
-            //    webClient.DownloadFile(new Uri(Url), artistFile);
-            // }
-
-            // if (File.Exists(artistFile))
-            // {
-            //    using (var fileStream  = File.OpenRead(artistFile))
-            //    using (IReader reader = ReaderFactory.Open(fileStream))
-            //    {
-            //        while (reader.MoveToNextEntry())
-            //        {
-            //            if (reader.Entry.Key.EndsWith("artist"))
-            //            {
-            //                reader.WriteEntryToDirectory(tempFilesDir, new SharpCompress.Common.ExtractionOptions()
-            //                {
-            //                    ExtractFullPath = true,
-            //                    Overwrite = true
-            //                });
-            //            }
-            //        }
-            //    }                
-            // }
-
-            string artistFileFull = (IsLinux ? $"{tempFilesDir}mbdump/artist" : $"{tempFilesDir}mbdump\\artist");
-            bool artistExists = false;
-            int newArtistsCount = 0;
-
-            using (FileStream fs = new FileStream(artistFileFull, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            {
-                // Start reading from the end of the file
-                fs.Seek(0, SeekOrigin.End);
-
-                // Read the file stream backward
-                long position = fs.Position;
-                byte[] buffer = new byte[1024];
-                StringBuilder sb = new StringBuilder();
-
-                while (!artistExists && position > 0)
-                {
-                    fs.Seek(-Math.Min(position, buffer.Length), SeekOrigin.Current);
-
-                    int bytesRead = fs.Read(buffer, 0, buffer.Length);
-                    if (bytesRead == 0)
-                        break;
-
-                    for (int i = bytesRead - 1; i >= 0; i--)
-                    {
-                        if (buffer[i] == '\n')
-                        {
-                            // Process the line
-                            string line = sb.ToString();
-
-                            MBArtistParseDataItem artistItem = Newtonsoft.Json.JsonConvert.DeserializeObject<MBArtistParseDataItem>(line);
-
-                            if (artistItem != null)
-                            {
-                                artistExists = _dapper.GetFirstOrDefault<bool>("radioconn", "Operations_CheckIfMBArtistIdExists", new
-                                {
-                                    mb_artistid = artistItem.id
-                                });
-
-                                if (!artistExists)
-                                {
-                                    SaveMBArtist(artistItem);
-                                    newArtistsCount++;
-                                }
-                            }
-
-                            sb.Clear();
-                        }
-                        else
-                        {
-                            sb.Insert(0, (char)buffer[i]);
-                        }
-                    }
-
-                    position -= bytesRead;
-                    fs.Seek(-bytesRead, SeekOrigin.Current);
-                }
-
-                // Process the first line if any
-                if (position <= 0 && sb.Length > 0)
-                {
-                    string line = sb.ToString();
-
-                    MBArtistParseDataItem artistItem = Newtonsoft.Json.JsonConvert.DeserializeObject<MBArtistParseDataItem>(line);
-
-                    if (artistItem != null)
-                    {
-                        artistExists = _dapper.GetFirstOrDefault<bool>("radioconn", "Operations_CheckIfMBArtistIdExists", new
-                        {
-                            mb_artistid = artistItem.id
-                        });
-
-                        if (!artistExists)
-                        {
-                            SaveMBArtist(artistItem);
-                            newArtistsCount++;
-                        }
-                    }
-                }
-            }
-
-            int finalCount = newArtistsCount;
-        }
-
-        private void SaveMBArtist(MBArtistParseDataItem artistItem)
-        {
-            if (artistItem != null)
-            {
-                using (var con = _dapper.GetConnection("radioconn"))
-                {
-                    int? newId = _dapper.GetFirstOrDefault<int?>(con, "Operations_MBInsertArtistWithGenres", new
-                    {
-                        mb_id = artistItem.id,
-                        name = artistItem.name,
-                        sort_name = artistItem.sortname,
-                        country = artistItem.country,
-                        type = artistItem.type,
-                        type_id = artistItem.typeid,
-                        rating_value = artistItem.rating?.value,
-                        rating_votes = artistItem.rating?.votescount,
-                        lifespan_begin = artistItem.lifespan?.begin,
-                        lifespan_end = artistItem.lifespan?.end,
-                        lifespan_ended = artistItem.lifespan?.ended
-                    });
-
-                    if (newId.HasValue && artistItem.genres != null && artistItem.genres.Count > 0)
-                    {
-                        foreach (var genre in artistItem.genres)
-                        {
-                            _dapper.ExecuteNonQuery(con, "Operations_MBInsertArtistGenre", new
-                            {
-                                artist_id = newId.Value,
-                                mb_id = genre.id,
-                                genre_name = genre.name,
-                                count = genre.count,
-                                disambiguation = genre.disambiguation
-                            });
-                        }
-                    }
-                }
-            }
         }
     }
 }
