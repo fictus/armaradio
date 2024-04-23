@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "name": "C#: arma_miner",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/arma_miner/arma_miner.csproj",
+            "launchConfigurationId": "TargetFramework=;arma_miner"
+        }
+    ]
+}
