@@ -45,12 +45,29 @@ namespace arma_miner.Service
 
             if (siteVersion != null)
             {
-                bool versionMatches = true;
-
-                if (versionMatches)
+                bool versionHasBeenProcessed = _dapper.GetFirstOrDefault<bool>("radioconn", "Operations_Sync_CheckIfVersionHasBeenProcessed", new
                 {
+                    version_number = siteVersion.Version
+                });
+
+                if (!versionHasBeenProcessed)
+                {
+                    _dapper.ExecuteNonQuery("radioconn", "Operations_Sync_AddVersionToStaging", new
+                    {
+                        version_number = siteVersion.Version
+                    });
+
                     string tempFilesDir = EmptyFilesFromTempFolder();
                     ProcessArtistFile(siteVersion.ArtistsFileUrl, tempFilesDir);
+
+
+
+
+                    _dapper.ExecuteNonQuery("radioconn", "Operations_Sync_AddVersionToCompleted", new
+                    {
+                        version_number = siteVersion.Version,
+                        errors_occurred = false
+                    });
                 }
             }
         }
@@ -205,6 +222,7 @@ namespace arma_miner.Service
 
                                 if (!artistExists)
                                 {
+                                    SaveMBArtist(artistItem);
                                     newArtistsCount++;
                                 }
                             }
@@ -237,6 +255,7 @@ namespace arma_miner.Service
 
                         if (!artistExists)
                         {
+                            SaveMBArtist(artistItem);
                             newArtistsCount++;
                         }
                     }
@@ -244,6 +263,45 @@ namespace arma_miner.Service
             }
 
             int finalCount = newArtistsCount;
+        }
+
+        private void SaveMBArtist(MBArtistParseDataItem artistItem)
+        {
+            if (artistItem != null)
+            {
+                using (var con = _dapper.GetConnection("radioconn"))
+                {
+                    int? newId = _dapper.GetFirstOrDefault<int?>(con, "Operations_MBInsertArtistWithGenres", new
+                    {
+                        mb_id = artistItem.id,
+                        name = artistItem.name,
+                        sort_name = artistItem.sortname,
+                        country = artistItem.country,
+                        type = artistItem.type,
+                        type_id = artistItem.typeid,
+                        rating_value = artistItem.rating?.value,
+                        rating_votes = artistItem.rating?.votescount,
+                        lifespan_begin = artistItem.lifespan?.begin,
+                        lifespan_end = artistItem.lifespan?.end,
+                        lifespan_ended = artistItem.lifespan?.ended
+                    });
+
+                    if (newId.HasValue && artistItem.genres != null && artistItem.genres.Count > 0)
+                    {
+                        foreach (var genre in artistItem.genres)
+                        {
+                            _dapper.ExecuteNonQuery(con, "Operations_MBInsertArtistGenre", new
+                            {
+                                artist_id = newId.Value,
+                                mb_id = genre.id,
+                                genre_name = genre.name,
+                                count = genre.count,
+                                disambiguation = genre.disambiguation
+                            });
+                        }
+                    }
+                }
+            }
         }
     }
 }
