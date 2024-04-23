@@ -12,6 +12,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -21,6 +22,7 @@ namespace arma_miner.Service
 {
     public class ArmaMinerService : IArmaMinerService
     {
+        private readonly bool IsLinux = false;
         private readonly IHostEnvironment _hostEnvironment;
         private readonly IDapperHelper _dapper;
         private readonly IConfiguration _configuration;
@@ -33,6 +35,8 @@ namespace arma_miner.Service
             _hostEnvironment = hostEnvironment;
             _dapper = dapper;
             _configuration = configuration;
+
+            IsLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         }
 
         public void RunUpdateRoutine()
@@ -109,12 +113,12 @@ namespace arma_miner.Service
         private string EmptyFilesFromTempFolder()
         {
             string rootPath = _hostEnvironment.ContentRootPath.TrimEnd('/').TrimEnd('\\');
-            string tempFiles = $"{rootPath}\\tempFiles\\";
+            string tempFiles = (IsLinux ? $"{rootPath}/tempFiles/" : $"{rootPath}\\tempFiles\\");
 
-            //if (!System.IO.Directory.Exists(tempFiles))
-            //{
-            //    System.IO.Directory.CreateDirectory(tempFiles);
-            //}
+            if (!System.IO.Directory.Exists(tempFiles))
+            {
+               System.IO.Directory.CreateDirectory(tempFiles);
+            }
 
             //var file = Directory.EnumerateFiles(tempFiles, "*")
             //    .FirstOrDefault();
@@ -135,21 +139,21 @@ namespace arma_miner.Service
             //Url = "https://data.metabrainz.org/pub/musicbrainz/data/json-dumps/20240420-001001/series.tar.xz";
             string artistFile = $"{tempFilesDir}artist.tar.xz";
 
-            //using (WebClient webClient = new WebClient())
-            //{
+            // using (WebClient webClient = new WebClient())
+            // {
             //    webClient.Headers.Add("Accept: text/html, application/xhtml+xml, */*");
             //    webClient.Headers.Add("User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)");
             //    webClient.DownloadFile(new Uri(Url), artistFile);
-            //}
+            // }
 
-            //if (File.Exists(artistFile))
-            //{
+            // if (File.Exists(artistFile))
+            // {
             //    using (var fileStream  = File.OpenRead(artistFile))
             //    using (IReader reader = ReaderFactory.Open(fileStream))
             //    {
             //        while (reader.MoveToNextEntry())
             //        {
-            //            if (reader.Entry.Key.EndsWith("/artist"))
+            //            if (reader.Entry.Key.EndsWith("artist"))
             //            {
             //                reader.WriteEntryToDirectory(tempFilesDir, new SharpCompress.Common.ExtractionOptions()
             //                {
@@ -159,48 +163,13 @@ namespace arma_miner.Service
             //            }
             //        }
             //    }                
-            //}
+            // }
 
-            //if (File.Exists($"{tempFilesDir}mbdump\\artist"))
-            //{
-            //    using (var fileReverse = new arma_miner.Data.GetFileReverse($"{tempFilesDir}mbdump\\artist"))
-            //    {
-            //        while (!fileReverse.StartOfFile)
-            //        {
-            //            string result = fileReverse.ReadLine();
-            //            string secondString = result;
-            //        }
-            //    }
-            //}
-
-            //using (System.IO.Stream fs = new FileStream($"{tempFilesDir}mbdump\\artist", FileMode.Open, FileAccess.Read))
-            //using (StreamReader streamReader = new StreamReader(fs)) //, Encoding.GetEncoding("iso-8859-1"))
-            //{
-            //    while (!streamReader.EndOfStream)
-            //    {
-            //        string result = streamReader.ReadLine();
-
-            //        if (!string.IsNullOrWhiteSpace(result))
-            //        {
-            //            MBArtistParseDataItem artistItem = Newtonsoft.Json.JsonConvert.DeserializeObject<MBArtistParseDataItem>(result);
-
-            //            if (artistItem != null)
-            //            {
-            //                bool artistExists = _dapper.GetFirstOrDefault<bool>("radioconn", "Operations_CheckIfMBArtistIdExists", new
-            //                {
-            //                    mb_artistid = artistItem.id
-            //                });
-
-            //                bool isExists = artistExists;
-            //            }
-            //        }
-            //    }
-            //}
-
+            string artistFileFull = (IsLinux ? $"{tempFilesDir}mbdump/artist" : $"{tempFilesDir}mbdump\\artist");
             bool artistExists = false;
             int newArtistsCount = 0;
 
-            using (FileStream fs = new FileStream($"{tempFilesDir}mbdump\\artist", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (FileStream fs = new FileStream(artistFileFull, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 // Start reading from the end of the file
                 fs.Seek(0, SeekOrigin.End);
