@@ -67,15 +67,16 @@ namespace arma_miner.Service
                     string tempFilesDir = EmptyFilesFromTempFolder();
                     bool artistErrors = _armaArtistsOps.ProcessArtistFile(siteVersion.ArtistsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess);
 
-                    tempFilesDir = EmptyFilesFromTempFolder();
-                    bool albumErrors = _armaAlbumsOps.ProcessAlbumsFile(siteVersion.AlbumsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess);
+                    //tempFilesDir = EmptyFilesFromTempFolder();
+                    //bool albumErrors = _armaAlbumsOps.ProcessAlbumsFile(siteVersion.AlbumsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess);
 
                     EmptyFilesFromTempFolder();
 
                     _dapper.ExecuteNonQuery("radioconn", "Operations_Sync_AddVersionToCompleted", new
                     {
                         version_number = siteVersion.Version,
-                        errors_occurred = ((artistErrors || albumErrors) ? true : false)
+                        //errors_occurred = ((artistErrors || albumErrors) ? true : false)
+                        errors_occurred = ((artistErrors) ? true : false)
                     });
                 }
             }
@@ -143,7 +144,7 @@ namespace arma_miner.Service
 
             if (!System.IO.Directory.Exists(tempFiles))
             {
-               System.IO.Directory.CreateDirectory(tempFiles);
+                System.IO.Directory.CreateDirectory(tempFiles);
             }
 
             var file = Directory.EnumerateFiles(tempFiles, "*")
