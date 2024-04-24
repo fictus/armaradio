@@ -158,6 +158,7 @@ div.list-container {
     left: 0;
     margin-right: -3px;
     margin-top: 49px;
+    z-index: 444;
 }
 
 #ulArtistsFound {

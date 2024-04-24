@@ -59,6 +59,15 @@ namespace armaradio.Repositories
             }
         }
 
+        public List<ArmaAlbumSongDataItem> Albums_GetAlbumSongs(int artistId, int albumId)
+        {
+            return _dapper.GetList<ArmaAlbumSongDataItem>("radioconn", "Arma_GetSongsForAlbum", new
+            {
+                album_id = albumId,
+                artist_id = artistId
+            });
+        }
+
         public List<TrackDataItem> Tracks_GetTop50Songs()
         {
             return _dapper.GetList<TrackDataItem>("radioconn", "Tracks_GetTop50UserFavorites");

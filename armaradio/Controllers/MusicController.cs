@@ -149,6 +149,30 @@ namespace armaradio.Controllers
             }
         }
 
+        [HttpPost]
+        public IActionResult LoadAlbumSongs([FromBody] AlbumSongsRequest value)
+        {
+            try
+            {
+                List<ArmaAlbumSongDataItem> returnItem = _musicRepo.Albums_GetAlbumSongs(value.ArtistId, value.AlbumId);
+                var finalList = returnItem.Select(sg =>
+                {
+                    return new
+                    {
+                        tid = sg.Id,
+                        artistName = sg.NameSearch,
+                        songName = sg.SongTitleFlat
+                    };
+                });
+
+                return new JsonResult(finalList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
         [HttpGet]
         public IActionResult GetArtistList(string seach)
         {

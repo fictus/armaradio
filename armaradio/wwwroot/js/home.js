@@ -667,12 +667,13 @@ function getAlbumsForArtists(artistId, artistName) {
                     $(this).on("click", function () {
                         let btn = $(this);
                         let artistName = btn.attr("data-artistname");
+                        let artistId = btn.attr("data-artistid");
                         let albumName = btn.attr("data-albumname");
+                        let albumId = btn.attr("data-albumid");
                         let albumDetails = btn.attr("data-albumdetails");
                         let albumToLoad = $.trim(artistName + " - " + albumName + " " + albumDetails);
 
-                        $("#txtMainGeneralSearch").val(albumToLoad);
-                        performGeneralSearch(albumToLoad);
+                        loadAlbumSongs(artistId, albumId, artistName, albumName);
 
                         $("#offcanvasArtistAlbums")
                             .removeClass("show")
@@ -696,6 +697,20 @@ function getAlbumsForArtists(artistId, artistName) {
             } else {
                 $("#btnArtistAlbumsOpen").css("display", "none");
             }
+        });
+}
+
+function loadAlbumSongs(artistId, albumId, artistName, albumTitle) {
+    armaradio.masterPageWait(true);
+
+    armaradio.masterAJAXPost({
+        ArtistId: artistId,
+        AlbumId: albumId
+    }, "Music", "LoadAlbumSongs")
+        .then(function (response) {
+            let headerTitle = "Album: " + artistName + " - " + albumTitle;
+
+            attachListToTableFromGeneralSearch(response, headerTitle);
         });
 }
 
@@ -760,10 +775,10 @@ function attachListToTable(response, isPageLoad, loadedPlaylist) {
     }
 }
 
-function attachListToTableFromGeneralSearch(response) {
+function attachListToTableFromGeneralSearch(response, headerTitle) {
     $("#lblTblHeaderPlaylistName")
         .attr("data-playlistid", "")
-        .html("Search Results");
+        .html(headerTitle || "Search Results");
 
     if (response && response.length) {
         let tblPlaylist = $("<table id=\"tblMainPlayList\"></table>");
