@@ -377,15 +377,19 @@ namespace arma_miner.Operations
                                     string nameFlat = Latinize(artistItem.sortname);
                                     string dbSource = nameFlat.Trim()[0].ToString().ToLower();
                                     string nameFlatReverse = new string(nameFlat.Reverse().ToArray());
-                                    string nameSearch = nameFlat;
+                                    string nameSearch = nameFlat.Trim();
 
                                     if (nameFlat.Contains(','))
                                     {
-                                        int lastIndexOf = nameFlatReverse.LastIndexOf(",");
+                                        List<string> stringParts = nameFlat.Trim().Split(',').ToList();
+                                        List<string> finalParts = new List<string>();
 
-                                        nameSearch = (nameFlat.Substring(lastIndexOf + 1)).Trim()
-                                            + " "
-                                            + (nameFlat.Substring(0, lastIndexOf)).Trim();
+                                        for (int i = 0; i < stringParts.Count - 1; i++)
+                                        {
+                                            finalParts.Add(stringParts[i].Trim());
+                                        }
+
+                                        nameSearch = stringParts.Last().Trim() + " " + string.Join(", ", finalParts.ToArray());
                                     }
 
                                     string nameSearchReverse = new string(nameSearch.Reverse().ToArray());
