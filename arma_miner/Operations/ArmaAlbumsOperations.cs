@@ -27,7 +27,7 @@ namespace arma_miner.Operations
             IsLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         }
 
-        public bool ProcessAlbumsFile(string Url, string tempFilesDir, string queueKey)
+        public bool ProcessAlbumsFile(string Url, string tempFilesDir, string queueKey, bool fistTimeProcess)
         {
             bool completedWithErrors = false;
             string artistFile = $"{tempFilesDir}release.tar.xz";
@@ -59,24 +59,94 @@ namespace arma_miner.Operations
             }
 
             string albumFileFull = (IsLinux ? $"{tempFilesDir}mbdump/release" : $"{tempFilesDir}mbdump\\release");
+
+            if (fistTimeProcess)
+            {
+                completedWithErrors = FirstTimeProcess(albumFileFull, queueKey);
+            }
+            else
+            {
+                completedWithErrors = AppendedProcess(albumFileFull, queueKey);
+            }
+
+            return completedWithErrors;
+        }
+
+        private bool FirstTimeProcess(string albumFileFull, string queueKey)
+        {
+            bool completedWithErrors = false;
             bool albumExists = false;
             int newAlbumsCount = 0;
 
-            using (FileStream fs = new FileStream(albumFileFull, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (System.IO.Stream fs = new FileStream(albumFileFull, FileMode.Open, FileAccess.Read))
+            using (StreamReader streamReader = new StreamReader(fs, System.Text.Encoding.UTF8))
+            {
+                while (!streamReader.EndOfStream)
+                {
+                    string result = streamReader.ReadLine();
+
+                    if (!string.IsNullOrWhiteSpace(result))
+                    {
+                        try
+                        {
+                            MBAlbumParseDataItem albumItem = Newtonsoft.Json.JsonConvert.DeserializeObject<MBAlbumParseDataItem>(result);
+
+                            if (albumItem != null && albumItem.artistcredit != null && albumItem.artistcredit.Count > 0 && albumItem.media != null && albumItem.media.Count > 0)
+                            {
+                                albumExists = _dapper.GetFirstOrDefault<bool>("radioconn", "Operations_CheckIfMBAlbumIdExists", new
+                                {
+                                    mb_albumid = albumItem.id,
+                                    mb_artistid = albumItem.artistcredit[0].artist.id
+                                });
+
+                                if (!albumExists)
+                                {
+                                    SaveMBAlbum(albumItem);
+                                    newAlbumsCount++;
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            completedWithErrors = true;
+
+                            _dapper.ExecuteNonQuery("radioconn", "Operations_Sync_LogError", new
+                            {
+                                queue_key = queueKey,
+                                error_parent = "AlbumsOperation",
+                                error_message = ex.Message.ToString(),
+                                json_source = (result ?? "")
+                            });
+                        }
+                    }
+                }
+            }
+
+            return completedWithErrors;
+        }
+
+        private bool AppendedProcess(string albumFileFull, string queueKey)
+        {
+            bool completedWithErrors = false;
+            bool albumExists = false;
+            int newAlbumsCount = 0;
+
+            using (FileStream fss = new FileStream(albumFileFull, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (StreamReader fs = new StreamReader(fss, System.Text.Encoding.UTF8))
             {
                 // Start reading from the end of the file
-                fs.Seek(0, SeekOrigin.End);
+                fs.BaseStream.Seek(0, SeekOrigin.End);
 
                 // Read the file stream backward
-                long position = fs.Position;
+                long position = fs.BaseStream.Position;
                 byte[] buffer = new byte[1024];
                 StringBuilder sb = new StringBuilder();
 
                 while (!albumExists && position > 0)
                 {
-                    fs.Seek(-Math.Min(position, buffer.Length), SeekOrigin.Current);
+                    fs.BaseStream.Seek(-Math.Min(position, buffer.Length), SeekOrigin.Current);
 
-                    int bytesRead = fs.Read(buffer, 0, buffer.Length);
+                    int bytesRead = fs.BaseStream.Read(buffer, 0, buffer.Length);
                     if (bytesRead == 0)
                         break;
 
@@ -128,7 +198,7 @@ namespace arma_miner.Operations
                     }
 
                     position -= bytesRead;
-                    fs.Seek(-bytesRead, SeekOrigin.Current);
+                    fs.BaseStream.Seek(-bytesRead, SeekOrigin.Current);
                 }
 
                 // Process the first line if any
@@ -183,7 +253,10 @@ namespace arma_miner.Operations
                 {
                     mb_artistid = albumItem.artistcredit[0].artist.id,
                     mb_albumid = albumItem.id,
-                    album_title = albumItem.title
+                    album_title = albumItem.title,
+                    status = albumItem.status,
+                    primary_type = (albumItem.releasegroup != null ? (albumItem.releasegroup.primarytype ?? "") : ""),
+                    first_release_date = (albumItem.releasegroup != null ? (albumItem.releasegroup.firstreleasedate ?? "") : "")
                 });
 
                 if (newId != null && newId.new_id.HasValue && !string.IsNullOrWhiteSpace(newId.db_source))

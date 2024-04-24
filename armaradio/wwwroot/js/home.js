@@ -51,7 +51,7 @@ function mainload_attacheEvents() {
 
     let mainSearchDeff;
     $("#txtMainGeneralSearch").on("keydown", function (e) {
-        if (arma_mainSearchSelectedType == "3") {
+        if (arma_mainSearchSelectedType == "1") {
             if (mainSearchDeff) {
                 try {
                     mainSearchDeff.cancel();
@@ -84,7 +84,7 @@ function mainload_attacheEvents() {
     });
 
     $("#txtMainGeneralSearch").on("focus", function () {
-        if (arma_mainSearchSelectedType == "3" && $("#ulArtistsFound").find("li").length) {
+        if (arma_mainSearchSelectedType == "1" && $("#ulArtistsFound").find("li").length) {
             setTimeout(function () {
                 $("#ulArtistsFound").css("display", "");
             }, 10);
@@ -972,7 +972,7 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
 }
 
 function onPlayerReady(e) {
-    e.target.playVideo();
+    //e.target.playVideo();
 }
 
 function onPlayerStateChange(e) {

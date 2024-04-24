@@ -14,7 +14,10 @@ namespace arma_miner.Models
         public MBAlbumParseDataItem_TextRepresentation textrepresentation { get; set; }
         public string title { get; set; }
         public string id { get; set; }
+        public string status { get; set; }
         public List<MBAlbumParseDataItem_Media> media { get; set; }
+        [Newtonsoft.Json.JsonProperty("release-group")]
+        public MBAlbumParseDataItem_RelseaseGroup releasegroup { get; set; }
     }
 
     public class MBAlbumParseDataItem_ArtistCredit
@@ -50,5 +53,13 @@ namespace arma_miner.Models
         public string number { get; set; }
         public string title { get; set; }
         public string id { get; set; }
+    }
+
+    public class MBAlbumParseDataItem_RelseaseGroup
+    {
+        [Newtonsoft.Json.JsonProperty("primary-type")]
+        public string primarytype { get; set; }
+        [Newtonsoft.Json.JsonProperty("first-release-date")]
+        public string firstreleasedate { get; set; }
     }
 }

@@ -58,7 +58,7 @@ namespace armaradio_ops.Operations
         public void SaveArtistsFromJsonFile()
         {
             using (System.IO.Stream fs = new FileStream("C:\\Users\\19039\\Downloads\\musicbrainzJson\\artist.json", FileMode.Open, FileAccess.Read))
-            using (StreamReader streamReader = new StreamReader(fs))
+            using (StreamReader streamReader = new StreamReader(fs, System.Text.Encoding.UTF8))
             {
                 while (!streamReader.EndOfStream)
                 {

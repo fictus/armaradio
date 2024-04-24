@@ -28,7 +28,7 @@ namespace arma_miner.Operations
             IsLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         }
 
-        public bool ProcessArtistFile(string Url, string tempFilesDir, string queueKey)
+        public bool ProcessArtistFile(string Url, string tempFilesDir, string queueKey, bool fistTimeProcess)
         {
             bool completedWithErrors = false;
             string artistFile = $"{tempFilesDir}artist.tar.xz";
@@ -60,24 +60,93 @@ namespace arma_miner.Operations
             }
 
             string artistFileFull = (IsLinux ? $"{tempFilesDir}mbdump/artist" : $"{tempFilesDir}mbdump\\artist");
+            
+            if (fistTimeProcess)
+            {
+                completedWithErrors = FirstTimeProcess(artistFileFull, queueKey);
+            }
+            else
+            {
+                completedWithErrors = AppendedProcess(artistFileFull, queueKey);
+            }
+
+            return completedWithErrors;
+        }
+
+        private bool FirstTimeProcess(string artistFileFull, string queueKey)
+        {
+            bool completedWithErrors = false;
             bool artistExists = false;
             int newArtistsCount = 0;
 
-            using (FileStream fs = new FileStream(artistFileFull, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (System.IO.Stream fs = new FileStream(artistFileFull, FileMode.Open, FileAccess.Read))
+            using (StreamReader streamReader = new StreamReader(fs, System.Text.Encoding.UTF8))
+            {
+                while (!streamReader.EndOfStream)
+                {
+                    string result = streamReader.ReadLine();
+
+                    if (!string.IsNullOrWhiteSpace(result))
+                    {
+                        try
+                        {
+                            MBArtistParseDataItem artistItem = Newtonsoft.Json.JsonConvert.DeserializeObject<MBArtistParseDataItem>(result);
+
+                            if (artistItem != null)
+                            {
+                                artistExists = _dapper.GetFirstOrDefault<bool>("radioconn", "Operations_CheckIfMBArtistIdExists", new
+                                {
+                                    mb_artistid = artistItem.id
+                                });
+
+                                if (!artistExists)
+                                {
+                                    SaveMBArtist(artistItem);
+                                    newArtistsCount++;
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            completedWithErrors = true;
+
+                            _dapper.ExecuteNonQuery("radioconn", "Operations_Sync_LogError", new
+                            {
+                                queue_key = queueKey,
+                                error_parent = "ArtistOperation",
+                                error_message = ex.Message.ToString(),
+                                json_source = (result ?? "")
+                            });
+                        }
+                    }
+                }
+            }
+
+            return completedWithErrors;
+        }
+
+        private bool AppendedProcess(string artistFileFull, string queueKey)
+        {
+            bool completedWithErrors = false;
+            bool artistExists = false;
+            int newArtistsCount = 0;
+
+            using (FileStream fss = new FileStream(artistFileFull, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (StreamReader fs = new StreamReader(fss, System.Text.Encoding.UTF8))
             {
                 // Start reading from the end of the file
-                fs.Seek(0, SeekOrigin.End);
+                fs.BaseStream.Seek(0, SeekOrigin.End);
 
                 // Read the file stream backward
-                long position = fs.Position;
+                long position = fs.BaseStream.Position;
                 byte[] buffer = new byte[1024];
                 StringBuilder sb = new StringBuilder();
 
                 while (!artistExists && position > 0)
                 {
-                    fs.Seek(-Math.Min(position, buffer.Length), SeekOrigin.Current);
+                    fs.BaseStream.Seek(-Math.Min(position, buffer.Length), SeekOrigin.Current);
 
-                    int bytesRead = fs.Read(buffer, 0, buffer.Length);
+                    int bytesRead = fs.BaseStream.Read(buffer, 0, buffer.Length);
                     if (bytesRead == 0)
                         break;
 
@@ -89,7 +158,7 @@ namespace arma_miner.Operations
                             string line = sb.ToString();
 
                             try
-                            { 
+                            {
                                 MBArtistParseDataItem artistItem = Newtonsoft.Json.JsonConvert.DeserializeObject<MBArtistParseDataItem>(line);
 
                                 if (artistItem != null)
@@ -128,7 +197,7 @@ namespace arma_miner.Operations
                     }
 
                     position -= bytesRead;
-                    fs.Seek(-bytesRead, SeekOrigin.Current);
+                    fs.BaseStream.Seek(-bytesRead, SeekOrigin.Current);
                 }
 
                 // Process the first line if any

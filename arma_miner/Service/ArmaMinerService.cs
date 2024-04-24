@@ -52,12 +52,12 @@ namespace arma_miner.Service
 
             if (siteVersion != null)
             {
-                bool versionHasBeenProcessed = _dapper.GetFirstOrDefault<bool>("radioconn", "Operations_Sync_CheckIfVersionHasBeenProcessed", new
+                MBSyncQueueDataItem versionHasBeenProcessed = _dapper.GetFirstOrDefault<MBSyncQueueDataItem>("radioconn", "Operations_Sync_CheckIfVersionHasBeenProcessed", new
                 {
                     version_number = siteVersion.Version
                 });
 
-                if (!versionHasBeenProcessed)
+                if (versionHasBeenProcessed != null && !versionHasBeenProcessed.HasBeenProcessed)
                 {
                     _dapper.ExecuteNonQuery("radioconn", "Operations_Sync_AddVersionToStaging", new
                     {
@@ -65,10 +65,10 @@ namespace arma_miner.Service
                     });
 
                     string tempFilesDir = EmptyFilesFromTempFolder();
-                    bool artistErrors = _armaArtistsOps.ProcessArtistFile(siteVersion.ArtistsFileUrl, tempFilesDir, siteVersion.Version);
+                    bool artistErrors = _armaArtistsOps.ProcessArtistFile(siteVersion.ArtistsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess);
 
                     tempFilesDir = EmptyFilesFromTempFolder();
-                    bool albumErrors = _armaAlbumsOps.ProcessAlbumsFile(siteVersion.AlbumsFileUrl, tempFilesDir, siteVersion.Version);
+                    bool albumErrors = _armaAlbumsOps.ProcessAlbumsFile(siteVersion.AlbumsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess);
 
                     EmptyFilesFromTempFolder();
 
@@ -155,6 +155,11 @@ namespace arma_miner.Service
 
                 file = Directory.EnumerateFiles(tempFiles, "*")
                     .FirstOrDefault();
+            }
+
+            foreach (var dir in Directory.EnumerateDirectories(tempFiles))
+            {
+                System.IO.Directory.Delete(dir, true);
             }
 
             return tempFiles;
