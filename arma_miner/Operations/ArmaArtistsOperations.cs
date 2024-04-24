@@ -325,8 +325,9 @@ namespace arma_miner.Operations
             using (SqlBulkCopy bulkCopy = new SqlBulkCopy(conArtists))
             using (SqlBulkCopy bulkCopyGenres = new SqlBulkCopy(conArtists))
             {
-                bulkCopy.DestinationTableName = "ArmaArtistsMain";
+                bulkCopy.DestinationTableName = "ArmaArtistsMainStaging";
                 bulkCopy.BatchSize = 1500;
+                bulkCopy.BulkCopyTimeout = 0;
 
                 bulkCopy.ColumnMappings.Add("MBId", "MBId");
                 bulkCopy.ColumnMappings.Add("Name", "Name");
@@ -348,6 +349,7 @@ namespace arma_miner.Operations
 
                 bulkCopyGenres.DestinationTableName = "ArmaGenresStaged";
                 bulkCopyGenres.BatchSize = 1500;
+                bulkCopyGenres.BulkCopyTimeout = 0;
 
                 bulkCopyGenres.ColumnMappings.Add("MBId", "MBId");
                 bulkCopyGenres.ColumnMappings.Add("ArtistMBId", "ArtistMBId");
@@ -378,6 +380,20 @@ namespace arma_miner.Operations
                                     string dbSource = nameFlat.Trim()[0].ToString().ToLower();
                                     string nameFlatReverse = new string(nameFlat.Reverse().ToArray());
                                     string nameSearch = nameFlat.Trim();
+
+                                    if (Int32.TryParse(dbSource, out int _tmpDBSource))
+                                    {
+                                        dbSource = "num";
+                                    }
+                                    else
+                                    {
+                                        char cDbSource = Convert.ToChar(dbSource);
+
+                                        if (!((cDbSource >= 'a' && cDbSource <= 'z') || (cDbSource >= 'A' && cDbSource <= 'Z')))
+                                        {
+                                            dbSource = "symb";
+                                        }
+                                    }
 
                                     if (nameFlat.Contains(','))
                                     {
