@@ -64,11 +64,13 @@ namespace arma_miner.Service
                         version_number = siteVersion.Version
                     });
 
-                    string tempFilesDir = EmptyFilesFromTempFolder();
-                    bool artistErrors = _armaArtistsOps.ProcessArtistFile(siteVersion.ArtistsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess);
+                    //string tempFilesDir = EmptyFilesFromTempFolder();
+                    //bool artistErrors = _armaArtistsOps.ProcessArtistFile(siteVersion.ArtistsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess);
 
-                    //tempFilesDir = EmptyFilesFromTempFolder();
-                    //bool albumErrors = _armaAlbumsOps.ProcessAlbumsFile(siteVersion.AlbumsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess);
+                    versionHasBeenProcessed.FirstTimeProcess = true;  // remove this !!!!!!
+
+                    string tempFilesDir = EmptyFilesFromTempFolder();
+                    bool albumErrors = _armaAlbumsOps.ProcessAlbumsFile(siteVersion.AlbumsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess);
 
                     EmptyFilesFromTempFolder();
 
@@ -76,7 +78,7 @@ namespace arma_miner.Service
                     {
                         version_number = siteVersion.Version,
                         //errors_occurred = ((artistErrors || albumErrors) ? true : false)
-                        errors_occurred = ((artistErrors) ? true : false)
+                        errors_occurred = ((albumErrors) ? true : false)
                     });
                 }
             }

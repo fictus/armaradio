@@ -16,6 +16,8 @@ namespace arma_miner.Operations
 {
     public class ArmaArtistsOperations : IArmaArtistsOperations
     {
+        private DataTable dataTable = new DataTable();
+        private DataTable dataTableGenres = new DataTable();
         private readonly bool IsLinux = false;
         private readonly IHostEnvironment _hostEnvironment;
         private readonly IDapperHelper _dapper;
@@ -62,12 +64,12 @@ namespace arma_miner.Operations
             }
 
             string artistFileFull = (IsLinux ? $"{tempFilesDir}mbdump/artist" : $"{tempFilesDir}mbdump\\artist");
-            //string artistFileFull = "D:\\eviCORE-CODE\\DnnDev\\DesktopModules\\armaradio\\arma_miner\\tempFiles\\mbdump\\artist";
+            //string artistFileFull = "C:\\Users\\19039\\Downloads\\savedfromerror.json";
 
             if (fistTimeProcess)
             {
-                //completedWithErrors = FirstTimeProcess(artistFileFull, queueKey);
-                completedWithErrors = FirstTimeProcessBulkInsert(artistFileFull, queueKey);
+                completedWithErrors = FirstTimeProcess(artistFileFull, queueKey);
+                //completedWithErrors = FirstTimeProcessBulkInsert(artistFileFull, queueKey);
             }
             else
             {
