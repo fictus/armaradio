@@ -144,26 +144,26 @@ namespace arma_miner.Service
             string rootPath = _hostEnvironment.ContentRootPath.TrimEnd('/').TrimEnd('\\');
             string tempFiles = (IsLinux ? $"{rootPath}/tempFiles/" : $"{rootPath}\\tempFiles\\");
 
-            if (!System.IO.Directory.Exists(tempFiles))
-            {
-                System.IO.Directory.CreateDirectory(tempFiles);
-            }
+            //if (!System.IO.Directory.Exists(tempFiles))
+            //{
+            //    System.IO.Directory.CreateDirectory(tempFiles);
+            //}
 
-            var file = Directory.EnumerateFiles(tempFiles, "*")
-                .FirstOrDefault();
+            //var file = Directory.EnumerateFiles(tempFiles, "*")
+            //    .FirstOrDefault();
 
-            while (file != null)
-            {
-                System.IO.File.Delete(file);
+            //while (file != null)
+            //{
+            //    System.IO.File.Delete(file);
 
-                file = Directory.EnumerateFiles(tempFiles, "*")
-                    .FirstOrDefault();
-            }
+            //    file = Directory.EnumerateFiles(tempFiles, "*")
+            //        .FirstOrDefault();
+            //}
 
-            foreach (var dir in Directory.EnumerateDirectories(tempFiles))
-            {
-                System.IO.Directory.Delete(dir, true);
-            }
+            //foreach (var dir in Directory.EnumerateDirectories(tempFiles))
+            //{
+            //    System.IO.Directory.Delete(dir, true);
+            //}
 
             return tempFiles;
         }
