@@ -290,6 +290,7 @@ namespace arma_miner.Operations
             bool completedWithErrors = false;
             bool artistExists = false;
             int newArtistsCount = 0;
+            List<string> errorSB = new List<string>();
 
             DataTable dataTable = new DataTable();
             dataTable.Columns.Add("MBId", typeof(string));
@@ -363,6 +364,8 @@ namespace arma_miner.Operations
 
                     if (!string.IsNullOrWhiteSpace(result))
                     {
+                        errorSB.Append(result);
+
                         try
                         {
                             MBArtistParseDataItem artistItem = Newtonsoft.Json.JsonConvert.DeserializeObject<MBArtistParseDataItem>(result);
@@ -435,6 +438,7 @@ namespace arma_miner.Operations
                                     {
                                         bulkCopy.WriteToServer(dataTable);
                                         dataTable.Clear();
+                                        errorSB.Clear();
                                     }
 
                                     foreach (var genre in artistItem.genres)
@@ -468,16 +472,37 @@ namespace arma_miner.Operations
                                 queue_key = queueKey,
                                 error_parent = "ArtistOperation",
                                 error_message = ex.Message.ToString(),
-                                json_source = (result ?? "")
+                                json_source = string.Join("\n", errorSB.ToArray())
                             });
+
+                            dataTable.Clear();
+                            errorSB.Clear();
                         }
                     }
                 }
 
                 if (dataTable.Rows.Count > 0)
                 {
-                    bulkCopy.WriteToServer(dataTable);
-                    dataTable.Clear();
+                    try
+                    {
+                        bulkCopy.WriteToServer(dataTable);
+                        dataTable.Clear();
+                    }
+                    catch (Exception ex)
+                    {
+                        completedWithErrors = true;
+
+                        _dapper.ExecuteNonQuery("radioconn", "Operations_Sync_LogError", new
+                        {
+                            queue_key = queueKey,
+                            error_parent = "ArtistOperation",
+                            error_message = ex.Message.ToString(),
+                            json_source = string.Join("\n", errorSB.ToArray())
+                        });
+
+                        dataTable.Clear();
+                        errorSB.Clear();
+                    }
                 }
 
                 if (dataTableGenres.Rows.Count > 0)
