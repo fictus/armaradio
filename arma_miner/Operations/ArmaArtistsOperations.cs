@@ -364,7 +364,7 @@ namespace arma_miner.Operations
 
                     if (!string.IsNullOrWhiteSpace(result))
                     {
-                        errorSB.Append(result);
+                        errorSB.Add(result);
 
                         try
                         {
