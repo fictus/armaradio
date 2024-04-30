@@ -25,15 +25,15 @@ namespace arma_miner
                     _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                 }
 
-                //// we only want to execute any valid process between 8:00-9:00 PM
-                //DateTime minTime = DateTime.Today.AddHours(20);
-                //DateTime maxTime = DateTime.Today.AddHours(21);
-                //DateTime currentTime = DateTime.Now;
+                // we only want to execute any valid process between 8:00-9:00 PM
+                DateTime minTime = DateTime.Today.AddHours(20);
+                DateTime maxTime = DateTime.Today.AddHours(21);
+                DateTime currentTime = DateTime.Now;
 
-                //if (currentTime >= minTime && currentTime <= maxTime)
-                //{
+                if (currentTime >= minTime && currentTime <= maxTime)
+                {
                     _armaMinerService.RunUpdateRoutine();
-                //}
+                }
 
                 await Task.Delay(60000, stoppingToken);
             }

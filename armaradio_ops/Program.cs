@@ -10,7 +10,10 @@
 //var audioDbArtistsProcessor = new armaradio_ops.Operations.AudioDbProcessor();
 //audioDbArtistsProcessor.SaveArtistsFromJsonFile();
 
-var mbAlbumsProcessor = new armaradio_ops.Operations.MBAlbumProcessor();
-//mbAlbumsProcessor.SplitLargeJsonFile();
-mbAlbumsProcessor.ProcessAlbumsFromJsonFile();
+//var mbAlbumsProcessor = new armaradio_ops.Operations.MBAlbumProcessor();
+////mbAlbumsProcessor.SplitLargeJsonFile();
+//mbAlbumsProcessor.ProcessAlbumsFromJsonFile();
+
+var songsAlikeFinder = new armaradio_ops.Operations.SpotifyFindSongsAlike();
+songsAlikeFinder.FindSimilarSong(-1);
 
