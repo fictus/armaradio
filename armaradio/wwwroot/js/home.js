@@ -572,13 +572,13 @@ function performGeneralSearch(searchPhrase) {
 }
 
 function getAlbumsForArtists(artistId, artistName) {
+    $("#btnArtistAlbumsOpen").css("display", "none");
+
     armaradio.masterAJAXPost({
         ArtistId: artistId
     }, "Music", "FindAlbumsForArtists")
         .then(function (response) {
             if (!(response && response.error) && (response.albums || response.singles)) {
-                console.log(response);
-
                 $("#offcanvasArtistAlbumsRightLabel").html("Albums: " + artistName);
                 $("#tblArtistAlbums tr").remove();
                 $("#tblArtistSingles tr").remove();
@@ -972,7 +972,7 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
 }
 
 function onPlayerReady(e) {
-    //e.target.playVideo();
+    e.target.playVideo();
 }
 
 function onPlayerStateChange(e) {
