@@ -1,4 +1,5 @@
-﻿using AngleSharp.Dom;
+﻿using AngleSharp;
+using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 using armaradio.Models;
 using armaradio.Models.BeatPort;
@@ -79,23 +80,27 @@ namespace armaradio.Repositories
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
+            var config = AngleSharp.Configuration.Default.WithDefaultLoader();
+            var browsingContext = BrowsingContext.New(config);
 
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-            {
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    string htmlContent;
-                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
-                    {
-                        htmlContent = sr.ReadToEnd();
-                    }
+            browsingContext.OpenAsync(url).Wait();
 
-                    if (!string.IsNullOrEmpty(htmlContent))
-                    {
-                        var parser = new HtmlParser();
-                        var document = parser.ParseDocument(htmlContent);
+            //using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            //{
+                //if (response.StatusCode == HttpStatusCode.OK)
+                //{
+                    //string htmlContent;
+                    //using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    //{
+                    //    htmlContent = sr.ReadToEnd();
+                    //}
 
-                        var chartHolder = document.QuerySelector("#searchPage");
+                    //if (!string.IsNullOrEmpty(htmlContent))
+                    //{
+                    //    var parser = new HtmlParser();
+                    //    var document = parser.ParseDocument(htmlContent);
+
+                        var chartHolder = browsingContext.Active.QuerySelector("#searchPage");
 
                         if (chartHolder != null)
                         {
@@ -146,9 +151,9 @@ namespace armaradio.Repositories
                                 }
                             }
                         }
-                    }
-                }
-            }
+                    //}
+                //}
+            //}
 
             //// to implement from url: https://spotalike.com/en/songs-similar-to/luis-miguel-la-incondicional/3225079
 
