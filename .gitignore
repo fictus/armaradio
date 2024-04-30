@@ -6,3 +6,6 @@ armaradio_ops/obj/
 arma_miner/obj/
 /arma_miner/bin/Debug/net8.0
 /arma_miner/tempFiles
+/armaradioSongsAlike/bin/Debug/net8.0
+/armaradioSongsAlike/obj
+/armaradioSongsAlike/armaradioSongsAlike.csproj.user
