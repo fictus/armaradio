@@ -5,8 +5,26 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Filters;
+using PuppeteerSharp;
 
 var builder = WebApplication.CreateBuilder(args);
+
+string url = $"https://spotalike.com/en";
+
+var browserFetcher = new BrowserFetcher();
+browserFetcher.Browser = SupportedBrowser.Firefox;
+browserFetcher.DownloadAsync().Wait();
+
+IBrowser _browser = Puppeteer.LaunchAsync(new LaunchOptions
+{
+    Headless = true,
+    Browser = SupportedBrowser.Firefox
+}).Result;
+
+IPage _page = _browser.NewPageAsync().Result;
+_page.GoToAsync(url);
+
+builder.Services.AddSingleton<IPage>(_page);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
