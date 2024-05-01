@@ -200,6 +200,7 @@ namespace armaradio.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> GetSongsLike([FromBody] SongAlikeRequest value)
         {
@@ -228,13 +229,13 @@ namespace armaradio.Controllers
                                 artist: artistName,
                                 mbid: artistId,
                                 track: songName
-                            }),
+                            })
                         };
 
                         fetch(""https://api.spotalike.com/v1/playlists"", fetchBody)
                             .then(function (response) {
                                 if (response.status >= 500) {
-                                    return response.text();
+                                    resolve(response.text());
                                 } else {
                                     return response.json().catch(function () {
                                         resolve(""{}"");
@@ -243,15 +244,13 @@ namespace armaradio.Controllers
                             })
                             .then(function (jsonData) {
                                 resolve(JSON.stringify(jsonData));
-                                //d.resolve(jsonData);
                             })
                             .catch(function (error) {
                                 resolve(error.message);
-                                //d.resolve({ error: true, errorMsg: error.message });
                             });
                     });
                 
-                }", "Luis Miguel", "6224ac4e-8c97-4005-9e45-6f10ad394404", "La Incondicional");
+                }", (value.ArtistName ?? ""), (value.MBId ?? ""), (value.SongName ?? ""));
 
                 while (response == null)
                 {
