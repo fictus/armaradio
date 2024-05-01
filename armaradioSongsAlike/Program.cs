@@ -51,6 +51,8 @@ app.UseCors("AllowAll");
 
 app.UseAuthorization();
 
+app.Urls.Add("http://*:5003");
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
