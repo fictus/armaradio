@@ -11,6 +11,9 @@ namespace armaradio.Repositories
         List<ArmaArtistDataItem> Artist_FindArtists(string search);
         ArmaArtistAlbumsResponse Albums_GetArtistsAlbums(int artistId);
         List<ArmaAlbumSongDataItem> Albums_GetAlbumSongs(int artistId, int albumId);
+        string GetApiToken();
+        RadioSessionSongsResponse GetRadioSessionSongsFromArtist(string artistName);
+        ArtistPlaylistsResponse GetArtistPlaylists(string artistName);
         List<ArtistDataItem> Artist_GetArtistList(string search);
         List<TrackDataItem> Tracks_GetTop50Songs();
         List<TrackDataItem> GetCurrentTop40DanceSingles();

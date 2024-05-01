@@ -1,0 +1,41 @@
+﻿namespace armaradio.Models.Response
+{
+    public class ArtistPlaylistsResponse
+    {
+        public ArtistPlaylistsResponse_Artist artists { get; set; }
+        public ArtistPlaylistsResponse_Playlist playlists { get; set; }
+    }
+
+    public class ArtistPlaylistsResponse_Artist
+    {
+        public List<ArtistPlaylistsResponse_ArtistEntry> items { get; set; }
+    }
+
+    public class ArtistPlaylistsResponse_ArtistEntry
+    {
+        public string id { get; set; }
+        public string name { get; set; }
+        public List<string> genres { get; set; }
+        public int? popularity { get; set; }
+    }
+
+    public class ArtistPlaylistsResponse_Playlist
+    {
+        public List<ArtistPlaylistsResponse_PlaylistEntry> items { get; set; }
+    }
+
+    public class ArtistPlaylistsResponse_PlaylistEntry
+    {
+        public string id { get; set; }
+        public string name { get; set; }
+        public string description { get; set; }
+        public string uri { get; set; }
+        public ArtistPlaylistsResponse_PlaylistEntry_Tracks tracks { get; set; }
+    }
+
+    public class ArtistPlaylistsResponse_PlaylistEntry_Tracks
+    {
+        public string href { get; set; }
+        public int? total { get; set; }
+    }
+}

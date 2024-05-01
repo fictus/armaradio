@@ -7,6 +7,8 @@ using armaradio.Models.Request;
 using armaradio.Models.Response;
 using armaradio.Models.Youtube;
 using Dapper;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Data;
 using System.Globalization;
 using System.Net;
@@ -18,11 +20,14 @@ namespace armaradio.Repositories
     public class MusicRepo : IMusicRepo
     {
         private readonly IDapperHelper _dapper;
+        private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
         public MusicRepo(
-            IDapperHelper dapper  
+            IDapperHelper dapper,
+            Microsoft.Extensions.Configuration.IConfiguration configuration
         )
         {
             _dapper = dapper;
+            _configuration = configuration;
         }
 
         public List<ArmaArtistDataItem> Artist_FindArtists(string search)
@@ -67,6 +72,106 @@ namespace armaradio.Repositories
                 album_id = albumId,
                 artist_id = artistId
             });
+        }
+
+        public string GetApiToken()
+        {
+            string returnItem = _dapper.GetFirstOrDefault<string>("radioconn", "Operations_GetCachedToken");
+
+            if (string.IsNullOrWhiteSpace(returnItem))
+            {
+                ApiTokenDataItem apiToken = null;
+                string clientId = _configuration.GetSection("ApplicationConfiguration:apiClientId").Value;
+                string clientSecret = _configuration.GetSection("ApplicationConfiguration:apiClientSecret").Value;
+
+                // Define the URL and form data
+                string url = "https://accounts.spotify.com/api/token";
+                var formData = new System.Collections.Generic.Dictionary<string, string>
+                {
+                    { "grant_type", "client_credentials" },
+                    { "client_id", clientId },
+                    { "client_secret", clientSecret }
+                };
+
+                using (HttpClient client = new HttpClient())
+                {
+                    var encodedFormData = new FormUrlEncodedContent(formData);
+
+                    using (var response = client.PostAsync(url, encodedFormData).Result)
+                    {
+                        if (response.IsSuccessStatusCode)
+                        {
+                            string responseBody = response.Content.ReadAsStringAsync().Result;
+                            apiToken = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiTokenDataItem>(responseBody);
+                        }
+                    }
+                }
+
+                if (apiToken != null && !string.IsNullOrWhiteSpace(apiToken.access_token))
+                {
+                    returnItem = apiToken.access_token;
+
+                    _dapper.ExecuteNonQuery("radioconn", "Operations_SaveApiTokenToCache", new
+                    {
+                        token = returnItem
+                    });
+                }
+            }
+
+            return returnItem;
+        }
+
+        public ArtistPlaylistsResponse GetArtistPlaylists(string artistName)
+        {
+            ArtistPlaylistsResponse returnItem = null;
+            string url = $"https://api.spotify.com/v1/search?q=artist%3A{Uri.EscapeUriString(artistName.Trim())}&type=playlist%2Cartist";
+            string accessToken = GetApiToken();
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+
+                using (var response = client.GetAsync(url).Result)
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseBody = response.Content.ReadAsStringAsync().Result;
+                        returnItem = Newtonsoft.Json.JsonConvert.DeserializeObject<ArtistPlaylistsResponse>(responseBody);
+                    }
+                }
+            }
+
+            return returnItem;
+        }
+
+        public RadioSessionSongsResponse GetRadioSessionSongsFromArtist(string artistName)
+        {
+            RadioSessionSongsResponse returnItem = null;
+            ArtistPlaylistsResponse playlists = GetArtistPlaylists(artistName);
+
+            if (playlists != null && playlists.playlists != null && playlists.playlists.items != null && playlists.playlists.items.Count > 0)
+            {
+                Random random = new Random();
+                int randomNumber = random.Next(0, playlists.playlists.items.Count);
+                string url = $"https://api.spotify.com/v1/playlists/{playlists.playlists.items[randomNumber].id}/tracks";
+                string accessToken = GetApiToken();
+
+                using (HttpClient client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+
+                    using (var response = client.GetAsync(url).Result)
+                    {
+                        if (response.IsSuccessStatusCode)
+                        {
+                            string responseBody = response.Content.ReadAsStringAsync().Result;
+                            returnItem = Newtonsoft.Json.JsonConvert.DeserializeObject<RadioSessionSongsResponse>(responseBody);
+                        }
+                    }
+                }
+            }
+
+            return returnItem;
         }
 
         public void FindSimilarSong(int artistId)

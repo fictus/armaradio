@@ -211,6 +211,8 @@ namespace armaradio.Controllers
                     throw new Exception("Invalid Request");
                 }
 
+                RadioSessionSongsResponse songs = _musicRepo.GetRadioSessionSongsFromArtist(value.ArtistName);
+
                 //var response = await _page.EvaluateFunctionAsync(@"(artistName, artistId, songName) => { 
                 //    return new Promise((resolve, reject) => {
                 //        let fetchBody = {
