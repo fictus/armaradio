@@ -15,16 +15,16 @@ namespace armaradio.Controllers
     {
         private readonly IMusicRepo _musicRepo;
         private readonly IArmaAuth _authControl;
-        private IPage _page;
+        //private IPage _page;
         public MusicController(
             IMusicRepo musicRepo,
-            IArmaAuth authControl,
-            IPage page
+            IArmaAuth authControl
+            //IPage page
         )
         {
             _musicRepo = musicRepo;
             _authControl = authControl;
-            _page = page;
+            //_page = page;
         }
 
         [HttpGet]
@@ -211,55 +211,57 @@ namespace armaradio.Controllers
                     throw new Exception("Invalid Request");
                 }
 
-                var response = await _page.EvaluateFunctionAsync(@"(artistName, artistId, songName) => { 
-                    return new Promise((resolve, reject) => {
-                        let fetchBody = {
-                            method: ""POST"", // *GET, POST, PUT, DELETE, etc.
-                            mode: ""cors"", // no-cors, *cors, same-origin
-                            cache: ""no-cache"", // *default, no-cache, reload, force-cache, only-if-cached
-                            credentials: ""same-origin"", // include, *same-origin, omit
-                            headers: {
-                                ""Content-Type"": ""application/json"",
-                                ""Accept-Encoding"": ""gzip, deflate""
-                                // 'Content-Type': 'application/x-www-form-urlencoded',
-                            },
-                            redirect: ""follow"", // manual, *follow, error
-                            referrerPolicy: ""no-referrer"", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-                            body: JSON.stringify({
-                                artist: artistName,
-                                mbid: artistId,
-                                track: songName
-                            })
-                        };
+                //var response = await _page.EvaluateFunctionAsync(@"(artistName, artistId, songName) => { 
+                //    return new Promise((resolve, reject) => {
+                //        let fetchBody = {
+                //            method: ""POST"", // *GET, POST, PUT, DELETE, etc.
+                //            mode: ""cors"", // no-cors, *cors, same-origin
+                //            cache: ""no-cache"", // *default, no-cache, reload, force-cache, only-if-cached
+                //            credentials: ""same-origin"", // include, *same-origin, omit
+                //            headers: {
+                //                ""Content-Type"": ""application/json"",
+                //                ""Accept-Encoding"": ""gzip, deflate""
+                //                // 'Content-Type': 'application/x-www-form-urlencoded',
+                //            },
+                //            redirect: ""follow"", // manual, *follow, error
+                //            referrerPolicy: ""no-referrer"", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                //            body: JSON.stringify({
+                //                artist: artistName,
+                //                mbid: artistId,
+                //                track: songName
+                //            })
+                //        };
 
-                        fetch(""https://api.spotalike.com/v1/playlists"", fetchBody)
-                            .then(function (response) {
-                                if (response.status >= 500) {
-                                    resolve(response.text());
-                                } else {
-                                    return response.json().catch(function () {
-                                        resolve(""{}"");
-                                    });
-                                }
-                            })
-                            .then(function (jsonData) {
-                                resolve(JSON.stringify(jsonData));
-                            })
-                            .catch(function (error) {
-                                resolve(error.message);
-                            });
-                    });
-                
-                }", (value.ArtistName ?? ""), (value.MBId ?? ""), (value.SongName ?? ""));
+                //        fetch(""https://api.spotalike.com/v1/playlists"", fetchBody)
+                //            .then(function (response) {
+                //                if (response.status >= 500) {
+                //                    resolve(response.text());
+                //                } else {
+                //                    return response.json().catch(function () {
+                //                        resolve(""{}"");
+                //                    });
+                //                }
+                //            })
+                //            .then(function (jsonData) {
+                //                resolve(JSON.stringify(jsonData));
+                //            })
+                //            .catch(function (error) {
+                //                resolve(error.message);
+                //            });
+                //    });
 
-                while (response == null)
-                {
-                    Thread.Sleep(5);
-                }
+                //}", (value.ArtistName ?? ""), (value.MBId ?? ""), (value.SongName ?? ""));
 
-                SongsAlikeResponse responseItem = Newtonsoft.Json.JsonConvert.DeserializeObject<SongsAlikeResponse>(response.ToObject<string>());
-                                                                                                                                                
-                return new JsonResult(responseItem);
+                //while (response == null)
+                //{
+                //    Thread.Sleep(5);
+                //}
+
+                //SongsAlikeResponse responseItem = Newtonsoft.Json.JsonConvert.DeserializeObject<SongsAlikeResponse>(response.ToObject<string>());
+
+                //return new JsonResult(responseItem);
+
+                return new JsonResult(Ok());
             }
             catch (Exception ex)
             {

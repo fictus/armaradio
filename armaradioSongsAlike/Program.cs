@@ -2,7 +2,7 @@ using PuppeteerSharp;
 
 var builder = WebApplication.CreateBuilder(args);
 
-string url = $"https://spotalike.com/en";
+string url = $"https://open.spotify.com/search";
 
 var browserFetcher = new BrowserFetcher();
 browserFetcher.Browser = SupportedBrowser.Firefox;

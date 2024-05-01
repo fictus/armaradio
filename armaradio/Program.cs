@@ -9,22 +9,22 @@ using PuppeteerSharp;
 
 var builder = WebApplication.CreateBuilder(args);
 
-string url = $"https://spotalike.com/en";
+//string url = $"https://spotalike.com/en";
 
-var browserFetcher = new BrowserFetcher();
-browserFetcher.Browser = SupportedBrowser.Firefox;
-browserFetcher.DownloadAsync().Wait();
+//var browserFetcher = new BrowserFetcher();
+//browserFetcher.Browser = SupportedBrowser.Firefox;
+//browserFetcher.DownloadAsync().Wait();
 
-IBrowser _browser = Puppeteer.LaunchAsync(new LaunchOptions
-{
-    Headless = true,
-    Browser = SupportedBrowser.Firefox
-}).Result;
+//IBrowser _browser = Puppeteer.LaunchAsync(new LaunchOptions
+//{
+//    Headless = true,
+//    Browser = SupportedBrowser.Firefox
+//}).Result;
 
-IPage _page = _browser.NewPageAsync().Result;
-_page.GoToAsync(url);
+//IPage _page = _browser.NewPageAsync().Result;
+//_page.GoToAsync(url);
 
-builder.Services.AddSingleton<IPage>(_page);
+//builder.Services.AddSingleton<IPage>(_page);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
