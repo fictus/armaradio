@@ -89,8 +89,7 @@ function playNextSong() {
                 armaradio.masterPageWait(false);
             });
     } else {
-        $("#dvRadioPlayerHolder").css("display", "none");
-        $("#dvRadioPlayer_currentlyPlaying").find(".iframe-holder").replaceWith("<div class=\"iframe-holder pl-0 pt-0\"></div>");
+        loadRadioPlayer();
     }
 }
 

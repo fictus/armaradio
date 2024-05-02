@@ -302,9 +302,8 @@ div.list-container {
     border-radius: 30px;
     min-height: 250px;
     left: 50%;
-    top: 50%;
+    top: 15%;
     margin-left: -178px;
-    margin-top: -125px;
 }
 
 .playercontrol-button {
