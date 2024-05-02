@@ -103,6 +103,7 @@ function radioPlayerHateCurrentSong() {
 
     tallyUpSongId();
     playNextSong();
+
 }
 
 function currentRadioSongOptions() {
