@@ -212,58 +212,36 @@ namespace armaradio.Controllers
                 }
 
                 RadioSessionSongsResponse songs = _musicRepo.GetRadioSessionSongsFromArtist(value.ArtistName);
+                List<ArmaAlbumSongDataItem> tracks = new List< ArmaAlbumSongDataItem>();
 
-                //var response = await _page.EvaluateFunctionAsync(@"(artistName, artistId, songName) => { 
-                //    return new Promise((resolve, reject) => {
-                //        let fetchBody = {
-                //            method: ""POST"", // *GET, POST, PUT, DELETE, etc.
-                //            mode: ""cors"", // no-cors, *cors, same-origin
-                //            cache: ""no-cache"", // *default, no-cache, reload, force-cache, only-if-cached
-                //            credentials: ""same-origin"", // include, *same-origin, omit
-                //            headers: {
-                //                ""Content-Type"": ""application/json"",
-                //                ""Accept-Encoding"": ""gzip, deflate""
-                //                // 'Content-Type': 'application/x-www-form-urlencoded',
-                //            },
-                //            redirect: ""follow"", // manual, *follow, error
-                //            referrerPolicy: ""no-referrer"", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-                //            body: JSON.stringify({
-                //                artist: artistName,
-                //                mbid: artistId,
-                //                track: songName
-                //            })
-                //        };
+                if (songs != null && songs.items != null && songs.items.Count > 0)
+                {
+                    int tempId = 0;
+                    foreach (var song in  songs.items)
+                    {
+                        if (song.track != null)
+                        {
+                            tempId++;
 
-                //        fetch(""https://api.spotalike.com/v1/playlists"", fetchBody)
-                //            .then(function (response) {
-                //                if (response.status >= 500) {
-                //                    resolve(response.text());
-                //                } else {
-                //                    return response.json().catch(function () {
-                //                        resolve(""{}"");
-                //                    });
-                //                }
-                //            })
-                //            .then(function (jsonData) {
-                //                resolve(JSON.stringify(jsonData));
-                //            })
-                //            .catch(function (error) {
-                //                resolve(error.message);
-                //            });
-                //    });
+                            tracks.Add(new ArmaAlbumSongDataItem()
+                            {
+                                Id = tempId,
+                                NameSearch = (song.track.artists != null && song.track.artists.Count > 0 ? song.track.artists[0].name ?? "" : ""),
+                                SongTitle = song.track.name
+                            });
+                        }
+                    }
+                }
 
-                //}", (value.ArtistName ?? ""), (value.MBId ?? ""), (value.SongName ?? ""));
-
-                //while (response == null)
-                //{
-                //    Thread.Sleep(5);
-                //}
-
-                //SongsAlikeResponse responseItem = Newtonsoft.Json.JsonConvert.DeserializeObject<SongsAlikeResponse>(response.ToObject<string>());
-
-                //return new JsonResult(responseItem);
-
-                return new JsonResult(Ok());
+                return new JsonResult(tracks.Select(tr =>
+                {
+                    return new
+                    {
+                        Id = tr.Id,
+                        ArtistName = tr.NameSearch,
+                        SongName = tr.SongTitle
+                    };
+                }));
             }
             catch (Exception ex)
             {

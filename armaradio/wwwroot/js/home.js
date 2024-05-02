@@ -513,6 +513,51 @@ function mainload_attacheEvents() {
         var popover = bootstrap.Popover.getInstance($("#btnSongOptions_RemoveFromPlaylist")[0]);
         popover.hide();
     });
+
+    $("#btnMain_StartRadioSession").on("click", function () {
+        if ($("#lnkMainLogin").length) {
+            armaradio.warningMsg({
+                msg: "Radio Player requires you to login or create a free account",
+                captionMsg: "Login Required",
+                typeLayout: "red"
+            });
+        } else {
+            if ("loadRadioPlayer" in window) {
+                loadRadioPlayer();
+            }
+        }
+    });
+
+    $("#lnkCloseRadio").on("click", function (e) {
+        e.preventDefault();
+
+        $("#dvRadioPlayerHolder").css("display", "none");
+        $("#dvRadioPlayer_currentlyPlaying").find(".iframe-holder").replaceWith("<div class=\"iframe-holder pl-0 pt-0\"></div>");
+    });
+
+    $("#lnkRadioOptions").on("click", function (e) {
+        e.preventDefault();
+
+        if ("currentRadioSongOptions" in window) {
+            currentRadioSongOptions();
+        }
+    });
+
+    $("#lnkRadioPlayer_LikeSong").on("click", function (e) {
+        e.preventDefault();
+
+        if ("radioPlayerLikeCurrentSong" in window) {
+            radioPlayerLikeCurrentSong();
+        }
+    });
+
+    $("#lnkRadioPlayer_HateSong").on("click", function (e) {
+        e.preventDefault();
+
+        if ("radioPlayerHateCurrentSong" in window) {
+            radioPlayerHateCurrentSong();
+        }
+    });
 }
 
 function attachArtistResponseFromSearch(response) {
@@ -573,6 +618,9 @@ function performGeneralSearch(searchPhrase) {
 
 function getAlbumsForArtists(artistId, artistName) {
     $("#btnArtistAlbumsOpen").css("display", "none");
+    $("#btnMain_StartRadioSession")
+        .attr("data-artistname", "")
+        .css("display", "none");
 
     armaradio.masterAJAXPost({
         ArtistId: artistId
@@ -589,7 +637,7 @@ function getAlbumsForArtists(artistId, artistName) {
 
                         tr.append(
                             $("<td></td>")
-                                .append("<i class=\"fas fa-compact-disc\"></i>")
+                                .append("<i class=\"fa-solid fa-compact-disc\"></i>")
                         );
                         tr.append(
                             $("<td></td>")
@@ -629,7 +677,7 @@ function getAlbumsForArtists(artistId, artistName) {
 
                         tr.append(
                             $("<td></td>")
-                                .append("<i class=\"fas fa-compact-disc\"></i>")
+                                .append("<i class=\"fa-solid fa-compact-disc\"></i>")
                         );
                         tr.append(
                             $("<td></td>")
@@ -689,13 +737,18 @@ function getAlbumsForArtists(artistId, artistName) {
 
                         //let bsOffcanvas = new bootstrap.Offcanvas($("#offcanvasArtistAlbums")[0]);
                         //bsOffcanvas.hide();
-
                     });
                 });
 
                 $("#btnArtistAlbumsOpen").css("display", "");
+                $("#btnMain_StartRadioSession")
+                    .attr("data-artistname", artistName)
+                    .css("display", "");
             } else {
                 $("#btnArtistAlbumsOpen").css("display", "none");
+                $("#btnMain_StartRadioSession")
+                    .attr("data-artistname", "")
+                    .css("display", "none");
             }
         });
 }
@@ -757,12 +810,12 @@ function attachListToTable(response, isPageLoad, loadedPlaylist) {
             );
             if (loadedPlaylist) {
                 tblPlaylist.find("tr").last().find("td").last().find("div").append(
-                    $("<a class=\"font-sz-11pt btn-inner-more-options\"><i class='fas fa-ellipsis-v pl-2 pr-2'></i></a>")
+                    $("<a class=\"font-sz-11pt btn-inner-more-options\"><i class='fa-solid fa-ellipsis-vertical pl-2 pr-2'></i></a>")
                 );
             } else {
                 if ($("#offcanvasNonePlaylistOptions").length) {
                     tblPlaylist.find("tr").last().find("td").last().find("div").append(
-                        $("<a class=\"font-sz-11pt btn-inner-more-none-list-options\"><i class='fas fa-ellipsis-v pl-2 pr-2'></i></a>")
+                        $("<a class=\"font-sz-11pt btn-inner-more-none-list-options\"><i class='fa-solid fa-ellipsis-vertical pl-2 pr-2'></i></a>")
                     );
                 }
             }
@@ -814,7 +867,7 @@ function attachListToTableFromGeneralSearch(response, headerTitle) {
             );
             if ($("#offcanvasNonePlaylistOptions").length) {
                 tblPlaylist.find("tr").last().find("td").last().find("div").append(
-                    $("<a class=\"font-sz-11pt btn-inner-more-none-list-options\"><i class='fas fa-ellipsis-v pl-2 pr-2'></i></a>")
+                    $("<a class=\"font-sz-11pt btn-inner-more-none-list-options\"><i class='fa-solid fa-ellipsis-vertical pl-2 pr-2'></i></a>")
                 );
             }
         }
