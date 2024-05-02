@@ -144,16 +144,78 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
-        public RadioSessionSongsResponse GetRadioSessionSongsFromArtist(string artistName)
+        public RadioSessionSongsResponse GetRadioPlalistSongsFromArtist(string artistName)
         {
             RadioSessionSongsResponse returnItem = null;
             ArtistPlaylistsResponse playlists = GetArtistPlaylists(artistName);
+            bool radioInstanceFound = false;
 
             if (playlists != null && playlists.playlists != null && playlists.playlists.items != null && playlists.playlists.items.Count > 0)
             {
-                Random random = new Random();
-                int randomNumber = random.Next(0, playlists.playlists.items.Count);
-                string url = $"https://api.spotify.com/v1/playlists/{playlists.playlists.items[randomNumber].id}/tracks";
+                foreach (var list in playlists.playlists.items)
+                {
+                    if ((list.name ?? "").Trim().ToLower().EndsWith(" radio"))
+                    {
+                        string url = $"https://api.spotify.com/v1/playlists/{list.id}/tracks";
+                        string accessToken = GetApiToken();
+
+                        using (HttpClient client = new HttpClient())
+                        {
+                            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+
+                            using (var response = client.GetAsync(url).Result)
+                            {
+                                if (response.IsSuccessStatusCode)
+                                {
+                                    radioInstanceFound = true;
+
+                                    string responseBody = response.Content.ReadAsStringAsync().Result;
+                                    returnItem = Newtonsoft.Json.JsonConvert.DeserializeObject<RadioSessionSongsResponse>(responseBody);
+                                }
+                            }
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            if (!radioInstanceFound)
+            {
+                if (playlists != null && playlists.playlists != null && playlists.playlists.items != null && playlists.playlists.items.Count > 0)
+                {
+                    Random random = new Random();
+                    int randomNumber = random.Next(0, playlists.playlists.items.Count);
+                    string url = $"https://api.spotify.com/v1/playlists/{playlists.playlists.items[randomNumber].id}/tracks";
+                    string accessToken = GetApiToken();
+
+                    using (HttpClient client = new HttpClient())
+                    {
+                        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+
+                        using (var response = client.GetAsync(url).Result)
+                        {
+                            if (response.IsSuccessStatusCode)
+                            {
+                                string responseBody = response.Content.ReadAsStringAsync().Result;
+                                returnItem = Newtonsoft.Json.JsonConvert.DeserializeObject<RadioSessionSongsResponse>(responseBody);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return returnItem;
+        }
+
+        public RadioSessionRecommendedResponse GetRadioSessionRecommendedSongsFromArtist(string artistName)
+        {
+            RadioSessionRecommendedResponse returnItem = null;
+            ArtistPlaylistsResponse playlists = GetArtistPlaylists(artistName);
+
+            if (playlists != null && playlists.artists != null && playlists.artists.items != null && playlists.artists.items.Count > 0)
+            {
+                string url = $"https://api.spotify.com/v1/recommendations?seed_artists={playlists.artists.items[0].id}";
                 string accessToken = GetApiToken();
 
                 using (HttpClient client = new HttpClient())
@@ -165,7 +227,7 @@ namespace armaradio.Repositories
                         if (response.IsSuccessStatusCode)
                         {
                             string responseBody = response.Content.ReadAsStringAsync().Result;
-                            returnItem = Newtonsoft.Json.JsonConvert.DeserializeObject<RadioSessionSongsResponse>(responseBody);
+                            returnItem = Newtonsoft.Json.JsonConvert.DeserializeObject<RadioSessionRecommendedResponse>(responseBody);
                         }
                     }
                 }

@@ -211,27 +211,46 @@ namespace armaradio.Controllers
                     throw new Exception("Invalid Request");
                 }
 
-                RadioSessionSongsResponse songs = _musicRepo.GetRadioSessionSongsFromArtist(value.ArtistName);
-                List<ArmaAlbumSongDataItem> tracks = new List< ArmaAlbumSongDataItem>();
+                RadioSessionRecommendedResponse songs = _musicRepo.GetRadioSessionRecommendedSongsFromArtist(value.ArtistName);
+                List<ArmaAlbumSongDataItem> tracks = new List<ArmaAlbumSongDataItem>();
 
-                if (songs != null && songs.items != null && songs.items.Count > 0)
+                if (songs != null && songs.tracks != null && songs.tracks.Count > 0)
                 {
                     int tempId = 0;
-                    foreach (var song in  songs.items)
+                    foreach (var track in songs.tracks)
                     {
-                        if (song.track != null)
-                        {
-                            tempId++;
+                        tempId++;
 
-                            tracks.Add(new ArmaAlbumSongDataItem()
-                            {
-                                Id = tempId,
-                                NameSearch = (song.track.artists != null && song.track.artists.Count > 0 ? song.track.artists[0].name ?? "" : ""),
-                                SongTitle = song.track.name
-                            });
-                        }
+                        tracks.Add(new ArmaAlbumSongDataItem()
+                        {
+                            Id = tempId,
+                            NameSearch = (track.artists != null && track.artists.Count > 0 ? track.artists[0].name ?? "" : ""),
+                            SongTitle = track.name
+                        });
                     }
                 }
+
+                //RadioSessionSongsResponse songs = _musicRepo.GetRadioSessionSongsFromArtist(value.ArtistName);
+                //List<ArmaAlbumSongDataItem> tracks = new List<ArmaAlbumSongDataItem>();
+
+                //if (songs != null && songs.items != null && songs.items.Count > 0)
+                //{
+                //    int tempId = 0;
+                //    foreach (var song in  songs.items)
+                //    {
+                //        if (song.track != null)
+                //        {
+                //            tempId++;
+
+                //            tracks.Add(new ArmaAlbumSongDataItem()
+                //            {
+                //                Id = tempId,
+                //                NameSearch = (song.track.artists != null && song.track.artists.Count > 0 ? song.track.artists[0].name ?? "" : ""),
+                //                SongTitle = song.track.name
+                //            });
+                //        }
+                //    }
+                //}
 
                 return new JsonResult(tracks.Select(tr =>
                 {
