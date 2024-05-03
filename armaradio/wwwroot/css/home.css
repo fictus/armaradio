@@ -310,3 +310,7 @@ div.list-container {
     color: #e14b4b;
     font-size: 30pt;
 }
+
+a.playercontrol-button {
+    cursor: pointer;
+}

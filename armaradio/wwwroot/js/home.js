@@ -32,19 +32,19 @@ function mainload_attacheEvents() {
 
                 $("#cmbMasterSearchOptions").find("button.dropdown-toggle").html(iconHtml);
 
-                $("#txtMainGeneralSearch").val("");
-                $("#txtMainGeneralSearch")[0].focus();
-
                 $("#ulArtistsFound").css("display", "none");
                 $("#btnArtistAlbumsOpen").css("display", "none");
 
-                $("#ulArtistsFound").find("li").remove();
+                //$("#ulArtistsFound").find("li").remove();
 
-                //if (arma_mainSearchSelectedType == "3") {
-                //    $("#btnArtistAlbumsOpen").css("display", "");
-                //} else {
-                //    $("#btnArtistAlbumsOpen").css("display", "none");
-                //}
+                if (arma_mainSearchSelectedType == "1") {
+                    //$("#txtMainGeneralSearch").val("");
+                    $("#btnMain_GeneralSearch").css("display", "none");
+                } else {
+                    $("#btnMain_GeneralSearch").css("display", "");
+                }
+
+                $("#txtMainGeneralSearch")[0].focus();
             }
         });
     });
@@ -79,7 +79,7 @@ function mainload_attacheEvents() {
                 } else {
                     attachArtistResponseFromSearch([]);
                 }
-            }, 800));
+            }, 700));
         }
     });
 
@@ -587,7 +587,9 @@ function attachArtistResponseFromSearch(response) {
                 let artistName = $(this).attr("data-artistflat");
                 let artistId = parseInt($(this).attr("data-id"));
 
-                performGeneralSearch(artistName);
+                $("#txtMainGeneralSearch").val(artistName);
+
+                //performGeneralSearch(artistName);
                 getAlbumsForArtists(artistId, artistName);
             });
         });
@@ -599,24 +601,30 @@ function attachArtistResponseFromSearch(response) {
 }
 
 function performGeneralSearch(searchPhrase) {
-    let searchText = (searchPhrase || $.trim($("#txtMainGeneralSearch").val()));
+    let searchType = $("#cmbMasterSearchOptions").find("a.dropdown-item.active").attr("data-type");
 
-    if (searchText != "") {
-        armaradio.masterPageWait(true);
+    if (searchType == "2") {
+        let searchText = (searchPhrase || $.trim($("#txtMainGeneralSearch").val()));
 
-        armaradio.masterAJAXGet({
-            SearchText: searchText
-        }, "Music", "GeneralSearch")
-            .then(function (response) {
-                $("#dvPopupPastePlaylist").modal("hide");
-                $("#txtPastedPlaylist").val("");
+        if (searchText != "") {
+            armaradio.masterPageWait(true);
 
-                attachListToTableFromGeneralSearch(response);
-            });
+            armaradio.masterAJAXGet({
+                SearchText: searchText
+            }, "Music", "GeneralSearch")
+                .then(function (response) {
+                    $("#dvPopupPastePlaylist").modal("hide");
+                    $("#txtPastedPlaylist").val("");
+
+                    attachListToTableFromGeneralSearch(response);
+                });
+        }
     }
 }
 
 function getAlbumsForArtists(artistId, artistName) {
+    armaradio.masterPageWait(true);
+
     $("#btnArtistAlbumsOpen").css("display", "none");
     $("#btnMain_StartRadioSession")
         .attr("data-artistname", "")
@@ -750,6 +758,8 @@ function getAlbumsForArtists(artistId, artistName) {
                     .attr("data-artistname", "")
                     .css("display", "none");
             }
+
+            armaradio.masterPageWait(false);
         });
 }
 
