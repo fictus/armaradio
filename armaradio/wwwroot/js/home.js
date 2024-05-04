@@ -548,6 +548,24 @@ function mainload_attacheEvents() {
         }
     });
 
+    $("#btnSongOptions_StartRadioSession").on("click", function () {
+        if ($("#lnkMainLogin").length) {
+            armaradio.warningMsg({
+                msg: "Radio Player requires you to login or create a free account",
+                captionMsg: "Login Required",
+                typeLayout: "red"
+            });
+        } else {
+            if ("loadRadioPlayer" in window) {
+                let dataHolder = $("#btnSongOptions_RemoveFromPlaylist");
+                let artistName = $.trim(dataHolder.attr("data-artist"));
+                let songName = $.trim(dataHolder.attr("data-song"));
+
+                loadRadioPlayer(artistName, songName, true);
+            }
+        }
+    });
+
     $("#lnkCloseRadio").on("click", function (e) {
         e.preventDefault();
 
@@ -1016,6 +1034,8 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
 
                 if (songId != "") {
                     $("#btnSongOptions_RemoveFromPlaylist").attr("data-id", songId);
+                    $("#btnSongOptions_RemoveFromPlaylist").attr("data-artist", artistName);
+                    $("#btnSongOptions_RemoveFromPlaylist").attr("data-song", songName);
                     $("#lblSongOptionsTitle").html(artistName + separator + songName);
 
                     let bsOffcanvas = new bootstrap.Offcanvas($("#offcanvasSongOptions")[0]);

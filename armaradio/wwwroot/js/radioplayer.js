@@ -24,7 +24,18 @@ function loadRadioPlayer(artistName, songName, fromPlaylist) {
                         playNextSong();
 
                         if (fromPlaylist) {
-                            $("#offcanvasNonePlaylistOptions").find("button.btn-close").trigger("click");
+                            let canvasCtrl;
+
+                            if ($("#offcanvasNonePlaylistOptions").hasClass("show")) {
+                                canvasCtrl = $("#offcanvasNonePlaylistOptions");
+                            }
+                            if ($("#offcanvasSongOptions").hasClass("show")) {
+                                canvasCtrl = $("#offcanvasSongOptions");
+                            }
+
+                            if (canvasCtrl.length) {
+                                canvasCtrl.find("button.btn-close").trigger("click");
+                            }
                         }
                     }
                 }
