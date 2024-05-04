@@ -4,6 +4,7 @@
     {
         public ArtistPlaylistsResponse_Artist artists { get; set; }
         public ArtistPlaylistsResponse_Playlist playlists { get; set; }
+        public ArtistPlaylistsResponse_Tracks tracks { get; set; }
     }
 
     public class ArtistPlaylistsResponse_Artist
@@ -37,5 +38,17 @@
     {
         public string href { get; set; }
         public int? total { get; set; }
+    }
+
+    public class ArtistPlaylistsResponse_Tracks
+    {
+        public List<ArtistPlaylistsResponse_Tracks_Item> items { get; set; }
+    }
+
+    public class ArtistPlaylistsResponse_Tracks_Item
+    {
+        public string id { get; set; }
+        public string name { get; set; }
+        public int? popularity { get; set; }
     }
 }

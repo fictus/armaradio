@@ -211,7 +211,7 @@ namespace armaradio.Controllers
                     throw new Exception("Invalid Request");
                 }
 
-                RadioSessionRecommendedResponse songs = _musicRepo.GetRadioSessionRecommendedSongsFromArtist(value.ArtistName);
+                RadioSessionRecommendedResponse songs = _musicRepo.GetRadioSessionRecommendedSongsFromArtist(value.ArtistName, value.SongName);
                 List<ArmaAlbumSongDataItem> tracks = new List<ArmaAlbumSongDataItem>();
 
                 if (songs != null && songs.tracks != null && songs.tracks.Count > 0)

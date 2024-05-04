@@ -1,11 +1,10 @@
-function loadRadioPlayer() {
-    let artistName = $.trim($("#btnMain_StartRadioSession").attr("data-artistname"));
-
+function loadRadioPlayer(artistName, songName, fromPlaylist) {
     if (artistName != "") {
         armaradio.masterPageWait(true);
 
         armaradio.masterAJAXPost({
-            ArtistName: artistName
+            ArtistName: artistName,
+            SongName: songName
         }, "Music", "GetSongsLike")
             .then(function (response) {
                 if (response && !response.error) {
@@ -23,6 +22,10 @@ function loadRadioPlayer() {
                         $("#dvRadioPlayerHolder").css("display", "");
 
                         playNextSong();
+
+                        if (fromPlaylist) {
+                            $("#offcanvasNonePlaylistOptions").find("button.btn-close").trigger("click");
+                        }
                     }
                 }
 

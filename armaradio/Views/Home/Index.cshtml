@@ -78,7 +78,7 @@
 <div class="row mt-5">
     <div class="col-md-12">
         <h5 id="lblTblHeaderPlaylistName" class="ml-2 mr-3" data-playlistid=""></h5>
-        <button id="btnMain_StartRadioSession" type="button" class="btn btn-primary mr-3@(!userIsAuthenticated ? " auth-required-msg" : "")" data-artistname="" style="display:none;"><i class="fa-solid fa-radio"></i> Start Radio Session</button>
+        <button id="btnMain_StartRadioSession" type="button" class="btn btn-primary mr-3" data-artistname="" style="display:none;"><i class="fa-solid fa-radio"></i> Play Artist-Inspired Radio</button>
     </div>
 </div>
 <div class="row">
@@ -206,6 +206,9 @@
         <div class="offcanvas-body">
             <div>
                 <span id="lblNonePlaylistOptionsTitle"></span>
+            </div>
+            <div>
+                <button id="btnPlaylist_StartRadioSession" type="button" class="btn btn-primary"><i class="fa-solid fa-radio"></i> Play Song-Inspired Radio</button>
             </div>
             <div class="mt-4">
                 <label class="font-color-gray">

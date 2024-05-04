@@ -523,7 +523,27 @@ function mainload_attacheEvents() {
             });
         } else {
             if ("loadRadioPlayer" in window) {
-                loadRadioPlayer();
+                let artistName = $.trim($("#btnMain_StartRadioSession").attr("data-artistname"));
+
+                loadRadioPlayer(artistName, "");
+            }
+        }
+    });
+
+    $("#btnPlaylist_StartRadioSession").on("click", function () {
+        if ($("#lnkMainLogin").length) {
+            armaradio.warningMsg({
+                msg: "Radio Player requires you to login or create a free account",
+                captionMsg: "Login Required",
+                typeLayout: "red"
+            });
+        } else {
+            if ("loadRadioPlayer" in window) {
+                let dataHolder = $("#btnNonePlaylistOptions_AddToPlaylist");
+                let artistName = $.trim(dataHolder.attr("data-artist"));
+                let songName = $.trim(dataHolder.attr("data-song"));
+
+                loadRadioPlayer(artistName, songName, true);
             }
         }
     });

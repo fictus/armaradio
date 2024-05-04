@@ -13,8 +13,8 @@ namespace armaradio.Repositories
         List<ArmaAlbumSongDataItem> Albums_GetAlbumSongs(int artistId, int albumId);
         string GetApiToken();
         RadioSessionSongsResponse GetRadioPlalistSongsFromArtist(string artistName);
-        RadioSessionRecommendedResponse GetRadioSessionRecommendedSongsFromArtist(string artistName);
-        ArtistPlaylistsResponse GetArtistPlaylists(string artistName);
+        RadioSessionRecommendedResponse GetRadioSessionRecommendedSongsFromArtist(string artistName, string songName);
+        ArtistPlaylistsResponse GetArtistPlaylists(string artistName, string songName);
         List<ArtistDataItem> Artist_GetArtistList(string search);
         List<TrackDataItem> Tracks_GetTop50Songs();
         List<TrackDataItem> GetCurrentTop40DanceSingles();

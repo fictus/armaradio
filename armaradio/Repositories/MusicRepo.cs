@@ -121,10 +121,21 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
-        public ArtistPlaylistsResponse GetArtistPlaylists(string artistName)
+        public ArtistPlaylistsResponse GetArtistPlaylists(string artistName, string songName)
         {
             ArtistPlaylistsResponse returnItem = null;
-            string url = $"https://api.spotify.com/v1/search?q=artist%3A{Uri.EscapeUriString(artistName.Trim())}&type=playlist%2Cartist";
+            string url = "";
+
+            if (!string.IsNullOrWhiteSpace(songName))
+            {
+                url = $"https://api.spotify.com/v1/search?q={Uri.EscapeUriString($"artist:{artistName} track:{songName}")}&type={Uri.EscapeUriString("track,playlist")}&limit=5";
+                //url = $"https://api.spotify.com/v1/search?q=remaster%20track%3A{Uri.EscapeUriString(songName.Trim())}&artist%3A{Uri.EscapeUriString(artistName.Trim())}&type=playlist%2Cartist&limit=5";
+            }
+            else
+            {
+                url = $"https://api.spotify.com/v1/search?q=artist%3A{Uri.EscapeUriString(artistName.Trim())}&type=playlist%2Cartist";
+            }
+
             string accessToken = GetApiToken();
 
             using (HttpClient client = new HttpClient())
@@ -147,7 +158,7 @@ namespace armaradio.Repositories
         public RadioSessionSongsResponse GetRadioPlalistSongsFromArtist(string artistName)
         {
             RadioSessionSongsResponse returnItem = null;
-            ArtistPlaylistsResponse playlists = GetArtistPlaylists(artistName);
+            ArtistPlaylistsResponse playlists = GetArtistPlaylists(artistName, "");
             bool radioInstanceFound = false;
 
             if (playlists != null && playlists.playlists != null && playlists.playlists.items != null && playlists.playlists.items.Count > 0)
@@ -208,14 +219,40 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
-        public RadioSessionRecommendedResponse GetRadioSessionRecommendedSongsFromArtist(string artistName)
+        public RadioSessionRecommendedResponse GetRadioSessionRecommendedSongsFromArtist(string artistName, string songName)
         {
             RadioSessionRecommendedResponse returnItem = null;
-            ArtistPlaylistsResponse playlists = GetArtistPlaylists(artistName);
+            ArtistPlaylistsResponse playlists = GetArtistPlaylists(artistName, songName);
+            string artistId = "";
+            string songId = "";
 
             if (playlists != null && playlists.artists != null && playlists.artists.items != null && playlists.artists.items.Count > 0)
             {
-                string url = $"https://api.spotify.com/v1/recommendations?seed_artists={playlists.artists.items[0].id}";
+                artistId = playlists.artists.items[0].id;
+            }
+
+            if (playlists.tracks != null && playlists.tracks.items != null && playlists.tracks.items.Count > 0)
+            {
+                songId = playlists.tracks.items[0].id;
+            }
+
+            string url = "";
+
+            if (!string.IsNullOrWhiteSpace(artistId) && !string.IsNullOrWhiteSpace(songId))
+            {
+                url = $"https://api.spotify.com/v1/recommendations?seed_artists={artistId}&seed_tracks={songId}";
+            }
+            else if (!string.IsNullOrWhiteSpace(artistId))
+            {
+                url = $"https://api.spotify.com/v1/recommendations?seed_artists={artistId}";
+            }
+            else if (!string.IsNullOrWhiteSpace(songId))
+            {
+                url = $"https://api.spotify.com/v1/recommendations?seed_tracks={songId}";
+            }
+
+            if (!string.IsNullOrWhiteSpace(url))
+            {
                 string accessToken = GetApiToken();
 
                 using (HttpClient client = new HttpClient())
