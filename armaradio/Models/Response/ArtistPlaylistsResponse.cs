@@ -50,5 +50,12 @@
         public string id { get; set; }
         public string name { get; set; }
         public int? popularity { get; set; }
+        public List<ArtistPlaylistsResponse_Tracks_Item_Artist> artists { get; set; }
+    }
+
+    public class ArtistPlaylistsResponse_Tracks_Item_Artist
+    {
+        public string id { get; set; }
+        public string name { get; set; }
     }
 }

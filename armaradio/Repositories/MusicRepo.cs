@@ -234,6 +234,14 @@ namespace armaradio.Repositories
             if (playlists.tracks != null && playlists.tracks.items != null && playlists.tracks.items.Count > 0)
             {
                 songId = playlists.tracks.items[0].id;
+
+                if (string.IsNullOrWhiteSpace(artistId))
+                {
+                    if (playlists.tracks.items[0].artists != null && playlists.tracks.items[0].artists.Count > 0)
+                    {
+                        artistId = playlists.tracks.items[0].artists[0].id;
+                    }
+                }
             }
 
             string url = "";
