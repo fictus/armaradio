@@ -1,6 +1,17 @@
-function loadRadioPlayer(artistName, songName, fromPlaylist) {
+function loadRadioPlayer(artistName, songName, fromPlaylist, reloadFromCache) {
     if (artistName != "") {
         armaradio.masterPageWait(true);
+
+        if (!reloadFromCache) {
+            $("#lnkRadioOptions").attr({
+                "data-artist": artistName,
+                "data-song": songName
+            });
+        } else {
+            let cachedValues = $("#lnkRadioOptions");
+            artistName = artistName || cachedValues.attr("data-artist");
+            songName = songName || cachedValues.attr("data-song");
+        }
 
         armaradio.masterAJAXPost({
             ArtistName: artistName,
@@ -103,7 +114,7 @@ function playNextSong() {
                 armaradio.masterPageWait(false);
             });
     } else {
-        loadRadioPlayer();
+        loadRadioPlayer(null, null, false, true);
     }
 }
 

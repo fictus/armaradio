@@ -314,3 +314,13 @@ div.list-container {
 a.playercontrol-button {
     cursor: pointer;
 }
+
+#lnkRadioPlayer_HateSong i::after {
+    content: "Skip";
+    position: absolute;
+    font-size: 6pt;
+    top: 0;
+    left: 0;
+    margin-top: 24px;
+    margin-left: 16px;
+}
