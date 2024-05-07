@@ -7,6 +7,7 @@ $(document).ready(function () {
 function mainload_attacheEvents() {
     $("#dvPopupPastePlaylist").modal();
     $("#dvPopupLoadPlaylists").modal();
+    $("#dvPopupRefineRadioParameters").modal();
 
     armaradio.masterAJAXGet({}, "Music", "GetCurrentTop100")
         .then(function (response) {
@@ -594,6 +595,12 @@ function mainload_attacheEvents() {
 
         if ("radioPlayerHateCurrentSong" in window) {
             radioPlayerHateCurrentSong();
+        }
+    });
+
+    $("#btnRefineParametersStartRadio").on("click", function () {
+        if ("radioPlayerRefineParametersStartRadio" in window) {
+            radioPlayerRefineParametersStartRadio();
         }
     });
 }

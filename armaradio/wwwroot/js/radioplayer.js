@@ -48,11 +48,39 @@ function loadRadioPlayer(artistName, songName, fromPlaylist, reloadFromCache) {
                                 canvasCtrl.find("button.btn-close").trigger("click");
                             }
                         }
+                    } else {
+                        showNoRadioFound(artistName, songName);
                     }
+                } else {
+                    showNoRadioFound(artistName, songName);
                 }
 
                 armaradio.masterPageWait(false);
             });
+    }
+}
+
+function showNoRadioFound(artistName, songName) {
+    $("#txtRefineParameters_ArtistName").val($.trim(artistName));
+    $("#txtRefineParameters_SongName").val($.trim(songName));
+
+    $("#dvPopupRefineRadioParameters").modal("show");
+}
+
+function radioPlayerRefineParametersStartRadio() {
+    let artistName = $.trim($("#txtRefineParameters_ArtistName").val());
+    let songName = $.trim($("#txtRefineParameters_SongName").val());
+
+    if (artistName == "" && songName == "") {
+        armaradio.warningMsg({
+            msg: "You must specify at least one parameter",
+            captionMsg: "Error",
+            typeLayout: "red"
+        });
+    } else {
+        loadRadioPlayer(artistName, songName, true);
+
+        $("#dvPopupRefineRadioParameters").modal("hide");
     }
 }
 
