@@ -8,23 +8,35 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PuppeteerSharp;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Pipes;
+using System.Net.Mime;
+using System.Runtime.InteropServices;
+using YoutubeExplode;
+using YoutubeExplode.Converter;
 
 namespace armaradio.Controllers
 {
     public class MusicController : Controller
     {
+        private readonly bool IsLinux = false;
         private readonly IMusicRepo _musicRepo;
         private readonly IArmaAuth _authControl;
+        private readonly IWebHostEnvironment _hostEnvironment;
         //private IPage _page;
         public MusicController(
             IMusicRepo musicRepo,
-            IArmaAuth authControl
+            IArmaAuth authControl,
+            IWebHostEnvironment hostEnvironment
             //IPage page
         )
         {
             _musicRepo = musicRepo;
             _authControl = authControl;
+            _hostEnvironment = hostEnvironment;
             //_page = page;
+
+            IsLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         }
 
         [HttpGet]
@@ -265,6 +277,46 @@ namespace armaradio.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        //[Authorize]
+        public async Task<IActionResult> GetTestAudio()
+        {
+            try
+            {
+                string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
+                string downloadFolder = (IsLinux ? $"{rootPath}/tempMp3/" : $"{rootPath}\\tempMp3\\");
+                string fileHandle = $"{Guid.NewGuid().ToString().ToLower()}.mp3";
+                string endFile = $"{downloadFolder}{fileHandle}";
+
+                if (!System.IO.Directory.Exists(downloadFolder))
+                {
+                    System.IO.Directory.CreateDirectory(downloadFolder);
+                }
+
+                var youtube = new YoutubeExplode.YoutubeClient();
+                await youtube.Videos.DownloadAsync("https://www.youtube.com/watch?v=Ck0LO6b6OQc", endFile);
+                MemoryStream memoryStream = new MemoryStream();
+
+                using (FileStream fileStream = new FileStream(endFile, FileMode.Open, FileAccess.Read))
+                {
+                    fileStream.CopyTo(memoryStream);
+                }
+
+                System.IO.File.Delete(endFile);
+
+                memoryStream.Position = 0;
+
+                return new FileStreamResult(memoryStream, "audio/mpeg")
+                {
+                    FileDownloadName = fileHandle,
+                };
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
             }
         }
 

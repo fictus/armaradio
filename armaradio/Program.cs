@@ -8,7 +8,7 @@ using Swashbuckle.AspNetCore.Filters;
 using PuppeteerSharp;
 
 var builder = WebApplication.CreateBuilder(args);
-
+IWebHostEnvironment hostEnvironment = builder.Environment;
 //string url = $"https://spotalike.com/en";
 
 //var browserFetcher = new BrowserFetcher();
@@ -43,6 +43,7 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddSingleton(hostEnvironment);
 builder.Services.AddTransient<IDapperHelper, DapperHelper>();
 builder.Services.AddTransient<IMusicRepo, MusicRepo>();
 builder.Services.AddTransient<IArmaWebRequest, ArmaWebRequest>();
