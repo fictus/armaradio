@@ -1,4 +1,5 @@
-﻿using armaradio.Models;
+﻿using armaradio.Attributes;
+using armaradio.Models;
 using armaradio.Models.ArmaAuth;
 using armaradio.Models.Request;
 using armaradio.Models.Response;
@@ -17,6 +18,7 @@ using YoutubeExplode.Converter;
 
 namespace armaradio.Controllers
 {
+    //[CrossDomainAttribute]
     public class MusicController : Controller
     {
         private readonly bool IsLinux = false;

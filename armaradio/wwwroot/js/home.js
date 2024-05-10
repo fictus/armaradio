@@ -774,6 +774,9 @@ function getAlbumsForArtists(artistId, artistName) {
                         let albumDetails = btn.attr("data-albumdetails");
                         let albumToLoad = $.trim(artistName + " - " + albumName + " " + albumDetails);
 
+                        $("#offcanvasArtistAlbums tr.loaded").removeClass("loaded");
+                        btn.closest("tr").addClass("loaded");
+
                         loadAlbumSongs(artistId, albumId, artistName, albumName);
 
                         $("#offcanvasArtistAlbums")

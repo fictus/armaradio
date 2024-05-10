@@ -1,3 +1,4 @@
+using armaradio.Attributes;
 using armaradio.Models;
 using armaradio.Models.ArmaAuth;
 using armaradio.Models.Home;
@@ -8,6 +9,7 @@ using System.Diagnostics;
 
 namespace armaradio.Controllers
 {
+    //[CrossDomainAttribute]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;

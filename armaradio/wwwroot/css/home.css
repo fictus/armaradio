@@ -179,11 +179,15 @@ div.list-container {
 }
 
 #tblArtistAlbums td {
-    padding-left: 8px;
-    padding-right: 8px;
-    vertical-align: top;
+    padding: 8px;
+    vertical-align: middle;
     border-top: 1px solid #EAEAEA;
     border-bottom: 1px solid #EAEAEA;
+}
+
+#tblArtistAlbums i {
+    font-size: 20pt;
+    color: #e77c7c;
 }
 
 #tblArtistAlbums td:first-child {
@@ -195,6 +199,10 @@ div.list-container {
 
 #tblArtistAlbums td:last-child {
     border-right: 1px solid #EAEAEA;
+}
+
+#tblArtistAlbums tr.loaded td {
+    background-color: #D1EBFF;
 }
 
 #tblArtistAlbums tr td:last-child {
@@ -227,11 +235,15 @@ div.list-container {
 }
 
 #tblArtistSingles td {
-    padding-left: 8px;
-    padding-right: 8px;
-    vertical-align: top;
+    padding: 8px;
+    vertical-align: middle;
     border-top: 1px solid #EAEAEA;
     border-bottom: 1px solid #EAEAEA;
+}
+
+#tblArtistSingles i {
+    font-size: 20pt;
+    color: #e77c7c;
 }
 
 #tblArtistSingles td:first-child {
@@ -243,6 +255,10 @@ div.list-container {
 
 #tblArtistSingles td:last-child {
     border-right: 1px solid #EAEAEA;
+}
+
+#tblArtistSingles tr.loaded td {
+    background-color: #D1EBFF;
 }
 
 #tblArtistSingles tr td:last-child {
