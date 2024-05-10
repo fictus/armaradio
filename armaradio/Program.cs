@@ -92,7 +92,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-//app.UseCors("ApiPolicy");
+app.UseCors("ApiPolicy");
 
 app.UseAuthorization();
 

@@ -6,6 +6,7 @@ using armaradio.Models.Response;
 using armaradio.Models.Youtube;
 using armaradio.Repositories;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.IO;
@@ -18,6 +19,7 @@ using YoutubeExplode.Converter;
 namespace armaradio.Controllers
 {
     //[CrossDomainAttribute]
+    [DisableCors]
     public class MusicController : Controller
     {
         private readonly bool IsLinux = false;

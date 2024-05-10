@@ -1,11 +1,13 @@
 using armaradio.Models.ArmaAuth;
 using armaradio.Models.Home;
 using armaradio.Repositories;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace armaradio.Controllers
 {
     //[CrossDomainAttribute]
+    [DisableCors]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
