@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace armaradio.Controllers
 {
-    //[EnableCors("ApiPolicy")]
+    [EnableCors("ApiPolicy")]
     public class ApiController : Controller
     {
         private readonly IArmaAuth _authControl;
