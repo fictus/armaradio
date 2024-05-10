@@ -426,7 +426,7 @@ var armaradio = {
     /************************************************
         masterAJAXPost
     ************************************************/
-    masterAJAXPost: function (data, controller, handler) {
+    masterAJAXPost: function (data, controller, handler, token) {
         let d = $.Deferred();
 
         try {
@@ -439,7 +439,7 @@ var armaradio = {
                 cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
                 credentials: "same-origin", // include, *same-origin, omit
                 headers: {
-                    "Content-Type": "application/json",
+                    "Content-Type": "application/json; charset=utf-8",
                     "Accept-Encoding": "gzip, deflate"
                     // 'Content-Type': 'application/x-www-form-urlencoded',
                 },
@@ -447,6 +447,10 @@ var armaradio = {
                 referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
                 body: JSON.stringify(data || {}), // body data type must match "Content-Type" header
             };
+
+            if (token) {
+                fetchBody.headers.Authorization = encodeURIComponent(token);
+            }
 
             fetch(endPointUrl, fetchBody)
                 .then(function (response) {
@@ -487,7 +491,7 @@ var armaradio = {
     /************************************************
         masterAJAXPostByEndPoint
     ************************************************/
-    masterAJAXPostByEndPoint: function (data, endPoint) {
+    masterAJAXPostByEndPoint: function (data, endPoint, token) {
         let d = $.Deferred();
 
         try {
@@ -500,7 +504,7 @@ var armaradio = {
                 cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
                 credentials: "same-origin", // include, *same-origin, omit
                 headers: {
-                    "Content-Type": "application/json",
+                    "Content-Type": "application/json; charset=utf-8",
                     "Accept-Encoding": "gzip, deflate"
                     // 'Content-Type': 'application/x-www-form-urlencoded',
                 },
@@ -508,6 +512,10 @@ var armaradio = {
                 referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
                 body: JSON.stringify(data || {}), // body data type must match "Content-Type" header
             };
+
+            if (token) {
+                fetchBody.headers.Authorization = encodeURIComponent(token);
+            }
 
             fetch(endPointUrl, fetchBody)
                 .then(function (response) {
@@ -548,7 +556,7 @@ var armaradio = {
     /************************************************
         masterAJAXGet
     ************************************************/
-    masterAJAXGet: function (data, controller, handler) {
+    masterAJAXGet: function (data, controller, handler, token) {
         let d = $.Deferred();
 
         try {
@@ -571,13 +579,17 @@ var armaradio = {
                 cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
                 credentials: "same-origin", // include, *same-origin, omit
                 headers: {
-                    "Content-Type": "application/json",
+                    "Content-Type": "application/json; charset=utf-8",
                     "Accept-Encoding": "gzip, deflate"
                     // 'Content-Type': 'application/x-www-form-urlencoded',
                 },
                 redirect: "follow", // manual, *follow, error
                 referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
             };
+
+            if (token) {
+                fetchBody.headers.Authorization = encodeURIComponent(token);
+            }
 
             fetch(endPointUrl, fetchBody)
                 .then(function (response) {
@@ -618,7 +630,7 @@ var armaradio = {
     /************************************************
         masterAJAXGetByUrl
     ************************************************/
-    masterAJAXGetByUrl: function (url) {
+    masterAJAXGetByUrl: function (url, token) {
         let d = $.Deferred();
 
         try {
@@ -633,13 +645,17 @@ var armaradio = {
                 cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
                 credentials: "same-origin", // include, *same-origin, omit
                 headers: {
-                    "Content-Type": "application/json",
+                    "Content-Type": "application/json; charset=utf-8",
                     "Accept-Encoding": "gzip, deflate"
                     // 'Content-Type': 'application/x-www-form-urlencoded',
                 },
                 redirect: "follow", // manual, *follow, error
                 referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
             };
+
+            if (token) {
+                fetchBody.headers.Authorization = encodeURIComponent(token);
+            }
 
             fetch(endPointUrl, fetchBody)
                 .then(function (response) {

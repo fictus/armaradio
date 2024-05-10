@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Filters;
-using PuppeteerSharp;
 
 var builder = WebApplication.CreateBuilder(args);
 IWebHostEnvironment hostEnvironment = builder.Environment;
@@ -26,6 +25,17 @@ IWebHostEnvironment hostEnvironment = builder.Environment;
 
 //builder.Services.AddSingleton<IPage>(_page);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ApiPolicy",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
+});
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
@@ -44,6 +54,8 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddSingleton(hostEnvironment);
+builder.Services.AddScoped<SignInManager<IdentityUser>, SignInManager<IdentityUser>>();
+builder.Services.AddScoped<UserManager<IdentityUser>, UserManager<IdentityUser>>();
 builder.Services.AddTransient<IDapperHelper, DapperHelper>();
 builder.Services.AddTransient<IMusicRepo, MusicRepo>();
 builder.Services.AddTransient<IArmaWebRequest, ArmaWebRequest>();
@@ -80,6 +92,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseCors();
 
 app.UseAuthorization();
 

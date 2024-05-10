@@ -5,6 +5,7 @@ namespace armaradio.Repositories
     public interface IArmaAuth
     {
         bool UserIsLoggedIn();
+        string GenerateJwtToken(string email);
         ArmaUser GetCurrentUser();
         AuthLoginResponse Login(string username, string password);
         AuthRegisterResponse Register(string email, string password);

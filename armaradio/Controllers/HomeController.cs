@@ -1,11 +1,7 @@
-using armaradio.Attributes;
-using armaradio.Models;
 using armaradio.Models.ArmaAuth;
 using armaradio.Models.Home;
 using armaradio.Repositories;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
 namespace armaradio.Controllers
 {

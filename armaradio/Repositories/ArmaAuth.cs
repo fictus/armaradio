@@ -1,8 +1,12 @@
 ﻿using armaradio.Models.ArmaAuth;
 using armaradio.Tools;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace armaradio.Repositories
@@ -11,20 +15,58 @@ namespace armaradio.Repositories
     {
         private readonly IHttpContextAccessor _context;
         private readonly IArmaWebRequest _webRequest;
+        private readonly UserManager<IdentityUser> _userManager;
         public ArmaAuth(
             IHttpContextAccessor context,
-            IArmaWebRequest webRequest
+            IArmaWebRequest webRequest,
+            UserManager<IdentityUser> userManager
         )
         {
             _context = context;
             _webRequest = webRequest;
+            _userManager = userManager;
         }
 
         public bool UserIsLoggedIn()
         {
             return _context.HttpContext.User?.Identity?.IsAuthenticated ?? false;
         }
-                
+
+        public string GenerateJwtToken(string email)
+        {
+            var user = _userManager.FindByEmailAsync(email).Result;
+            if (user == null)
+            {
+                return null;
+            }
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email)
+            };
+
+            string jwtKey = "d7f6a09dyf09asd6f09asd8f767daf85a75a87dfad65ad5a6587d587ds5fad5afa5sf5as8d7f5a8d75as875ad5daf57a8sdrvdvdsv";
+            string jwtIssuer = "armarad.com";
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                jwtIssuer,
+                jwtIssuer,
+                claims,
+                expires: DateTime.UtcNow.AddDays(1), // Token expiration time
+                signingCredentials: creds
+            );
+
+            var jwToken = new JwtSecurityTokenHandler().WriteToken(token);
+            var jwtBytes = Encoding.UTF8.GetBytes(jwToken);
+            var base64EncodedToken = Convert.ToBase64String(jwtBytes);
+
+            return base64EncodedToken;
+        }
+
         public ArmaUser GetCurrentUser()
         {
             ArmaUser returnItem = null;

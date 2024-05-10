@@ -7,7 +7,6 @@ using armaradio.Models.Youtube;
 using armaradio.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PuppeteerSharp;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
