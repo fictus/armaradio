@@ -14,6 +14,7 @@ using System.IO.Pipes;
 using System.Net.Mime;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using YoutubeExplode;
 using YoutubeExplode.Converter;
 
@@ -308,7 +309,7 @@ namespace armaradio.Controllers
                     fileNameParts.Add(SongName.Trim());
                 }
 
-                string fileName = $"{Latinize(string.Join(" - ", fileNameParts.ToArray()))}.mp3";
+                string fileName = $"{SanitizeFileName(Latinize(string.Join(" - ", fileNameParts.ToArray())))}.mp3";
 
                 if (!System.IO.Directory.Exists(downloadFolder))
                 {
@@ -699,6 +700,15 @@ namespace armaradio.Controllers
             var strBytes = latinizeEncoding.GetBytes(Input);
 
             return latinizeEncoding.GetString(strBytes);
+        }
+
+        public static string SanitizeFileName(string fileName)
+        {
+            // Define a regular expression pattern to match harmful characters
+            string pattern = @"[/\\?%*:|""<>]";
+
+            // Replace harmful characters with an empty string
+            return Regex.Replace(fileName, pattern, "");
         }
     }
 }
