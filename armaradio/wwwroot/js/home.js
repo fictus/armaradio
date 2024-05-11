@@ -2,6 +2,10 @@ var arma_mainSearchSelectedType = "1";
 
 $(document).ready(function () {
     mainload_attacheEvents();
+
+    if ("radioplayer_attachEvents" in window) {
+        radioplayer_attachEvents();
+    }
 });
 
 function mainload_attacheEvents() {
@@ -339,9 +343,27 @@ function mainload_attacheEvents() {
             $("#btnNonePlaylistOptions_AddToPlaylist").attr("disabled", "disabled");
         }
     });
+    $("#offcanvasSongOptions").on("show.bs.offcanvas", function () {
+        if ($(document).data("allowDownload")) {
+            $(".btn-options-download").css("display", "");
+        }
+    });
+
+    $("#offcanvasSongOptions").on("hidden.bs.offcanvas", function () {
+        $(".btn-options-download").attr({
+            "data-artist": "",
+            "data-song": "",
+            "data-videoid": ""
+        });
+        $(".btn-options-download").css("display", "none");
+    });
 
     $("#offcanvasNonePlaylistOptions").on("show.bs.offcanvas", function () {
         armaradio.masterPageWait(true);
+
+        if ($(document).data("allowDownload")) {
+            $(".btn-options-download").css("display", "");
+        }
 
         $("#chkAddToPlaylist_CreateNewPlaylist").prop("checked", false);
         $("#chkAddToPlaylist_CreateNewPlaylist").trigger("change");
@@ -383,6 +405,13 @@ function mainload_attacheEvents() {
             "data-song": "",
             "data-videoid": ""
         });
+
+        $(".btn-options-download").attr({
+            "data-artist": "",
+            "data-song": "",
+            "data-videoid": ""
+        });
+        $(".btn-options-download").css("display", "none");
     });
 
     $("#btnNonePlaylistOptions_AddToPlaylist").on("click", function () {
@@ -1038,6 +1067,7 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
             $(this).on("click", function (e) {
                 let currentRow = $(this).closest("tr");
                 let songId = $.trim(currentRow.attr("data-tid"));
+                let videoId = $.trim(currentRow.attr("data-videoid"));
                 let artistName = $.trim(currentRow.attr("data-artist"));
                 let songName = $.trim(currentRow.attr("data-song"));
                 let separator = (artistName != "" && songName != "" ? " - " : "");
@@ -1047,6 +1077,12 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                     $("#btnSongOptions_RemoveFromPlaylist").attr("data-artist", artistName);
                     $("#btnSongOptions_RemoveFromPlaylist").attr("data-song", songName);
                     $("#lblSongOptionsTitle").html(artistName + separator + songName);
+
+                    $(".btn-options-download").attr({
+                        "data-artist": artistName,
+                        "data-song": songName,
+                        "data-videoid": videoId
+                    });
 
                     let bsOffcanvas = new bootstrap.Offcanvas($("#offcanvasSongOptions")[0]);
                     bsOffcanvas.show();
@@ -1070,6 +1106,12 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                     "data-videoid": videoId
                 });
                 $("#lblNonePlaylistOptionsTitle").html(artistName + separator + songName);
+
+                $(".btn-options-download").attr({
+                    "data-artist": artistName,
+                    "data-song": songName,
+                    "data-videoid": videoId
+                });
 
                 let bsOffcanvas = new bootstrap.Offcanvas($("#offcanvasNonePlaylistOptions")[0]);
                 bsOffcanvas.show();

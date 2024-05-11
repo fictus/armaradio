@@ -218,7 +218,7 @@ function ajaxHandleRedirect(response, fetchData) {
                 }
             })
                 .done(function (newResponse) {
-                    if (micronet.isValidJsonObject(newResponse)) {
+                    if (armaradio.isValidJsonObject(newResponse)) {
                         fetch(fetchData.url, fetchData.fetchBody)
                             .then(function (refetchResponse) {
                                 return refetchResponse.json();
@@ -636,7 +636,7 @@ var armaradio = {
         try {
             let endPointUrlPre = url.split("?")[0];
             let callUrlParameters = url.split("?")[1];
-            let data = micronet.queryStringToJSON(callUrlParameters);
+            let data = armaradio.queryStringToJSON(callUrlParameters);
 
             let endPointUrl = url;
             let fetchBody = {
@@ -909,7 +909,7 @@ var armaradio = {
             method: "post",
             target: openInNewTab ? "_blank" : "_self"
         });
-        let formData = micronet.serializeObjectToFormBody(jsonData);
+        let formData = armaradio.serializeObjectToFormBody(jsonData);
 
         $.each(formData, function (indx, element) {
             postform.append(element);
@@ -923,8 +923,16 @@ var armaradio = {
     /************************************************
         getFileAsBlob
     ************************************************/
-    getFileAsBlob: function (endPoint, application_type) {
-        return fetch(endPoint)
+    getFileAsBlob: function (endPoint, data, application_type) {
+        let params = [];
+
+        $.each((data || {}), function (key, val) {
+            params.push(key + "=" + encodeURIComponent(val));
+        });
+
+        let finUrl = endPoint + (params.length ? "?" : "") + params.join("&");
+
+        return fetch(finUrl)
             .then(function (response) {
                 return response.arrayBuffer();
             }).then(function (buffer) {
@@ -937,6 +945,14 @@ var armaradio = {
     },
     /************************************************
         getFileAsBlob
+    ************************************************/
+    sanitizeFileName: function (fileName) {
+        const sanitizeRegex = /[/\\?%*:|"<>]/g;
+
+        return fileName.replace(sanitizeRegex, "");
+    },
+    /************************************************
+        sanitizeFileName
     ************************************************/
     queryStringToJSON: function (queryString) {
         if (queryString && ($.trim(queryString) != "")) {

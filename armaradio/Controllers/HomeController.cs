@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace armaradio.Controllers
 {
-    //[CrossDomainAttribute]
     [DisableCors]
     public class HomeController : Controller
     {

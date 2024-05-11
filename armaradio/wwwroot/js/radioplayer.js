@@ -1,3 +1,53 @@
+function radioplayer_attachEvents() {
+    $(document).on("keydown", function (e) {
+        if (e.ctrlKey) {
+            $(document).data("allowDownload", true);
+        }
+    });
+
+    $(document).on("keyup", function () {
+        $(document).data("allowDownload", false);
+    });
+
+    $(".btn-options-download").on("click", function () {
+        let btn = $(this);
+        let videoId = $.trim(btn.attr("data-videoid"));
+        let artistName = $.trim(btn.attr("data-artist"));
+        let songName = $.trim(btn.attr("data-song"));
+        let songParts = [];
+
+        if (artistName != "") {
+            songParts.push(artistName);
+        }
+        if (songName != "") {
+            songParts.push(songName);
+        }
+
+        let fileName = armaradio.sanitizeFileName(songParts.join(" - ")) + ".mp3";
+
+        if (videoId != "") {
+            armaradio.masterPageWait(true);
+
+            armaradio.getFileAsBlob(ajaxPointCall + "/Music/GetAudioFile", {
+                ArtistName: artistName,
+                SongName: songName,
+                VideoId: videoId
+            })
+                .then(function (blobResponse) {
+                    const url = window.URL.createObjectURL(blobResponse);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+
+                    armaradio.masterPageWait(false);
+                });
+        }
+    });
+}
+
 function loadRadioPlayer(artistName, songName, fromPlaylist, reloadFromCache) {
     if (artistName != "") {
         armaradio.masterPageWait(true);

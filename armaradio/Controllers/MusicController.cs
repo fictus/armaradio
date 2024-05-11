@@ -13,12 +13,12 @@ using System.IO;
 using System.IO.Pipes;
 using System.Net.Mime;
 using System.Runtime.InteropServices;
+using System.Text;
 using YoutubeExplode;
 using YoutubeExplode.Converter;
 
 namespace armaradio.Controllers
 {
-    //[CrossDomainAttribute]
     [DisableCors]
     public class MusicController : Controller
     {
@@ -284,15 +284,31 @@ namespace armaradio.Controllers
         }
 
         [HttpGet]
-        //[Authorize]
-        public async Task<IActionResult> GetTestAudio()
+        [Authorize]
+        public async Task<IActionResult> GetAudioFile(
+            string ArtistName,
+            string SongName,
+            string VideoId
+        )
         {
             try
             {
+                List<string> fileNameParts = new List<string>();
                 string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
                 string downloadFolder = (IsLinux ? $"{rootPath}/tempMp3/" : $"{rootPath}\\tempMp3\\");
                 string fileHandle = $"{Guid.NewGuid().ToString().ToLower()}.mp3";
                 string endFile = $"{downloadFolder}{fileHandle}";
+
+                if (!string.IsNullOrWhiteSpace(ArtistName))
+                {
+                    fileNameParts.Add(ArtistName.Trim());
+                }
+                if (!string.IsNullOrWhiteSpace(SongName))
+                {
+                    fileNameParts.Add(SongName.Trim());
+                }
+
+                string fileName = $"{Latinize(string.Join(" - ", fileNameParts.ToArray()))}.mp3";
 
                 if (!System.IO.Directory.Exists(downloadFolder))
                 {
@@ -300,7 +316,7 @@ namespace armaradio.Controllers
                 }
 
                 var youtube = new YoutubeExplode.YoutubeClient();
-                await youtube.Videos.DownloadAsync("https://www.youtube.com/watch?v=Ck0LO6b6OQc", endFile);
+                await youtube.Videos.DownloadAsync($"https://www.youtube.com/watch?v={VideoId}", endFile);
                 MemoryStream memoryStream = new MemoryStream();
 
                 using (FileStream fileStream = new FileStream(endFile, FileMode.Open, FileAccess.Read))
@@ -314,7 +330,7 @@ namespace armaradio.Controllers
 
                 return new FileStreamResult(memoryStream, "audio/mpeg")
                 {
-                    FileDownloadName = fileHandle,
+                    FileDownloadName = fileName,
                 };
             }
             catch (Exception ex)
@@ -675,6 +691,14 @@ namespace armaradio.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
             }
+        }
+
+        private string Latinize(string Input)
+        {
+            Encoding latinizeEncoding = Encoding.GetEncoding("ISO-8859-8");
+            var strBytes = latinizeEncoding.GetBytes(Input);
+
+            return latinizeEncoding.GetString(strBytes);
         }
     }
 }
