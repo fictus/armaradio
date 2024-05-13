@@ -32,8 +32,13 @@ namespace arma_miner.Operations
             IsLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         }
 
-        public bool ProcessArtistFile(string Url, string tempFilesDir, string queueKey, bool fistTimeProcess)
+        public async Task<bool> ProcessArtistFile(string Url, string tempFilesDir, string queueKey, bool fistTimeProcess)
         {
+            _dapper.ExecuteNonQuery("radioconn", "Operations_Sync_ArtistTaskMarkAsStarted", new
+            {
+                version_number = queueKey
+            });
+
             bool completedWithErrors = false;
             string artistFile = $"{tempFilesDir}artist.tar.xz";
 
@@ -75,6 +80,11 @@ namespace arma_miner.Operations
             {
                 completedWithErrors = AppendedProcess(artistFileFull, queueKey);
             }
+
+            _dapper.ExecuteNonQuery("radioconn", "Operations_Sync_ArtistTaskMarkAsCompleted", new
+            {
+                version_number = queueKey
+            });
 
             return completedWithErrors;
         }

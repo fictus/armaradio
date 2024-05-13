@@ -628,8 +628,13 @@ namespace arma_miner.Operations
             tbl_z_songsMapper.Columns.Add("MBAlbumId", typeof(string));
         }
 
-        public bool ProcessAlbumsFile(string Url, string tempFilesDir, string queueKey, bool fistTimeProcess)
+        public async Task<bool> ProcessAlbumsFile(string Url, string tempFilesDir, string queueKey, bool fistTimeProcess)
         {
+            _dapper.ExecuteNonQuery("radioconn", "Operations_Sync_AlbumTaskMarkAsStarted", new
+            {
+                version_number = queueKey
+            });
+
             bool completedWithErrors = false;
             string artistFile = $"{tempFilesDir}release.tar.xz";
 
@@ -671,6 +676,11 @@ namespace arma_miner.Operations
             {
                 completedWithErrors = AppendedProcess(albumFileFull, queueKey);
             }
+
+            _dapper.ExecuteNonQuery("radioconn", "Operations_Sync_AlbumTaskMarkAsCompleted", new
+            {
+                version_number = queueKey
+            });
 
             return completedWithErrors;
         }

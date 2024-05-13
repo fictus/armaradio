@@ -8,6 +8,6 @@ namespace arma_miner.Service
 {
     public interface IArmaMinerService
     {
-        void RunUpdateRoutine();
+        Task RunUpdateRoutine();
     }
 }

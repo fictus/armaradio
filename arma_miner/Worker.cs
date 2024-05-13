@@ -32,7 +32,7 @@ namespace arma_miner
 
                 if (currentTime >= minTime && currentTime <= maxTime)
                 {
-                    _armaMinerService.RunUpdateRoutine();
+                    await _armaMinerService.RunUpdateRoutine();
                 }
 
                 await Task.Delay(60000, stoppingToken);

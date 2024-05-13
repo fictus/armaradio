@@ -46,7 +46,7 @@ namespace arma_miner.Service
             IsLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         }
 
-        public void RunUpdateRoutine()
+        public async Task RunUpdateRoutine()
         {
             VersionDataItem siteVersion = GetLatestVersion();
 
@@ -65,10 +65,20 @@ namespace arma_miner.Service
                     });
 
                     string tempFilesDir = EmptyFilesFromTempFolder();
-                    bool artistErrors = _armaArtistsOps.ProcessArtistFile(siteVersion.ArtistsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess);
 
-                    tempFilesDir = EmptyFilesFromTempFolder();
-                    bool albumErrors = _armaAlbumsOps.ProcessAlbumsFile(siteVersion.AlbumsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess);
+                    var tasks = new Task<bool>[]
+                    {
+                        _armaArtistsOps.ProcessArtistFile(siteVersion.ArtistsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess),
+                        _armaAlbumsOps.ProcessAlbumsFile(siteVersion.AlbumsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess)
+                    };
+
+                    //bool artistErrors = _armaArtistsOps.ProcessArtistFile(siteVersion.ArtistsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess);
+                    //bool albumErrors = _armaAlbumsOps.ProcessAlbumsFile(siteVersion.AlbumsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess);
+
+                    var results = await Task.WhenAll(tasks);
+
+                    bool artistErrors = results[0];
+                    bool albumErrors = results[1];
 
                     EmptyFilesFromTempFolder();
 
