@@ -68,17 +68,14 @@ namespace arma_miner.Service
 
                     var tasks = new Task<bool>[]
                     {
-                        _armaArtistsOps.ProcessArtistFile(siteVersion.ArtistsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess),
-                        _armaAlbumsOps.ProcessAlbumsFile(siteVersion.AlbumsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess)
+                        DownloadArtitsFile(siteVersion.ArtistsFileUrl, tempFilesDir, siteVersion.Version),
+                        DownloadAlbumsFile(siteVersion.AlbumsFileUrl, tempFilesDir, siteVersion.Version)
                     };
-
-                    //bool artistErrors = _armaArtistsOps.ProcessArtistFile(siteVersion.ArtistsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess);
-                    //bool albumErrors = _armaAlbumsOps.ProcessAlbumsFile(siteVersion.AlbumsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess);
-
+                    
                     var results = await Task.WhenAll(tasks);
 
-                    bool artistErrors = results[0];
-                    bool albumErrors = results[1];
+                    bool artistErrors = _armaArtistsOps.ProcessArtistFile(siteVersion.ArtistsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess);
+                    bool albumErrors = _armaAlbumsOps.ProcessAlbumsFile(siteVersion.AlbumsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess);
 
                     EmptyFilesFromTempFolder();
 
@@ -144,6 +141,92 @@ namespace arma_miner.Service
             }
 
             return returnItem;
+        }
+
+        private async Task<bool> DownloadArtitsFile(string Url, string tempFilesDir, string queueKey)
+        {
+            _dapper.ExecuteNonQuery("radioconn", "Operations_Sync_ArtistTaskMarkAsStarted", new
+            {
+                version_number = queueKey
+            });
+
+            string artistFile = $"{tempFilesDir}artist.tar.xz";
+
+            using (WebClient webClient = new WebClient())
+            {
+                webClient.Headers.Add("Accept: text/html, application/xhtml+xml, */*");
+                webClient.Headers.Add("User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)");
+                webClient.DownloadFile(new Uri(Url), artistFile);
+            }
+
+            if (File.Exists(artistFile))
+            {
+                using (var fileStream = File.OpenRead(artistFile))
+                using (IReader reader = ReaderFactory.Open(fileStream))
+                {
+                    while (reader.MoveToNextEntry())
+                    {
+                        if (reader.Entry.Key.EndsWith("artist"))
+                        {
+                            reader.WriteEntryToDirectory(tempFilesDir, new SharpCompress.Common.ExtractionOptions()
+                            {
+                                ExtractFullPath = true,
+                                Overwrite = true
+                            });
+                        }
+                    }
+                }
+            }
+
+            if (System.IO.File.Exists($"{tempFilesDir}artist.tar.xz"))
+            {
+                System.IO.File.Delete($"{tempFilesDir}artist.tar.xz");
+            }
+
+            return true;
+        }
+
+        private async Task<bool> DownloadAlbumsFile(string Url, string tempFilesDir, string queueKey)
+        {
+            _dapper.ExecuteNonQuery("radioconn", "Operations_Sync_AlbumTaskMarkAsStarted", new
+            {
+                version_number = queueKey
+            });
+
+            string artistFile = $"{tempFilesDir}release.tar.xz";
+
+            using (WebClient webClient = new WebClient())
+            {
+                webClient.Headers.Add("Accept: text/html, application/xhtml+xml, */*");
+                webClient.Headers.Add("User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)");
+                webClient.DownloadFile(new Uri(Url), artistFile);
+            }
+
+            if (File.Exists(artistFile))
+            {
+                using (var fileStream = File.OpenRead(artistFile))
+                using (IReader reader = ReaderFactory.Open(fileStream))
+                {
+                    while (reader.MoveToNextEntry())
+                    {
+                        if (reader.Entry.Key.EndsWith("release"))
+                        {
+                            reader.WriteEntryToDirectory(tempFilesDir, new SharpCompress.Common.ExtractionOptions()
+                            {
+                                ExtractFullPath = true,
+                                Overwrite = true
+                            });
+                        }
+                    }
+                }
+            }
+
+            if (System.IO.File.Exists($"{tempFilesDir}release.tar.xz"))
+            {
+                System.IO.File.Delete($"{tempFilesDir}release.tar.xz");
+            }
+
+            return true;
         }
 
         private string EmptyFilesFromTempFolder()

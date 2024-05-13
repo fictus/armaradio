@@ -628,41 +628,41 @@ namespace arma_miner.Operations
             tbl_z_songsMapper.Columns.Add("MBAlbumId", typeof(string));
         }
 
-        public async Task<bool> ProcessAlbumsFile(string Url, string tempFilesDir, string queueKey, bool fistTimeProcess)
+        public bool ProcessAlbumsFile(string Url, string tempFilesDir, string queueKey, bool fistTimeProcess)
         {
-            _dapper.ExecuteNonQuery("radioconn", "Operations_Sync_AlbumTaskMarkAsStarted", new
-            {
-                version_number = queueKey
-            });
+            //_dapper.ExecuteNonQuery("radioconn", "Operations_Sync_AlbumTaskMarkAsStarted", new
+            //{
+            //    version_number = queueKey
+            //});
 
             bool completedWithErrors = false;
             string artistFile = $"{tempFilesDir}release.tar.xz";
 
-            using (WebClient webClient = new WebClient())
-            {
-                webClient.Headers.Add("Accept: text/html, application/xhtml+xml, */*");
-                webClient.Headers.Add("User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)");
-                webClient.DownloadFile(new Uri(Url), artistFile);
-            }
+            //using (WebClient webClient = new WebClient())
+            //{
+            //    webClient.Headers.Add("Accept: text/html, application/xhtml+xml, */*");
+            //    webClient.Headers.Add("User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)");
+            //    webClient.DownloadFile(new Uri(Url), artistFile);
+            //}
 
-            if (File.Exists(artistFile))
-            {
-                using (var fileStream = File.OpenRead(artistFile))
-                using (IReader reader = ReaderFactory.Open(fileStream))
-                {
-                    while (reader.MoveToNextEntry())
-                    {
-                        if (reader.Entry.Key.EndsWith("release"))
-                        {
-                            reader.WriteEntryToDirectory(tempFilesDir, new SharpCompress.Common.ExtractionOptions()
-                            {
-                                ExtractFullPath = true,
-                                Overwrite = true
-                            });
-                        }
-                    }
-                }
-            }
+            //if (File.Exists(artistFile))
+            //{
+            //    using (var fileStream = File.OpenRead(artistFile))
+            //    using (IReader reader = ReaderFactory.Open(fileStream))
+            //    {
+            //        while (reader.MoveToNextEntry())
+            //        {
+            //            if (reader.Entry.Key.EndsWith("release"))
+            //            {
+            //                reader.WriteEntryToDirectory(tempFilesDir, new SharpCompress.Common.ExtractionOptions()
+            //                {
+            //                    ExtractFullPath = true,
+            //                    Overwrite = true
+            //                });
+            //            }
+            //        }
+            //    }
+            //}
 
             string albumFileFull = (IsLinux ? $"{tempFilesDir}mbdump/release" : $"{tempFilesDir}mbdump\\release");
             //string albumFileFull = "C:\\Users\\19039\\Downloads\\release";

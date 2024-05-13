@@ -8,6 +8,6 @@ namespace arma_miner.Operations
 {
     public interface IArmaArtistsOperations
     {
-        Task<bool> ProcessArtistFile(string Url, string tempFilesDir, string queueKey, bool fistTimeProcess);
+        bool ProcessArtistFile(string Url, string tempFilesDir, string queueKey, bool fistTimeProcess);
     }
 }
