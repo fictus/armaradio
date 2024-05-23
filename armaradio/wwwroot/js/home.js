@@ -829,6 +829,8 @@ function getAlbumsForArtists(artistId, artistName) {
                 $("#btnMain_StartRadioSession")
                     .attr("data-artistname", artistName)
                     .css("display", "");
+
+                $("#btnArtistAlbumsOpen").trigger("click");
             } else {
                 $("#btnArtistAlbumsOpen").css("display", "none");
                 $("#btnMain_StartRadioSession")
