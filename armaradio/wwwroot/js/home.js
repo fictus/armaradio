@@ -830,6 +830,8 @@ function getAlbumsForArtists(artistId, artistName) {
                     .attr("data-artistname", artistName)
                     .css("display", "");
 
+                $("#offcanvasArtistAlbums div.offcanvas-body")[0].scrollTop = 0;
+
                 $("#btnArtistAlbumsOpen").trigger("click");
             } else {
                 $("#btnArtistAlbumsOpen").css("display", "none");
