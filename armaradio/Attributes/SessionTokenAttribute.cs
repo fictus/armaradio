@@ -27,11 +27,18 @@ namespace armaradio.Attributes
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var securityToken = tokenHandler.ReadJwtToken(jwtToken);
+
+            if (securityToken.ValidTo < DateTime.UtcNow)
+            {
+                context.Result = new UnauthorizedResult();
+                return;
+            }
+
             var userId = securityToken.Subject;
 
-            IdentityUser testTokenUser = userManager.FindByIdAsync(userId).Result;
+            IdentityUser tokenUser = userManager.FindByIdAsync(userId).Result;
 
-            if (userId == null)
+            if (tokenUser == null)
             {
                 context.Result = new UnauthorizedResult();
                 return;
