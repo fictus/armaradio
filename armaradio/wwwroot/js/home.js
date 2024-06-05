@@ -1016,7 +1016,10 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                     .then(function (response) {
                         if (response) {
                             if (response.hasVideo) {
-                                currentRow.attr("data-videoid", response.videoId);
+                                currentRow.attr({
+                                    "data-videoid": response.videoId,
+                                    "data-alternateids": (response.alternateIds || []).join(",")
+                                });
 
                                 let newIframe = $("<iframe></iframe");
                                 newIframe.attr({
@@ -1160,11 +1163,18 @@ function playerPlayNext(fromError) {
 
     if (lastPlayedRow.length) {
         if (fromError) {
-            lastPlayedRow.attr("data-videoid", "");
-        }
+            getAlternateId(lastPlayedRow);
 
-        let indexRow = lastPlayedRow.index() + 1;
-        nextPlay = $("#tblMainPlayList").find("tr").eq(indexRow);
+            if ($.trim(lastPlayedRow.attr("data-videoid")) != "") {
+                nextPlay = lastPlayedRow;
+            } else {
+                let indexRow = lastPlayedRow.index() + 1;
+                nextPlay = $("#tblMainPlayList").find("tr").eq(indexRow);
+            }
+        } else {
+            let indexRow = lastPlayedRow.index() + 1;
+            nextPlay = $("#tblMainPlayList").find("tr").eq(indexRow);
+        }
 
         if (nextPlay.length) {
             $("#tblMainPlayList").find("tr.now-playing").removeClass("now-playing");
@@ -1186,5 +1196,18 @@ function playerPlayNext(fromError) {
         if ($("button.btn-play-inner-btn-play").length) {
             nextPlay.find("button.btn-play-inner-btn-play").trigger("click");
         }
+    }
+}
+
+function getAlternateId(tr) {
+    let allIds = ($.trim(tr.attr("data-alternateids"))).split(",");
+
+    if (allIds.length) {
+        tr.attr("data-videoid", allIds[0]);
+        allIds.shift();
+
+        tr.attr("data-alternateids", (allIds || []).join(","));
+    } else {
+        tr.attr("data-videoid", "");
     }
 }

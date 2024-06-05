@@ -553,15 +553,28 @@ namespace armaradio.Controllers
         {
             try
             {
-                string currentVideoId = _musicRepo.Youtube_GetUrlByArtistNameSongName(value.artistName, value.songName);
+                YTVideoIdsDataItem videoIds = _musicRepo.Youtube_GetUrlByArtistNameSongName(value.artistName, value.songName);
 
-                return new JsonResult(new
+                if (videoIds != null)
                 {
-                    hasVideo = !string.IsNullOrWhiteSpace(currentVideoId),
-                    url = $"https://www.youtube.com/watch?v={currentVideoId}",
-                    embedUrl = $"https://www.youtube.com/embed/{currentVideoId}?enablejsapi=1", //&autoplay=1
-                    videoId = currentVideoId
-                });
+                    string currentVideoId = videoIds.VideoId;
+
+                    return new JsonResult(new
+                    {
+                        hasVideo = !string.IsNullOrWhiteSpace(currentVideoId),
+                        url = $"https://www.youtube.com/watch?v={currentVideoId}",
+                        embedUrl = $"https://www.youtube.com/embed/{currentVideoId}?enablejsapi=1", //&autoplay=1
+                        videoId = currentVideoId,
+                        alternateIds = videoIds.AlternateIds
+                    });
+                }
+                else
+                {
+                    return new JsonResult(new
+                    {
+                        hasVideo = false
+                    });
+                }
             }
             catch (Exception ex)
             {

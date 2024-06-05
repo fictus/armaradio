@@ -159,7 +159,8 @@ function playNextSong() {
                         $("#lnkRadioOptions").attr({
                             "data-videoid": response.videoId,
                             "data-artistname": songData.artistName,
-                            "data-songname": songData.songName
+                            "data-songname": songData.songName,
+                            "data-alternateids": (response.alternateIds || []).join(",")
                         });
                         $("#lblRadioPlayer_SongTitle").html(songData.songName);
                         $("#lblRadioPlayer_ArtistName").html(songData.artistName);
@@ -253,6 +254,46 @@ function tallyUpSongId() {
 }
 
 function onRadioPlayerError(e) {
-    tallyUpSongId();
-    playNextSong();
+    let lnkControl = $("#lnkRadioOptions");
+    let allIds = ($.trim(lnkControl.attr("data-alternateids"))).split(",");
+
+    if (allIds.length) {
+        let videoId = allIds[0];
+        allIds.shift();
+
+        lnkControl.attr({
+            "data-videoid": videoId,
+            "data-alternateids": (allIds || []).join(",")
+        });
+
+        replayWithAlternateId(videoId);
+    } else {
+        tallyUpSongId();
+        playNextSong();
+    }
+}
+
+function replayWithAlternateId(videoId) {
+    let newIframe = $("<iframe></iframe");
+    newIframe.attr({
+        "id": "armaRadioPlayer",
+        "class": "iframe-holder pl-0 pt-0",
+        "src": "https://www.youtube.com/embed/" + videoId + "?enablejsapi=1",
+        "width": "356", //560
+        "height": "200", //315
+        "frameborder": "0",
+        "allow": "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
+        "allowfullscreen": ""
+    });
+
+    $("#dvRadioPlayer_currentlyPlaying").find(".iframe-holder").remove();
+    $("#dvRadioPlayer_currentlyPlaying").append(newIframe);
+
+    let player = new YT.Player("armaRadioPlayer", {
+        events: {
+            "onReady": onRadioPlayerReady,
+            "onStateChange": onRadioPlayerStateChange,
+            "onError": onRadioPlayerError
+        }
+    });
 }

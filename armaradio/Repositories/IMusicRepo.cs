@@ -20,7 +20,7 @@ namespace armaradio.Repositories
         List<TrackDataItem> GetCurrentTop40DanceSingles();
         List<TrackDataItem> GetCurrentTranceTop100();
         List<TrackDataItem> GetCurrentTranceHype100();
-        string Youtube_GetUrlByArtistNameSongName(string artistName, string songName);
+        YTVideoIdsDataItem Youtube_GetUrlByArtistNameSongName(string artistName, string songName);
         List<YTGeneralSearchDataItem> Youtube_PerformGeneralSearch(string searchText);
         bool CheckIfPlaylistExists(string PlaylistName, string UserId);
         int? InsertPlaylistName(string PlaylistName, string UserId);

@@ -724,9 +724,10 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
-        public string Youtube_GetUrlByArtistNameSongName(string artistName, string songName)
+        public YTVideoIdsDataItem Youtube_GetUrlByArtistNameSongName(string artistName, string songName)
         {
-            string returnItem = "";
+            YTVideoIdsDataItem returnItem = null;
+            List<string> alternateIds = new List<string>();
 
             string userInput = HttpUtility.UrlEncode($"{artistName} - {songName}");
 
@@ -765,22 +766,27 @@ namespace armaradio.Repositories
                                     {
                                         if (subContent.videoRenderer != null)
                                         {
-                                            currentVideoId = subContent.videoRenderer.videoId;
+                                            if (string.IsNullOrWhiteSpace(currentVideoId))
+                                            {
+                                                currentVideoId = subContent.videoRenderer.videoId;
+                                            }
+                                            else
+                                            {
+                                                alternateIds.Add(subContent.videoRenderer.videoId);
+                                            }
                                             //currentVideoTitle = content.itemSectionRenderer.contents[0].videoRenderer.title.runs[0].text;
-                                            break;
                                         }
                                     }
-                                }
-
-                                if (!string.IsNullOrWhiteSpace(currentVideoId))
-                                {
-                                    break;
                                 }
                             }
 
                             if (!string.IsNullOrWhiteSpace(currentVideoId))
                             {
-                                returnItem = currentVideoId;
+                                returnItem = new YTVideoIdsDataItem()
+                                {
+                                    VideoId = currentVideoId,
+                                    AlternateIds = alternateIds
+                                };
                             }
                         }
                     }
