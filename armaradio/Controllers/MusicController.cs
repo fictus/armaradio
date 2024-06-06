@@ -284,6 +284,29 @@ namespace armaradio.Controllers
             }
         }
 
+        [HttpPost]
+        [Authorize]
+        public IActionResult GeRandomtSongsFromPlaylists()
+        {
+            try
+            {
+                ArmaUser currentUser = _authControl.GetCurrentUser();
+
+                if (currentUser == null)
+                {
+                    throw new Exception("Authentication required");
+                }
+
+                List<ArmaRandomSongDataItem> retunItem = _musicRepo.Songs_GetRandomFromPlaylists(currentUser.UserId);
+
+                return new JsonResult(retunItem);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetAudioFile(

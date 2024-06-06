@@ -544,6 +544,20 @@ function mainload_attacheEvents() {
         popover.hide();
     });
 
+    $("#btnLoadPL_StartRadioFromPlaylistsSongs").on("click", function () {
+        if ($("#lnkMainLogin").length) {
+            armaradio.warningMsg({
+                msg: "Radio Player requires you to login or create a free account",
+                captionMsg: "Login Required",
+                typeLayout: "red"
+            });
+        } else {
+            if ("loadRadioPlayer" in window) {
+                loadRadioPlayer(null, null, false, false, true);
+            }
+        }
+    });
+
     $("#btnMain_StartRadioSession").on("click", function () {
         if ($("#lnkMainLogin").length) {
             armaradio.warningMsg({

@@ -15,6 +15,9 @@
     border-top-color: #606060;
 }
 
+.justify-start {
+    margin-right: auto;
+}
 
 .brdr-none {
     border-width: 0;

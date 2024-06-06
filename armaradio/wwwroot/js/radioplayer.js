@@ -48,31 +48,96 @@ function radioplayer_attachEvents() {
     });
 }
 
-function loadRadioPlayer(artistName, songName, fromPlaylist, reloadFromCache) {
-    if (artistName != "") {
-        armaradio.masterPageWait(true);
+function loadRadioPlayer(artistName, songName, fromPlaylist, reloadFromCache, fromRandomSongsPlayer) {
+    if (!fromRandomSongsPlayer) {
+        if (artistName != "") {
+            armaradio.masterPageWait(true);
 
-        if (!reloadFromCache) {
-            $("#lnkRadioOptions").attr({
-                "data-artist": artistName,
-                "data-song": songName
-            });
-        } else {
-            let cachedValues = $("#lnkRadioOptions");
-            artistName = artistName || cachedValues.attr("data-artist");
-            songName = songName || cachedValues.attr("data-song");
+            if (!reloadFromCache) {
+                $("#lnkRadioOptions").attr({
+                    "data-artist": artistName,
+                    "data-song": songName
+                });
+            } else {
+                let cachedValues = $("#lnkRadioOptions");
+                artistName = artistName || cachedValues.attr("data-artist");
+                songName = songName || cachedValues.attr("data-song");
+            }
+
+            armaradio.masterAJAXPost({
+                ArtistName: artistName,
+                SongName: songName
+            }, "Music", "GetSongsLike")
+                .then(function (response) {
+                    if (response && !response.error) {
+                        if (response.length) {
+                            $("#dvRadioPlayer_currentlyPlaying")
+                                .attr({
+                                    "data-israndom": "0",
+                                    "data-playingid": ""
+                                })
+                                .data("playerSongs", (response || []));
+
+                            $("#lblRadioPlayer_SongTitle").html("");
+                            $("#lblRadioPlayer_ArtistName").html("");
+
+                            $("#dvMainPlay_currentlyPlaying").find(".iframe-holder").replaceWith("<div class=\"iframe-holder\"></div>");
+                            $("#dvRadioPlayer_currentlyPlaying").find(".iframe-holder").replaceWith("<div class=\"iframe-holder pl-0 pt-0\"></div>");
+
+                            $("#dvRadioPlayerHolder").css("display", "");
+
+                            playNextSong();
+
+                            if (fromPlaylist) {
+                                let canvasCtrl;
+
+                                if ($("#offcanvasNonePlaylistOptions").hasClass("show")) {
+                                    canvasCtrl = $("#offcanvasNonePlaylistOptions");
+                                }
+                                if ($("#offcanvasSongOptions").hasClass("show")) {
+                                    canvasCtrl = $("#offcanvasSongOptions");
+                                }
+
+                                if (canvasCtrl.length) {
+                                    canvasCtrl.find("button.btn-close").trigger("click");
+                                }
+                            }
+                        } else {
+                            showNoRadioFound(artistName, songName);
+                        }
+                    } else {
+                        showNoRadioFound(artistName, songName);
+                    }
+
+                    armaradio.masterPageWait(false);
+                });
         }
+    } else {
+        // start playing from random songs in user's playlists
+        armaradio.masterPageWait(true);
 
         armaradio.masterAJAXPost({
             ArtistName: artistName,
             SongName: songName
-        }, "Music", "GetSongsLike")
+        }, "Music", "GeRandomtSongsFromPlaylists")
             .then(function (response) {
                 if (response && !response.error) {
                     if (response.length) {
+                        let allSongs = [];
+
+                        for (let i = 0; i < response.length; i++) {
+                            let currentSong = response[i];
+                            currentSong["id"] = i + 1;
+
+                            allSongs.push(currentSong);
+                        }
+
                         $("#dvRadioPlayer_currentlyPlaying")
-                            .attr("data-playingid", "")
-                            .data("playerSongs", (response || []));
+                            .attr({
+                                "data-israndom": "1",
+                                "data-playingid": ""
+                            })
+                            .data("playerSongs", (allSongs || []));
 
                         $("#lblRadioPlayer_SongTitle").html("");
                         $("#lblRadioPlayer_ArtistName").html("");
@@ -81,6 +146,10 @@ function loadRadioPlayer(artistName, songName, fromPlaylist, reloadFromCache) {
                         $("#dvRadioPlayer_currentlyPlaying").find(".iframe-holder").replaceWith("<div class=\"iframe-holder pl-0 pt-0\"></div>");
 
                         $("#dvRadioPlayerHolder").css("display", "");
+
+                        if ($("#dvPopupLoadPlaylists").is(":visible")) {
+                            $("#dvPopupLoadPlaylists").modal("hide");
+                        }
 
                         playNextSong();
 
@@ -99,10 +168,18 @@ function loadRadioPlayer(artistName, songName, fromPlaylist, reloadFromCache) {
                             }
                         }
                     } else {
-                        showNoRadioFound(artistName, songName);
+                        armaradio.warningMsg({
+                            msg: "You must have songs in your Playlists",
+                            captionMsg: "Empty Playlists",
+                            typeLayout: "red"
+                        });
                     }
                 } else {
-                    showNoRadioFound(artistName, songName);
+                    armaradio.warningMsg({
+                        msg: response.errorMsg,
+                        captionMsg: "Error",
+                        typeLayout: "red"
+                    });
                 }
 
                 armaradio.masterPageWait(false);
@@ -135,6 +212,7 @@ function radioPlayerRefineParametersStartRadio() {
 }
 
 function playNextSong() {
+    let fromRandomSongs = $.trim($("#dvRadioPlayer_currentlyPlaying").attr("data-israndom")) == "1";
     let allSongs = $("#dvRadioPlayer_currentlyPlaying").data("playerSongs") || [];
     let stringId = $.trim($("#dvRadioPlayer_currentlyPlaying").attr("data-playingid"));
     let currentId = 0;
@@ -149,51 +227,85 @@ function playNextSong() {
     let songData = _.where(allSongs, { id: currentId }).pop();
 
     if (songData) {
-        armaradio.masterAJAXPost({
-            artistName: songData.artistName,
-            songName: songData.songName
-        }, "Music", "GetUrlByArtistSongName")
-            .then(function (response) {
-                if (response) {
-                    if (response.hasVideo) {
-                        $("#lnkRadioOptions").attr({
-                            "data-videoid": response.videoId,
-                            "data-artistname": songData.artistName,
-                            "data-songname": songData.songName,
-                            "data-alternateids": (response.alternateIds || []).join(",")
-                        });
-                        $("#lblRadioPlayer_SongTitle").html(songData.songName);
-                        $("#lblRadioPlayer_ArtistName").html(songData.artistName);
+        if (!fromRandomSongs) {
+            armaradio.masterAJAXPost({
+                artistName: songData.artistName,
+                songName: songData.songName
+            }, "Music", "GetUrlByArtistSongName")
+                .then(function (response) {
+                    if (response) {
+                        if (response.hasVideo) {
+                            $("#lnkRadioOptions").attr({
+                                "data-videoid": response.videoId,
+                                "data-artistname": songData.artistName,
+                                "data-songname": songData.songName,
+                                "data-alternateids": (response.alternateIds || []).join(",")
+                            });
+                            $("#lblRadioPlayer_SongTitle").html(songData.songName);
+                            $("#lblRadioPlayer_ArtistName").html(songData.artistName);
 
-                        let newIframe = $("<iframe></iframe");
-                        newIframe.attr({
-                            "id": "armaRadioPlayer",
-                            "class": "iframe-holder pl-0 pt-0",
-                            "src": response.embedUrl,
-                            "width": "356", //560
-                            "height": "200", //315
-                            "frameborder": "0",
-                            "allow": "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
-                            "allowfullscreen": ""
-                        });
+                            let newIframe = $("<iframe></iframe");
+                            newIframe.attr({
+                                "id": "armaRadioPlayer",
+                                "class": "iframe-holder pl-0 pt-0",
+                                "src": response.embedUrl,
+                                "width": "356", //560
+                                "height": "200", //315
+                                "frameborder": "0",
+                                "allow": "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
+                                "allowfullscreen": ""
+                            });
 
-                        $("#dvRadioPlayer_currentlyPlaying").find(".iframe-holder").remove();
-                        $("#dvRadioPlayer_currentlyPlaying").append(newIframe);
+                            $("#dvRadioPlayer_currentlyPlaying").find(".iframe-holder").remove();
+                            $("#dvRadioPlayer_currentlyPlaying").append(newIframe);
 
-                        let player = new YT.Player("armaRadioPlayer", {
-                            events: {
-                                "onReady": onRadioPlayerReady,
-                                "onStateChange": onRadioPlayerStateChange,
-                                "onError": onRadioPlayerError
-                            }
-                        });
+                            let player = new YT.Player("armaRadioPlayer", {
+                                events: {
+                                    "onReady": onRadioPlayerReady,
+                                    "onStateChange": onRadioPlayerStateChange,
+                                    "onError": onRadioPlayerError
+                                }
+                            });
+                        }
                     }
-                }
 
-                armaradio.masterPageWait(false);
+                    armaradio.masterPageWait(false);
+                });
+        } else {
+            $("#lnkRadioOptions").attr({
+                "data-videoid": songData.videoId,
+                "data-artistname": songData.artist,
+                "data-songname": songData.song,
+                "data-alternateids": ""
             });
+            $("#lblRadioPlayer_SongTitle").html(songData.song);
+            $("#lblRadioPlayer_ArtistName").html(songData.artist);
+
+            let newIframe = $("<iframe></iframe");
+            newIframe.attr({
+                "id": "armaRadioPlayer",
+                "class": "iframe-holder pl-0 pt-0",
+                "src": "https://www.youtube.com/embed/" + songData.videoId + "?enablejsapi=1",
+                "width": "356", //560
+                "height": "200", //315
+                "frameborder": "0",
+                "allow": "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
+                "allowfullscreen": ""
+            });
+
+            $("#dvRadioPlayer_currentlyPlaying").find(".iframe-holder").remove();
+            $("#dvRadioPlayer_currentlyPlaying").append(newIframe);
+
+            let player = new YT.Player("armaRadioPlayer", {
+                events: {
+                    "onReady": onRadioPlayerReady,
+                    "onStateChange": onRadioPlayerStateChange,
+                    "onError": onRadioPlayerError
+                }
+            });
+        }
     } else {
-        loadRadioPlayer(null, null, false, true);
+        loadRadioPlayer(null, null, false, true, fromRandomSongs);
     }
 }
 
@@ -202,7 +314,11 @@ function radioPlayerLikeCurrentSong() {
 }
 
 function radioPlayerHateCurrentSong() {
-    armaradio.masterPageWait(true);
+    let fromRandomSongs = $.trim($("#dvRadioPlayer_currentlyPlaying").attr("data-israndom")) == "1";
+
+    if (!fromRandomSongs) {
+        armaradio.masterPageWait(true);
+    }
 
     tallyUpSongId();
     playNextSong();

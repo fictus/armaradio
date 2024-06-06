@@ -74,6 +74,14 @@ namespace armaradio.Repositories
             });
         }
 
+        public List<ArmaRandomSongDataItem> Songs_GetRandomFromPlaylists(string userIdentity)
+        {
+            return _dapper.GetList<ArmaRandomSongDataItem>("radioconn", "Arma_GetRandomFromPlaylists", new
+            {
+                user_identity = userIdentity
+            });
+        }
+
         public string GetApiToken()
         {
             string returnItem = _dapper.GetFirstOrDefault<string>("radioconn", "Operations_GetCachedToken");
