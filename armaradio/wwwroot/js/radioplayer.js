@@ -322,7 +322,6 @@ function radioPlayerHateCurrentSong() {
 
     tallyUpSongId();
     playNextSong();
-
 }
 
 function currentRadioSongOptions() {
@@ -333,6 +332,11 @@ function currentRadioSongOptions() {
     let separator = (artistName != "" && songName != "" ? " - " : "");
 
     $("#btnNonePlaylistOptions_AddToPlaylist").attr({
+        "data-artist": artistName,
+        "data-song": songName,
+        "data-videoid": videoId
+    });
+    $(".btn-options-download").attr({
         "data-artist": artistName,
         "data-song": songName,
         "data-videoid": videoId
