@@ -332,7 +332,7 @@ namespace armaradio.Controllers
                     fileNameParts.Add(SongName.Trim());
                 }
 
-                string fileName = $"{SanitizeFileName(Latinize(string.Join(" - ", fileNameParts.ToArray())))}.mp3";
+                string fileName = $"{(SanitizeFileName(string.Join(" - ", fileNameParts.ToArray()))).Trim()}.mp3";
 
                 if (!System.IO.Directory.Exists(downloadFolder))
                 {
