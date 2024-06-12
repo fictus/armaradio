@@ -212,6 +212,23 @@ function mainload_attacheEvents() {
         //$("#dvPopupPastePlaylist").modal("show");
     });
 
+    $("#offcanvasNonePlaylistOptionsRightLabel").on("click", function () {
+        if (!$("#lnkMainLogin").length) {
+            clearTimeout($("#offcanvasNonePlaylistOptionsRightLabel").data("clicksTimeout"));
+
+            $("#offcanvasNonePlaylistOptionsRightLabel").data("clicksTimeout", setTimeout(function () {
+                $("#offcanvasNonePlaylistOptionsRightLabel").attr("data-clicks", "0");
+            }, 3000));
+
+            let currentClicks = parseInt($("#offcanvasNonePlaylistOptionsRightLabel").attr("data-clicks")) + 1;
+            $("#offcanvasNonePlaylistOptionsRightLabel").attr("data-clicks", currentClicks);
+
+            if (currentClicks > 5) {
+                $("#btnPlaylist_DownloadSong").css("display", "");
+            }
+        }
+    });
+
     $("#btnPopup_Apply").on("click", function () {
         let playlistTxt = $.trim($("#txtPastedPlaylist").val());
         let playlistName = $.trim($("#txtPasterPlaylistName").val());
