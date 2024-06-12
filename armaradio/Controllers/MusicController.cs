@@ -341,8 +341,9 @@ namespace armaradio.Controllers
 
                 var youtube = new YoutubeExplode.YoutubeClient();
                 await youtube.Videos.DownloadAsync($"https://www.youtube.com/watch?v={VideoId}", endFile);
-                MemoryStream memoryStream = new MemoryStream();
 
+
+                MemoryStream memoryStream = new MemoryStream();
                 using (FileStream fileStream = new FileStream(endFile, FileMode.Open, FileAccess.Read))
                 {
                     fileStream.CopyTo(memoryStream);
@@ -352,10 +353,30 @@ namespace armaradio.Controllers
 
                 memoryStream.Position = 0;
 
-                return new FileStreamResult(memoryStream, "audio/mpeg")
+                var returnItem = new FileStreamResult(memoryStream, "audio/mpeg")
                 {
                     FileDownloadName = fileName,
                 };
+
+                Response.RegisterForDispose(memoryStream);
+
+                return returnItem;
+
+                //MemoryStream memoryStream = new MemoryStream();
+
+                //using (FileStream fileStream = new FileStream(endFile, FileMode.Open, FileAccess.Read))
+                //{
+                //    fileStream.CopyTo(memoryStream);
+                //}
+
+                //System.IO.File.Delete(endFile);
+
+                //memoryStream.Position = 0;
+
+                //return new FileStreamResult(memoryStream, "audio/mpeg")
+                //{
+                //    FileDownloadName = fileName,
+                //};
             }
             catch (Exception ex)
             {
