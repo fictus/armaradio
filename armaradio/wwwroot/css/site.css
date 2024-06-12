@@ -44,6 +44,11 @@ html body .form-select:focus {
     border-color: #c4bcbc;
 }
 
+html body .popup-header-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+}
+
 /***  Image downloaded from
     https://unsplash.com/s/photos/soft-background?license=free **/
 body {
