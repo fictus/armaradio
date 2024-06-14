@@ -43,9 +43,10 @@ function mainload_attacheEvents() {
                 //$("#ulArtistsFound").find("li").remove();
 
                 if (arma_mainSearchSelectedType == "1") {
-                    //$("#txtMainGeneralSearch").val("");
+                    $("#txtMainGeneralSearch").attr("placeholder", "Artist Search");
                     $("#btnMain_GeneralSearch").css("display", "none");
                 } else {
+                    $("#txtMainGeneralSearch").attr("placeholder", "General Search");
                     $("#btnMain_GeneralSearch").css("display", "");
                 }
 
