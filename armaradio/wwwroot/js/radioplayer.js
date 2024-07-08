@@ -375,7 +375,7 @@ function tallyUpSongId() {
 
 function onRadioPlayerError(e) {
     let lnkControl = $("#lnkRadioOptions");
-    let allIds = ($.trim(lnkControl.attr("data-alternateids"))).split(",");
+    let allIds = ($.trim(lnkControl.attr("data-alternateids")) == "" ? [] : ($.trim(lnkControl.attr("data-alternateids"))).split(","));
 
     if (allIds.length) {
         let videoId = allIds[0];
