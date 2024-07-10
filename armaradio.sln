@@ -7,9 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "armaradio", "armaradio\arma
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "armaradio_ops", "armaradio_ops\armaradio_ops.csproj", "{868ADB36-C987-4659-9ECD-FF0D89DA155D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "arma_miner", "arma_miner\arma_miner.csproj", "{512EE815-3CB1-4678-B8F1-069C0DD6C774}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "arma_miner", "arma_miner\arma_miner.csproj", "{512EE815-3CB1-4678-B8F1-069C0DD6C774}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "armaradioSongsAlike", "armaradioSongsAlike\armaradioSongsAlike.csproj", "{88E33244-6BBD-49BE-BE99-D1150586A2CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "armaradioSongsAlike", "armaradioSongsAlike\armaradioSongsAlike.csproj", "{88E33244-6BBD-49BE-BE99-D1150586A2CF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "armaoffline", "armaoffline\armaoffline.csproj", "{3983311C-295E-4CB2-918A-8806CA773986}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,12 @@ Global
 		{88E33244-6BBD-49BE-BE99-D1150586A2CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{88E33244-6BBD-49BE-BE99-D1150586A2CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{88E33244-6BBD-49BE-BE99-D1150586A2CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3983311C-295E-4CB2-918A-8806CA773986}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3983311C-295E-4CB2-918A-8806CA773986}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3983311C-295E-4CB2-918A-8806CA773986}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{3983311C-295E-4CB2-918A-8806CA773986}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3983311C-295E-4CB2-918A-8806CA773986}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3983311C-295E-4CB2-918A-8806CA773986}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
