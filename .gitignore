@@ -10,3 +10,5 @@ arma_miner/obj/
 /armaradioSongsAlike/obj
 /armaradioSongsAlike/armaradioSongsAlike.csproj.user
 /armaradio/wwwroot/tempMp3
+/armaoffline/bin/Debug
+/armaoffline/obj
