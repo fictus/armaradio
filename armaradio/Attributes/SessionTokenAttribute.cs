@@ -30,7 +30,7 @@ namespace armaradio.Attributes
 
             if (securityToken.ValidTo < DateTime.UtcNow)
             {
-                context.Result = new UnauthorizedResult();
+                context.Result = new ConflictResult(); //409
                 return;
             }
 
@@ -40,7 +40,7 @@ namespace armaradio.Attributes
 
             if (tokenUser == null)
             {
-                context.Result = new UnauthorizedResult();
+                context.Result = new NotFoundResult(); //404
                 return;
             }
 

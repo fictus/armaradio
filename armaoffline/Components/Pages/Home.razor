@@ -47,6 +47,8 @@
                 {
                     string currentToken = _globalState.appToken;
 
+                    var userPlaylists = _armaApi.GetUserPlaylists();
+
                     await JS.InvokeVoidAsync("loginError", "Login sucsessful");
                 }
                 else
