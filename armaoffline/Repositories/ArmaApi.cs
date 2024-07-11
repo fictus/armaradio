@@ -3,6 +3,7 @@ using armaoffline.Services;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
@@ -31,8 +32,9 @@ namespace armaoffline.Repositories
                     Password = Password
                 });
 
+                string endPoing = "https://armarad.com/Api"; // $"{(Debugger.IsAttached ? "https://localhost:7001/Api" : "https://armarad.com/Api")}";
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = client.PostAsync("https://armarad.com/Api/ExternalLogin", content).Result;
+                var response = client.PostAsync($"{endPoing}/ExternalLogin", content).Result;
 
                 if (response != null && response.IsSuccessStatusCode)
                 {
@@ -63,12 +65,41 @@ namespace armaoffline.Repositories
 
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpUtility.UrlEncode(_globalState.appToken));
 
-                var response = client.GetAsync("https://armarad.com/Api/GetUserPlaylists").Result;
+                string endPoing = "https://armarad.com/Api"; // $"{(Debugger.IsAttached ? "https://localhost:7001/Api" : "https://armarad.com/Api")}";
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = client.PostAsync($"{endPoing}/GetUserPlaylists", content).Result;
 
                 if (response != null && response.IsSuccessStatusCode)
                 {
                     var responseString = response.Content.ReadAsStringAsync().Result;
                     returnItem = JsonConvert.DeserializeObject<List<ArmaUserPlaylistDataItem>>(responseString);
+                }
+            }
+
+            return returnItem;
+        }
+
+        public List<ArmaPlaylistDataItem> GetPlaylistById(int playlistId)
+        {
+            List<ArmaPlaylistDataItem> returnItem = new List<ArmaPlaylistDataItem>();
+
+            using (HttpClient client = new HttpClient())
+            {
+                var json = JsonConvert.SerializeObject(new
+                {
+                    playlistId = playlistId
+                });
+
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpUtility.UrlEncode(_globalState.appToken));
+
+                string endPoing = "https://armarad.com/Api"; // $"{(Debugger.IsAttached ? "https://localhost:7001/Api" : "https://armarad.com/Api")}";
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = client.PostAsync($"{endPoing}/GetPlaylistById", content).Result;
+
+                if (response != null && response.IsSuccessStatusCode)
+                {
+                    var responseString = response.Content.ReadAsStringAsync().Result;
+                    returnItem = JsonConvert.DeserializeObject<List<ArmaPlaylistDataItem>>(responseString);
                 }
             }
 

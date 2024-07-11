@@ -1,4 +1,5 @@
-﻿@inject armaoffline.Repositories.IArmaApi _armaApi
+﻿@using armaoffline.Models
+@inject armaoffline.Repositories.IArmaApi _armaApi
 @inject armaoffline.Services.GlobalState _globalState
 @inject IJSRuntime JS
 @page "/"
@@ -47,7 +48,12 @@
                 {
                     string currentToken = _globalState.appToken;
 
-                    var userPlaylists = _armaApi.GetUserPlaylists();
+                    List<ArmaUserPlaylistDataItem> userPlaylists = _armaApi.GetUserPlaylists();
+
+                    if (userPlaylists != null && userPlaylists.Count > 0)
+                    {
+                        List<ArmaPlaylistDataItem> firstPlaylist = _armaApi.GetPlaylistById(userPlaylists[0].Id);
+                    }
 
                     await JS.InvokeVoidAsync("loginError", "Login sucsessful");
                 }

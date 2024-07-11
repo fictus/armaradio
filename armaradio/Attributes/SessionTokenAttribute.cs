@@ -18,7 +18,7 @@ namespace armaradio.Attributes
 
             if (string.IsNullOrEmpty(token))
             {
-                context.Result = new UnauthorizedResult();
+                context.Result = new UnauthorizedResult(); //401
                 return;
             }
 

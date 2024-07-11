@@ -1,10 +1,13 @@
 ﻿using armaradio.Attributes;
 using armaradio.Models;
 using armaradio.Models.Home;
+using armaradio.Models.Request;
 using armaradio.Repositories;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 namespace armaradio.Controllers
 {
@@ -83,8 +86,8 @@ namespace armaradio.Controllers
             return new JsonResult(Ok());
         }
 
-        [SessionTokenAttribute]
-        [HttpGet]
+        [ApiTokenAttribute]
+        [HttpPost]
         public IActionResult GetUserPlaylists()
         {
             var userId = HttpContext.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -101,9 +104,9 @@ namespace armaradio.Controllers
             return new JsonResult(returnItem);
         }
 
-        [SessionTokenAttribute]
-        [HttpGet]
-        public IActionResult GetPlaylistById(int playlistId)
+        [ApiTokenAttribute]
+        [HttpPost]
+        public IActionResult GetPlaylistById([FromBody] ApiGetPlaylistByIdRequest value)
         {
             var userId = HttpContext.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var user = _userManager.FindByIdAsync(userId).Result;
@@ -114,7 +117,7 @@ namespace armaradio.Controllers
                 return NotFound();
             }
 
-            List<ArmaPlaylistDataItem> returnItem = _musicRepo.GetPlaylistById(playlistId, userId);
+            List<ArmaPlaylistDataItem> returnItem = _musicRepo.GetPlaylistById(value.PlaylistId, userId);
 
             return new JsonResult(returnItem);
         }
