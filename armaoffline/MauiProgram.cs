@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using armaoffline.Repositories;
+using armaoffline.Services;
 
 namespace armaoffline
 {
@@ -16,6 +17,7 @@ namespace armaoffline
                 });
 
 
+            builder.Services.AddSingleton<GlobalState>();
             builder.Services.AddTransient<IArmaApi, ArmaApi>();
 
             builder.Services.AddMauiBlazorWebView();

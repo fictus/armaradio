@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace armaoffline.Repositories
+namespace armaoffline.Models
 {
-    public interface IArmaApi
+    public class ApiSigninResponse
     {
-        bool Singin(string Email, string Password);
+        public string apiToken { get; set; }
     }
 }

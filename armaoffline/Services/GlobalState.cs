@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace armaoffline.Repositories
+namespace armaoffline.Services
 {
-    public interface IArmaApi
+    public class GlobalState
     {
-        bool Singin(string Email, string Password);
+        public string appToken { get; set; }
     }
 }

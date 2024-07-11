@@ -1,5 +1,67 @@
-﻿@page "/"
+﻿@inject armaoffline.Repositories.IArmaApi _armaApi
+@inject armaoffline.Services.GlobalState _globalState
+@inject IJSRuntime JS
+@page "/"
 
-<h1>Hello, world!</h1>
+<div class="row">
+    <div class="col-md-12">
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">User Name</span>
+            <input id="txtMainUserName" type="text" class="form-control" placeholder="Username" aria-label="Username" @bind="userName" />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Password</span>
+            <input id="txtMainPassword" type="password" class="form-control" placeholder="Password" aria-label="Password" @bind="password" />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <button class="btn btn-primary" @onclick="Login">Login</button>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <span id="lblLoginError"></span>
+    </div>
+</div>
 
-Welcome to your new app.
+@code {
+    private string userName = string.Empty;
+    private string password = string.Empty;
+    private string token = string.Empty;
+
+    private async void Login()
+    {
+        await JS.InvokeVoidAsync("loginError", "");
+
+        if (!string.IsNullOrWhiteSpace(userName) && !string.IsNullOrWhiteSpace(password))
+        {
+            try
+            {
+                if (_armaApi.Singin(userName, password))
+                {
+                    string currentToken = _globalState.appToken;
+
+                    await JS.InvokeVoidAsync("loginError", "Login sucsessful");
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("loginError", "Incorrect 'UserName' or 'Password'");
+                }
+            }
+            catch (Exception ex)
+            {
+                await JS.InvokeVoidAsync("loginError", ex.Message.ToString());
+            }
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("loginError", "'UserName'/'Password' are required");
+        }
+    }
+}
