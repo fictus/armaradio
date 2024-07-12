@@ -2,6 +2,7 @@
 using armaoffline.Repositories;
 using armaoffline.Services;
 using CommunityToolkit.Maui;
+using armaoffline.Providers;
 
 namespace armaoffline
 {
@@ -22,6 +23,7 @@ namespace armaoffline
             builder.Services.AddSingleton<GlobalState>();
             builder.Services.AddTransient<IArmaApi, ArmaApi>();
 
+
             builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
@@ -29,7 +31,11 @@ namespace armaoffline
     		builder.Logging.AddDebug();
 #endif
 
-            return builder.Build();
+            var app = builder.Build();
+
+            ServiceLocator.ServiceProvider = app.Services;
+
+            return app;
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using armaoffline.Models;
 using armaoffline.Services;
+using Microsoft.JSInterop;
+using Microsoft.Maui.Storage;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -103,27 +105,57 @@ namespace armaoffline.Repositories
                 }
             }
 
+            returnItem = returnItem.Where(sg => !string.IsNullOrWhiteSpace(sg.VideoId)).ToList();
+
             return returnItem;
         }
 
-        public byte[] GetAudioFile(string VideoId)
+        public void GetAudioFile(string VideoId)
         {
-            byte[] returnItem = null;
-
-            using (HttpClient client = new HttpClient())
+            if (!string.IsNullOrWhiteSpace(VideoId) && !CheckIfAudioFileExists(VideoId))
             {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpUtility.UrlEncode(_globalState.appToken));
+                byte[] fileBytes = null;
 
-                string endPoing = "https://armarad.com/Api"; // $"{(Debugger.IsAttached ? "https://localhost:7001/Api" : "https://armarad.com/Api")}";
-                var response = client.GetAsync($"{endPoing}/GetAudioFile?VideoId={HttpUtility.UrlEncode(VideoId)}").Result;
-
-                if (response != null && response.IsSuccessStatusCode)
+                using (HttpClient client = new HttpClient())
                 {
-                    returnItem = response.Content.ReadAsByteArrayAsync().Result;
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpUtility.UrlEncode(_globalState.appToken));
+
+                    string endPoing = "https://armarad.com/Api"; // $"{(Debugger.IsAttached ? "https://localhost:7001/Api" : "https://armarad.com/Api")}";
+                    var response = client.GetAsync($"{endPoing}/GetAudioFile?VideoId={HttpUtility.UrlEncode(VideoId.Trim())}").Result;
+
+                    if (response != null && response.IsSuccessStatusCode)
+                    {
+                        fileBytes = response.Content.ReadAsByteArrayAsync().Result;
+                    }
+                }
+
+                if (fileBytes != null)
+                {
+                    string audioFolderPath = Path.Combine(FileSystem.AppDataDirectory, "audio");
+                    string filePath = Path.Combine(audioFolderPath, $"{VideoId.Trim()}.mp3");
+
+                    File.WriteAllBytesAsync(filePath, fileBytes).Wait();
                 }
             }
+        }
 
-            return returnItem;
+        public bool CheckIfAudioFileExists(string VideoId)
+        {
+            if (!string.IsNullOrWhiteSpace(VideoId))
+            {
+                string audioFolderPath = Path.Combine(FileSystem.AppDataDirectory, "audio");
+
+                if (!Directory.Exists(audioFolderPath))
+                {
+                    Directory.CreateDirectory(audioFolderPath);
+                }
+
+                string filePath = Path.Combine(audioFolderPath, $"{VideoId.Trim()}.mp3");
+
+                return File.Exists(filePath);
+            }
+
+            return false;
         }
     }
 }

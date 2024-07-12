@@ -5,6 +5,7 @@ using armaradio.Models.Request;
 using armaradio.Models.Response;
 using armaradio.Models.Youtube;
 using armaradio.Repositories;
+using FFMpegCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +18,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using YoutubeExplode;
 using YoutubeExplode.Converter;
+using YoutubeExplode.Videos;
+using YoutubeExplode.Videos.Streams;
 
 namespace armaradio.Controllers
 {
@@ -321,7 +324,9 @@ namespace armaradio.Controllers
                 string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
                 string downloadFolder = (IsLinux ? $"{rootPath}/tempMp3/" : $"{rootPath}\\tempMp3\\");
                 string fileHandle = $"{Guid.NewGuid().ToString().ToLower()}.mp3";
+                string fileHandleTemp = $"{Guid.NewGuid().ToString().ToLower()}";
                 string endFile = $"{downloadFolder}{fileHandle}";
+                string endTempFile = $"{downloadFolder}{fileHandleTemp}";
 
                 if (!string.IsNullOrWhiteSpace(ArtistName))
                 {
@@ -340,7 +345,18 @@ namespace armaradio.Controllers
                 }
 
                 var youtube = new YoutubeExplode.YoutubeClient();
-                await youtube.Videos.DownloadAsync($"https://www.youtube.com/watch?v={VideoId}", endFile);
+                var streamManifest = await youtube.Videos.Streams.GetManifestAsync($"https://www.youtube.com/watch?v={VideoId}");
+                var allStreams = streamManifest.GetAudioOnlyStreams();
+                var streamInfo = allStreams.GetWithHighestBitrate();
+                endTempFile = $"{endTempFile}.{streamInfo.Container.Name}";
+
+                await youtube.Videos.Streams.DownloadAsync(streamInfo, endTempFile);
+                //await DownloadStreamAsync(streamInfo, endTempFile);
+                ConvertToMp3(endTempFile, endFile);
+
+                System.IO.File.Delete(endTempFile);
+
+                //await youtube.Videos.DownloadAsync($"https://www.youtube.com/watch?v={VideoId}", endFile);
 
 
                 MemoryStream memoryStream = new MemoryStream();
@@ -382,6 +398,17 @@ namespace armaradio.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
             }
+        }
+
+        private static void ConvertToMp3(string inputFilePath, string outputFilePath)
+        {
+            FFMpegArguments
+                .FromFileInput(inputFilePath)
+                .OutputToFile(outputFilePath, true, options => options
+                    .WithAudioCodec("libmp3lame")
+                    .WithAudioBitrate(192)
+                )
+                .ProcessSynchronously();
         }
 
         [HttpGet]
