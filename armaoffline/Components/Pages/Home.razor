@@ -1,6 +1,7 @@
 ﻿@using armaoffline.Models
 @inject armaoffline.Repositories.IArmaApi _armaApi
 @inject armaoffline.Services.GlobalState _globalState
+@inject NavigationManager Navigation
 @inject IJSRuntime JS
 @page "/"
 
@@ -44,18 +45,9 @@
         {
             try
             {
-                if (_armaApi.Singin(userName, password))
+                if (!string.IsNullOrWhiteSpace(_globalState.appToken) || _armaApi.Singin(userName, password))
                 {
-                    string currentToken = _globalState.appToken;
-
-                    List<ArmaUserPlaylistDataItem> userPlaylists = _armaApi.GetUserPlaylists();
-
-                    if (userPlaylists != null && userPlaylists.Count > 0)
-                    {
-                        List<ArmaPlaylistDataItem> firstPlaylist = _armaApi.GetPlaylistById(userPlaylists[0].Id);
-                    }
-
-                    await JS.InvokeVoidAsync("loginError", "Login sucsessful");
+                    Navigation.NavigateTo("/armaloader");
                 }
                 else
                 {

@@ -12,5 +12,6 @@ namespace armaoffline.Repositories
         bool Singin(string Email, string Password);
         List<ArmaUserPlaylistDataItem> GetUserPlaylists();
         List<ArmaPlaylistDataItem> GetPlaylistById(int playlistId);
+        byte[] GetAudioFile(string VideoId);
     }
 }

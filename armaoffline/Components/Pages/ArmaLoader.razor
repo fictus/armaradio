@@ -1,0 +1,49 @@
+﻿@using armaoffline.Models
+@inject armaoffline.Repositories.IArmaApi _armaApi
+@inject armaoffline.Services.GlobalState _globalState
+@inject IJSRuntime JS
+@page "/armaloader"
+@{
+    List<ArmaUserPlaylistDataItem> userPlaylists = _armaApi.GetUserPlaylists();
+
+    // if (userPlaylists != null && userPlaylists.Count > 0)
+    // {
+    //     List<ArmaPlaylistDataItem> firstPlaylist = _armaApi.GetPlaylistById(userPlaylists[0].Id);
+    // }
+}
+
+<h1>Armaradio</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <select id="cmbPlaylists" class="form-select" @onchange="OnChangeHandler">
+            <option value="">(select playlist)</option>
+            @{
+                foreach (var item in userPlaylists)
+                {
+                    <option value="@item.Id">@item.PlaylistName</option>
+                }
+            }
+        </select>
+    </div>
+</div>
+
+@code {
+    private string playlistSelectedValue;
+
+    private void OnChangeHandler(ChangeEventArgs e)
+    {
+        int? playlistId = (Int32.TryParse(e.Value.ToString(), out int _idValue) ? _idValue : (int?)null);
+
+        if (playlistId.HasValue)
+        {
+            List<ArmaPlaylistDataItem> firstPlaylist = _armaApi.GetPlaylistById(playlistId.Value);
+
+            
+        }
+        else
+        {
+            
+        }
+    }
+}

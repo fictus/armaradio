@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using armaoffline.Repositories;
 using armaoffline.Services;
+using CommunityToolkit.Maui;
 
 namespace armaoffline
 {
@@ -11,6 +12,7 @@ namespace armaoffline
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseMauiCommunityToolkitMediaElement()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

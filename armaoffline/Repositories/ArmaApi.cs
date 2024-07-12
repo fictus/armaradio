@@ -105,5 +105,25 @@ namespace armaoffline.Repositories
 
             return returnItem;
         }
+
+        public byte[] GetAudioFile(string VideoId)
+        {
+            byte[] returnItem = null;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpUtility.UrlEncode(_globalState.appToken));
+
+                string endPoing = "https://armarad.com/Api"; // $"{(Debugger.IsAttached ? "https://localhost:7001/Api" : "https://armarad.com/Api")}";
+                var response = client.GetAsync($"{endPoing}/GetAudioFile?VideoId={HttpUtility.UrlEncode(VideoId)}").Result;
+
+                if (response != null && response.IsSuccessStatusCode)
+                {
+                    returnItem = response.Content.ReadAsByteArrayAsync().Result;
+                }
+            }
+
+            return returnItem;
+        }
     }
 }
