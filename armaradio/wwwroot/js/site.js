@@ -392,6 +392,34 @@ var armaradio = {
         }
     },
     /************************************************
+        getFileExtensionFromMimeType
+    ************************************************/
+    getFileExtensionFromMimeType: function (mimeType) {
+        const mimeToExtMap = {
+            'image/jpeg': 'jpg',
+            'image/png': 'png',
+            'image/gif': 'gif',
+            'image/bmp': 'bmp',
+            'image/webp': 'webp',
+            'audio/mpeg': 'mp3',
+            'audio/x-wav': 'wav',
+            'video/mp4': 'mp4',
+            'video/webm': 'webm',
+            'application/pdf': 'pdf',
+            'text/plain': 'txt',
+            'application/json': 'json',
+            'application/xml': 'xml',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+            'application/zip': 'zip'
+            // Add more MIME types and extensions as needed
+        };
+
+        const defaultExt = 'dat';
+        
+        return mimeToExtMap[mimeType] || defaultExt;
+    },
+    /************************************************
         isValidJsonObject
     ************************************************/
     isValidJsonObject: function (data) {

@@ -3,7 +3,6 @@ using armaradio.Models;
 using armaradio.Models.Home;
 using armaradio.Models.Request;
 using armaradio.Repositories;
-using FFMpegCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Identity;
@@ -137,19 +136,44 @@ namespace armaradio.Controllers
 
         [ApiTokenAttribute]
         [HttpGet]
+        public async Task<IActionResult> GetAudioFileDetails(string VideoId)
+        {
+            try
+            {
+                var youtube = new YoutubeExplode.YoutubeClient();
+                var streamManifest = await youtube.Videos.Streams.GetManifestAsync($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}");
+                var allStreams = streamManifest.GetAudioOnlyStreams();
+                var streamInfo = allStreams.GetWithHighestBitrate();
+                var fileType = MimeTypes.GetMimeType($"tmpFileName.{streamInfo.Container.Name}");
+
+                return new JsonResult(new
+                {
+                    FileExtension = streamInfo.Container.Name,
+                    MimeType = fileType
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        [ApiTokenAttribute]
+        [HttpGet]
         public async Task<IActionResult> GetAudioFile(string VideoId)
         {
             try
             {
                 if (!string.IsNullOrWhiteSpace(VideoId))
                 {
-                    List<string> fileNameParts = new List<string>();
                     string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
                     string downloadFolder = (!IsWindows ? $"{rootPath}/tempMp3/" : $"{rootPath}\\tempMp3\\");
                     string fileHandle = $"{SanitizeFileName(VideoId).ToLower()}.mp3";
                     string fileHandleTemp = $"{Guid.NewGuid().ToString().ToLower()}";
                     string endFile = $"{downloadFolder}{fileHandle}";
                     string endTempFile = $"{downloadFolder}{fileHandleTemp}";
+
+                    string fileName = SanitizeFileName(VideoId).ToLower();
 
                     if (!System.IO.Directory.Exists(downloadFolder))
                     {
@@ -160,27 +184,29 @@ namespace armaradio.Controllers
                     var streamManifest = await youtube.Videos.Streams.GetManifestAsync($"https://www.youtube.com/watch?v={VideoId}");
                     var allStreams = streamManifest.GetAudioOnlyStreams();
                     var streamInfo = allStreams.GetWithHighestBitrate();
+                    fileName = $"{fileName}.{streamInfo.Container.Name}";
                     endTempFile = $"{endTempFile}.{streamInfo.Container.Name}";
+                    fileHandleTemp = $"{fileHandleTemp}.{streamInfo.Container.Name}";
 
                     await youtube.Videos.Streams.DownloadAsync(streamInfo, endTempFile);
 
-                    ConvertToMp3(endTempFile, endFile);
+                    //ConvertToMp3(endTempFile, endFile);
 
-                    System.IO.File.Delete(endTempFile);
+                    //System.IO.File.Delete(endTempFile);
 
                     MemoryStream memoryStream = new MemoryStream();
-                    using (FileStream fileStream = new FileStream(endFile, FileMode.Open, FileAccess.Read))
+                    using (FileStream fileStream = new FileStream(endTempFile, FileMode.Open, FileAccess.Read))
                     {
                         fileStream.CopyTo(memoryStream);
                     }
 
-                    System.IO.File.Delete(endFile);
+                    System.IO.File.Delete(endTempFile);
 
                     memoryStream.Position = 0;
 
-                    var returnItem = new FileStreamResult(memoryStream, "audio/mpeg")
+                    var returnItem = new FileStreamResult(memoryStream, MimeTypes.GetMimeType(fileHandleTemp)) //"audio/mpeg"
                     {
-                        FileDownloadName = fileHandle,
+                        FileDownloadName = fileName
                     };
 
                     Response.RegisterForDispose(memoryStream);
@@ -198,16 +224,16 @@ namespace armaradio.Controllers
             }
         }
 
-        private static void ConvertToMp3(string inputFilePath, string outputFilePath)
-        {
-            FFMpegArguments
-                .FromFileInput(inputFilePath)
-                .OutputToFile(outputFilePath, true, options => options
-                    .WithAudioCodec("libmp3lame")
-                    .WithAudioBitrate(192)
-                )
-                .ProcessSynchronously();
-        }
+        //private static void ConvertToMp3(string inputFilePath, string outputFilePath)
+        //{
+        //    FFMpegArguments
+        //        .FromFileInput(inputFilePath)
+        //        .OutputToFile(outputFilePath, true, options => options
+        //            .WithAudioCodec("libmp3lame")
+        //            .WithAudioBitrate(192)
+        //        )
+        //        .ProcessSynchronously();
+        //}
 
         public static string SanitizeFileName(string fileName)
         {

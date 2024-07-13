@@ -120,8 +120,8 @@ namespace armaoffline.Repositories
                 {
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpUtility.UrlEncode(_globalState.appToken));
 
-                    string endPoing = "https://armarad.com/Api"; // $"{(Debugger.IsAttached ? "https://localhost:7001/Api" : "https://armarad.com/Api")}";
-                    var response = client.GetAsync($"{endPoing}/GetAudioFile?VideoId={HttpUtility.UrlEncode(VideoId.Trim())}").Result;
+                    string endPoint = "https://armarad.com/Api"; // $"{(Debugger.IsAttached ? "https://localhost:7001/Api" : "https://armarad.com/Api")}";
+                    var response = client.GetAsync($"{endPoint}/GetAudioFile?VideoId={HttpUtility.UrlEncode(VideoId.Trim())}").Result;
 
                     if (response != null && response.IsSuccessStatusCode)
                     {

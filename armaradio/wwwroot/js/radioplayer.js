@@ -23,26 +23,34 @@ function radioplayer_attachEvents() {
             songParts.push(songName);
         }
 
-        let fileName = armaradio.sanitizeFileName(songParts.join(" - ")) + ".mp3";
+        let fileName = armaradio.sanitizeFileName(songParts.join(" - "));
 
         if (videoId != "") {
             armaradio.masterPageWait(true);
 
-            armaradio.getFileAsBlob(ajaxPointCall + "/Music/GetAudioFile", {
-                ArtistName: artistName,
-                SongName: songName,
+            armaradio.masterAJAXGet({
                 VideoId: videoId
-            })
-                .then(function (blobResponse) {
-                    const url = window.URL.createObjectURL(blobResponse);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = fileName;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
+            }, "Music", "GetAudioFileDetails")
+                .then(function (response) {
+                    let fileExtension = response.fileExtension || ".mp3";
+                    let mimeType = response.mimeType || "audio/mpeg";
 
-                    armaradio.masterPageWait(false);
+                    armaradio.getFileAsBlob(ajaxPointCall + "/Music/GetAudioFile", {
+                        ArtistName: artistName,
+                        SongName: songName,
+                        VideoId: videoId
+                    }, mimeType)
+                        .then(function (blobResponse) {
+                            const url = window.URL.createObjectURL(blobResponse);
+                            const a = document.createElement("a");
+                            a.href = url;
+                            a.download = fileName + fileExtension;
+                            document.body.appendChild(a);
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+
+                            armaradio.masterPageWait(false);
+                        });
                 });
         }
     });
