@@ -32,7 +32,7 @@ function radioplayer_attachEvents() {
                 VideoId: videoId
             }, "Music", "GetAudioFileDetails")
                 .then(function (response) {
-                    let fileExtension = response.fileExtension || ".mp3";
+                    let fileExtension = response.fileExtension || "mp3";
                     let mimeType = response.mimeType || "audio/mpeg";
 
                     armaradio.getFileAsBlob(ajaxPointCall + "/Music/GetAudioFile", {
@@ -44,7 +44,7 @@ function radioplayer_attachEvents() {
                             const url = window.URL.createObjectURL(blobResponse);
                             const a = document.createElement("a");
                             a.href = url;
-                            a.download = fileName + fileExtension;
+                            a.download = fileName + "." + fileExtension;
                             document.body.appendChild(a);
                             a.click();
                             window.URL.revokeObjectURL(url);

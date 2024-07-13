@@ -110,11 +110,39 @@ namespace armaoffline.Repositories
             return returnItem;
         }
 
-        public void GetAudioFile(string VideoId)
+        public ApiAudioDetailsDataItem GetAudioFileDetails(string VideoId)
         {
-            if (!string.IsNullOrWhiteSpace(VideoId) && !CheckIfAudioFileExists(VideoId))
+            ApiAudioDetailsDataItem returnItem = null;
+
+            if (!string.IsNullOrWhiteSpace(VideoId))
             {
                 byte[] fileBytes = null;
+
+                using (HttpClient client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpUtility.UrlEncode(_globalState.appToken));
+
+                    string endPoint = "https://armarad.com/Api"; // $"{(Debugger.IsAttached ? "https://localhost:7001/Api" : "https://armarad.com/Api")}";
+                    var response = client.GetAsync($"{endPoint}/GetAudioFileDetails?VideoId={HttpUtility.UrlEncode(VideoId.Trim())}").Result;
+
+                    if (response != null && response.IsSuccessStatusCode)
+                    {
+                        //ApiAudioDetailsDataItem
+                        var responseString = response.Content.ReadAsStringAsync().Result;
+                        returnItem = JsonConvert.DeserializeObject<ApiAudioDetailsDataItem>(responseString);
+                    }
+                }
+            }
+
+            return returnItem;
+        }
+
+        public void GetAudioFile(string VideoId)
+        {
+            if (!string.IsNullOrWhiteSpace(VideoId) && !CheckIfAudioFileExists($"{VideoId.Trim()}.mp3"))
+            {
+                byte[] fileBytes = null;
+                ApiAudioDetailsDataItem audioDetails = GetAudioFileDetails(VideoId);
 
                 using (HttpClient client = new HttpClient())
                 {
@@ -132,9 +160,12 @@ namespace armaoffline.Repositories
                 if (fileBytes != null)
                 {
                     string audioFolderPath = Path.Combine(FileSystem.AppDataDirectory, "audio");
-                    string filePath = Path.Combine(audioFolderPath, $"{VideoId.Trim()}.mp3");
+                    string filePath = Path.Combine(audioFolderPath, $"{VideoId.Trim()}.{(audioDetails != null ? audioDetails.FileExtension : "mp3")}");
 
-                    File.WriteAllBytesAsync(filePath, fileBytes).Wait();
+                    if (!CheckIfAudioFileExists($"{VideoId.Trim()}.{(audioDetails != null ? audioDetails.FileExtension : "mp3")}"))
+                    {
+                        File.WriteAllBytesAsync(filePath, fileBytes).Wait();
+                    }
                 }
             }
         }
@@ -150,7 +181,7 @@ namespace armaoffline.Repositories
                     Directory.CreateDirectory(audioFolderPath);
                 }
 
-                string filePath = Path.Combine(audioFolderPath, $"{VideoId.Trim()}.mp3");
+                string filePath = Path.Combine(audioFolderPath, VideoId.Trim());
 
                 return File.Exists(filePath);
             }
