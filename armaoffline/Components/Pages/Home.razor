@@ -1,6 +1,7 @@
 ﻿@using armaoffline.Models
 @inject armaoffline.Repositories.IArmaApi _armaApi
 @inject armaoffline.Services.GlobalState _globalState
+@inject armaoffline.Data.IDapperHelper _dapper
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 @page "/"
@@ -36,6 +37,14 @@
     private string userName = string.Empty;
     private string password = string.Empty;
     private string token = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dapper.CreateDatabase();
+        }
+    }
 
     private async void Login()
     {

@@ -1,5 +1,7 @@
-﻿using armaoffline.Models;
+﻿using armaoffline.Data;
+using armaoffline.Models;
 using armaoffline.Services;
+using Dapper;
 using Microsoft.JSInterop;
 using Microsoft.Maui.Storage;
 using Newtonsoft.Json;
@@ -17,9 +19,14 @@ namespace armaoffline.Repositories
     public class ArmaApi : IArmaApi
     {
         public static GlobalState _globalState;
-        public ArmaApi(GlobalState globalState)
+        private readonly IDapperHelper _dapper;
+        public ArmaApi(
+            GlobalState globalState,
+            IDapperHelper dapper
+        )
         {
             _globalState = globalState;
+            _dapper = dapper;
         }
 
         public bool Singin(string Email, string Password)
@@ -47,12 +54,124 @@ namespace armaoffline.Repositories
                     {
                         _globalState.appToken = returnItem.apiToken;
 
+                        int userid = _dapper.GetFirstOrDefault<int>(@"
+                            with existinguser as (
+                                select 1 from armausers where username=@username
+                            )
+                            insert into armausers
+                            (
+                                username
+                            )
+                            select
+                                @username
+                            where not exists (
+                                select 1 from existinguser
+                            );
+
+                            select
+                                id
+                            from armausers
+                            where
+                                username=@username;
+                        ", new
+                        {
+                            username = (Email ?? "").Trim().ToLower()
+                        });
+
+                        _globalState.localUserId = userid;
+
+                        RepopulateUserPlaylistAndSongs();
+
                         nowSignedIn = true;
                     }
                 }
             }
 
             return nowSignedIn;
+        }
+
+        public void RepopulateUserPlaylistAndSongs()
+        {
+            using (var conn = _dapper.GetConnection())
+            {
+                _dapper.ExecuteNonQuery(conn, @"
+                    delete from playlists
+                    where
+                        userid=@userid;
+
+                    delete from usersongs
+                    where
+                        userid=@userid;
+                    ", new
+                    {
+                        userid = _globalState.localUserId
+                    });
+
+                List<ArmaUserPlaylistDataItem> playlists = GetUserPlaylists() ?? new List<ArmaUserPlaylistDataItem>();
+
+                foreach (var playlist in playlists)
+                {
+                    List<ArmaPlaylistDataItem> songs = GetPlaylistById(playlist.Id) ?? new List<ArmaPlaylistDataItem>();
+
+                    int localPlaylistId = _dapper.GetFirstOrDefault<int>(conn, @"
+                        insert into playlists
+                        (
+                            playlistid,
+                            userid,
+                            playlistname
+                        )
+                        values
+                        (
+                            @playlistid,
+                            @userid,
+                            @playlistname
+                        );
+
+                        select
+                            id
+                        from playlists
+                        where
+                            playlistid=@playlistid;
+                        ", new
+                        {
+                            playlistid = playlist.Id,
+                            userid = _globalState.localUserId,
+                            playlistname = (playlist.PlaylistName ?? "")
+                        });
+
+                    foreach (var song in songs.Where(sg => !string.IsNullOrWhiteSpace(sg.VideoId)).ToList())
+                    {
+                        _dapper.ExecuteNonQuery(conn, @"
+                            insert into usersongs
+                            (
+                                songid,
+                                playlistid,
+                                userid,
+                                videoid,
+                                songname,
+                                artist
+                            )
+                            values
+                            (
+                                @songid,
+                                @playlistid,
+                                @userid,
+                                @videoid,
+                                @songname,
+                                @artist
+                            );
+                        ", new
+                            {
+                                songid = song.Id,
+                                playlistid = localPlaylistId,
+                                userid = _globalState.localUserId,
+                                videoid = song.VideoId,
+                                songname = song.Song,
+                                artist = song.Artist
+                            });
+                    }
+                }
+            }
         }
 
         public List<ArmaUserPlaylistDataItem> GetUserPlaylists()
@@ -139,7 +258,19 @@ namespace armaoffline.Repositories
 
         public void GetAudioFile(string VideoId)
         {
-            if (!string.IsNullOrWhiteSpace(VideoId) && !CheckIfAudioFileExists($"{VideoId.Trim()}.mp3"))
+            string fileName = _dapper.GetFirstOrDefault<string>(@"
+                select
+                    filename
+                from localsongs
+                where
+                    videoid=@videoid;
+            ",
+            new
+            {
+                videoid = VideoId
+            });
+
+            if (!string.IsNullOrWhiteSpace(VideoId) && string.IsNullOrWhiteSpace(fileName))
             {
                 byte[] fileBytes = null;
                 ApiAudioDetailsDataItem audioDetails = GetAudioFileDetails(VideoId);
@@ -160,19 +291,38 @@ namespace armaoffline.Repositories
                 if (fileBytes != null)
                 {
                     string audioFolderPath = Path.Combine(FileSystem.AppDataDirectory, "audio");
-                    string filePath = Path.Combine(audioFolderPath, $"{VideoId.Trim()}.{(audioDetails != null ? audioDetails.FileExtension : "mp3")}");
+                    string fileNameFinal = $"{VideoId.Trim()}.{(audioDetails != null ? audioDetails.FileExtension : "mp3")}";
+                    string filePath = Path.Combine(audioFolderPath, fileNameFinal);
 
-                    if (!CheckIfAudioFileExists($"{VideoId.Trim()}.{(audioDetails != null ? audioDetails.FileExtension : "mp3")}"))
+                    if (!CheckIfAudioFileExists(fileNameFinal))
                     {
                         File.WriteAllBytesAsync(filePath, fileBytes).Wait();
+
+                        _dapper.ExecuteNonQuery(@"
+                            insert into localsongs
+                            (
+                                videoid,
+                                filename
+                            )
+                            values
+                            (
+                                @videoid,
+                                @filename
+                            );
+                        ",
+                        new
+                        {
+                            videoid = VideoId.Trim(),
+                            filename = fileNameFinal
+                        });
                     }
                 }
             }
         }
 
-        public bool CheckIfAudioFileExists(string VideoId)
+        public bool CheckIfAudioFileExists(string FileName)
         {
-            if (!string.IsNullOrWhiteSpace(VideoId))
+            if (!string.IsNullOrWhiteSpace(FileName))
             {
                 string audioFolderPath = Path.Combine(FileSystem.AppDataDirectory, "audio");
 
@@ -181,7 +331,38 @@ namespace armaoffline.Repositories
                     Directory.CreateDirectory(audioFolderPath);
                 }
 
-                string filePath = Path.Combine(audioFolderPath, VideoId.Trim());
+                string filePath = Path.Combine(audioFolderPath, FileName.Trim());
+
+                return File.Exists(filePath);
+            }
+
+            return false;
+        }
+
+        public bool CheckIfAudioFileExistsByVideoId(string VideoId)
+        {
+            string fileName = _dapper.GetFirstOrDefault<string>(@"
+                select
+                    filename
+                from localsongs
+                where
+                    videoid=@videoid;
+            ",
+            new
+            {
+                videoid = VideoId
+            });
+
+            if (!string.IsNullOrWhiteSpace(fileName))
+            {
+                string audioFolderPath = Path.Combine(FileSystem.AppDataDirectory, "audio");
+
+                if (!Directory.Exists(audioFolderPath))
+                {
+                    Directory.CreateDirectory(audioFolderPath);
+                }
+
+                string filePath = Path.Combine(audioFolderPath, fileName.Trim());
 
                 return File.Exists(filePath);
             }

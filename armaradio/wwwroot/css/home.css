@@ -1,3 +1,8 @@
+html body .vjs-poster {
+    background-size: cover;
+    background-position: center;
+    display: block !important;
+}
 .bottom-controls {
     position: fixed;
     bottom: 0;

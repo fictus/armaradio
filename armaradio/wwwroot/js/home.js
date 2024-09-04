@@ -1,4 +1,5 @@
 var arma_mainSearchSelectedType = "1";
+var localHomePlayer;
 
 $(document).ready(function () {
     mainload_attacheEvents();
@@ -631,6 +632,14 @@ function mainload_attacheEvents() {
     $("#lnkCloseRadio").on("click", function (e) {
         e.preventDefault();
 
+        if (radioPlayerMain) {
+            try {
+                radioPlayerMain.dispose();
+            } catch (ex) {
+
+            }
+        }
+
         $("#dvRadioPlayerHolder").css("display", "none");
         $("#dvRadioPlayer_currentlyPlaying").find(".iframe-holder").replaceWith("<div class=\"iframe-holder pl-0 pt-0\"></div>");
     });
@@ -1016,27 +1025,46 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
             currentRow.addClass("now-playing");
 
             if (videoId != "") {
-                let newIframe = $("<iframe></iframe");
+                let newIframe = $("<video></video");
                 newIframe.attr({
                     "id": "armaMainPlayer",
-                    "class": "iframe-holder",
-                    "src": "https://www.youtube.com/embed/" + videoId + "?enablejsapi=1",
-                    "width": "356", //560
-                    "height": "200", //315
-                    "frameborder": "0",
-                    "allow": "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
-                    "allowfullscreen": ""
+                    "class": "iframe-holder video-js vjs-default-skin"
                 });
+
+                if (localHomePlayer) {
+                    try {
+                        localHomePlayer.dispose();
+                    } catch (ex) {
+
+                    }
+                }
 
                 $("#dvMainPlay_currentlyPlaying").find(".iframe-holder").remove();
                 $("#dvMainPlay_currentlyPlaying").append(newIframe);
+                
+                localHomePlayer = videojs("armaMainPlayer", {
+                    width: 356,
+                    height: 200,
+                    autoplay: true,
+                    controls: true,
+                    poster: "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID(),
+                    sources: [{
+                        src: (ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId),
+                        type: "audio/webm"
+                    }]
+                });
 
-                let player = new YT.Player("armaMainPlayer", {
-                    events: {
-                        "onReady": onPlayerReady,
-                        "onStateChange": onPlayerStateChange,
-                        "onError": onPlayerError
-                    }
+                localHomePlayer.on("error", function () {
+                    console.error("error:", player.error());
+                });
+                localHomePlayer.on("ready", function () {
+                    restoreVolume(localHomePlayer);
+                });
+                localHomePlayer.on("ended", function () {
+                    onPlayerStateChange();
+                });
+                localHomePlayer.on("volumechange", function () {
+                    saveVolume(localHomePlayer);
                 });
 
                 armaradio.masterPageWait(false);
@@ -1051,29 +1079,48 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                                 currentRow.attr({
                                     "data-videoid": response.videoId,
                                     "data-alternateids": (response.alternateIds || []).join(",")
-                                });
+                                }); //videoId 
 
-                                let newIframe = $("<iframe></iframe");
+                                let newIframe = $("<video></video");
                                 newIframe.attr({
                                     "id": "armaMainPlayer",
-                                    "class": "iframe-holder",
-                                    "src": response.embedUrl,
-                                    "width": "356", //560
-                                    "height": "200", //315
-                                    "frameborder": "0",
-                                    "allow": "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
-                                    "allowfullscreen": ""
+                                    "class": "iframe-holder video-js vjs-default-skin"
                                 });
+
+                                if (localHomePlayer) {
+                                    try {
+                                        localHomePlayer.dispose();
+                                    } catch (ex) {
+
+                                    }
+                                }
 
                                 $("#dvMainPlay_currentlyPlaying").find(".iframe-holder").remove();
                                 $("#dvMainPlay_currentlyPlaying").append(newIframe);
 
-                                let player = new YT.Player("armaMainPlayer", {
-                                    events: {
-                                        "onReady": onPlayerReady,
-                                        "onStateChange": onPlayerStateChange,
-                                        "onError": onPlayerError
-                                    }
+                                localHomePlayer = videojs("armaMainPlayer", {
+                                    width: 356,
+                                    height: 200,
+                                    autoplay: true,
+                                    controls: true,
+                                    poster: "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID(),
+                                    sources: [{
+                                        src: (ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + response.videoId),
+                                        type: "audio/webm"
+                                    }]
+                                });
+
+                                localHomePlayer.on("error", function () {
+                                    console.error("error:", player.error());
+                                });
+                                localHomePlayer.on("ready", function () {
+                                    restoreVolume(localHomePlayer);
+                                });
+                                localHomePlayer.on("ended", function () {
+                                    onPlayerStateChange();
+                                });
+                                localHomePlayer.on("volumechange", function () {
+                                    saveVolume(localHomePlayer);
                                 });
 
                                 armaradio.masterPageWait(false);
@@ -1085,6 +1132,14 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                                 });
 
                                 newIframe.append($("<span class=\"lbl-not-found\"></span>").html("Song not found"));
+
+                                if (localHomePlayer) {
+                                    try {
+                                        localHomePlayer.dispose();
+                                    } catch (ex) {
+
+                                    }
+                                }
 
                                 $("#dvMainPlay_currentlyPlaying").find(".iframe-holder").remove();
                                 $("#dvMainPlay_currentlyPlaying").append(newIframe);
@@ -1165,21 +1220,43 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
     armaradio.masterPageWait(false);
 }
 
+function saveVolume(currentPlayer) {
+    localStorage.setItem("videoVolume", currentPlayer.volume());
+}
+
+function restoreVolume(currentPlayer) {
+    let savedVolume = localStorage.getItem("videoVolume");
+    if (savedVolume !== null) {
+        currentPlayer.volume(parseFloat(savedVolume));
+    }
+}
+
 function onPlayerReady(e) {
     e.target.playVideo();
 }
 
-function onPlayerStateChange(e) {
-    if (e.data == YT.PlayerState.ENDED) {
-        let currentStatus = $.trim($("#btnMainPlayerToggleRepeat").attr("data-status"));
+//function onPlayerStateChange(e) {
+//    if (e.data == YT.PlayerState.ENDED) {
+//        let currentStatus = $.trim($("#btnMainPlayerToggleRepeat").attr("data-status"));
 
-        if (currentStatus == "1") {
-            e.target.playVideo();
-        } else {
-            playerPlayNext();
-        }
+//        if (currentStatus == "1") {
+//            e.target.playVideo();
+//        } else {
+//            playerPlayNext();
+//        }
+//    } else {
+//        console.log(e);
+//    }
+//}
+
+function onPlayerStateChange() {
+    let currentStatus = $.trim($("#btnMainPlayerToggleRepeat").attr("data-status"));
+
+    if (currentStatus == "1") {
+        localHomePlayer.currentTime(0);
+        localHomePlayer.play();
     } else {
-        console.log(e);
+        playerPlayNext();
     }
 }
 

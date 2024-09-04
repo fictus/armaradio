@@ -9,5 +9,6 @@ namespace armaoffline.Services
     public class GlobalState
     {
         public string appToken { get; set; }
+        public int? localUserId { get; set; }
     }
 }

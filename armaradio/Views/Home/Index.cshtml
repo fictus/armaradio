@@ -5,6 +5,7 @@
     bool userIsAuthenticated = (this.Context.User?.Identity?.IsAuthenticated ?? false);
 }
 
+<link href="https://vjs.zencdn.net/8.16.1/video-js.css" rel="stylesheet" />
 <link href="~/css/home.css" rel="stylesheet" asp-append-version="true" />
 
 <button id="btnArtistAlbumsOpen" class="btn btn-primary" style="display:none;">
@@ -329,7 +330,8 @@
     </div>
 }
 
-<script src="https://www.youtube.com/iframe_api"></script>
+@* <script src="https://www.youtube.com/iframe_api"></script> *@
+<script src="https://vjs.zencdn.net/8.16.1/video.min.js"></script>
 @if (userIsAuthenticated)
 {
     <script src="~/js/radioplayer.js" asp-append-version="true"></script>

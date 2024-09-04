@@ -1,7 +1,19 @@
 ﻿$(document).ready(function () {
     pageMainAttachEvents();
     attachLoginRegisterEvents();
+    wireKeepAliveHack();
 });
+
+function wireKeepAliveHack() {
+    
+
+    //document.addEventListener("visibilitychange", function () {
+    //    if (document.visibilityState === "hidden") {
+    //        // Ensure the dummy iframe is kept alive
+    //        document.getElementById("keepAliveFrm").contentWindow.location.reload(true);
+    //    }
+    //});
+}
 
 function pageMainAttachEvents() {    
     $("#dvMasterWarning").modal();
@@ -278,6 +290,13 @@ function ajaxHandleRedirect(response, fetchData) {
         });
 
     return d.promise();
+}
+
+function generateGUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }
 
 function isJSON(str) {

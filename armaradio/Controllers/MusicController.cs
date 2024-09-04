@@ -8,9 +8,12 @@ using armaradio.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.IO.Pipes;
+using System.Net;
 using System.Net.Mime;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -332,6 +335,155 @@ namespace armaradio.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> FetchAudioFile(string VideoId)
+        {
+            try
+            {
+                var youtube = new YoutubeExplode.YoutubeClient();
+                var streamManifest = await youtube.Videos.Streams.GetManifestAsync($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}");
+                var allStreams = streamManifest.GetAudioOnlyStreams();
+                var streamInfo = allStreams.GetWithHighestBitrate();
+                var fileType = MimeTypes.GetMimeType($"tmpFileName.{streamInfo.Container.Name}");
+                var fileName = $"{VideoId.Trim()}.{streamInfo.Container.Name}";
+
+                string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
+                string downloadFolder = (IsLinux ? $"{rootPath}/AudioFiles/" : $"{rootPath}\\AudioFiles\\");
+                string endFileName = $"{downloadFolder}{fileName}";
+
+                if (!System.IO.Directory.Exists(downloadFolder))
+                {
+                    System.IO.Directory.CreateDirectory(downloadFolder);
+                }
+
+                if (!System.IO.File.Exists(endFileName))
+                {
+                    await youtube.Videos.Streams.DownloadAsync(streamInfo, endFileName);
+                }
+
+                byte[] fileBytes = System.IO.File.ReadAllBytes(endFileName);
+
+                long size, start, end, length, fp = 0;
+                using (var reader = new System.IO.StreamReader(endFileName))
+                {
+                    size = reader.BaseStream.Length;
+                    start = 0;
+                    end = size - 1;
+                    length = size;
+
+                    // Set the "Accept-Ranges" header to indicate that we support range requests
+                    HttpContext.Response.Headers.Add("Accept-Ranges", "0-" + size);
+
+                    // Handle range requests
+                    if (!string.IsNullOrEmpty(HttpContext.Request.Headers["Range"]))
+                    {
+                        long anotherStart = start;
+                        long anotherEnd = end;
+                        var rangeParts = HttpContext.Request.Headers["Range"].ToString().Split(new char[] { '=' }, 2);
+                        var range = rangeParts[1];
+
+                        // Ensure the client hasn't sent a multi-byte range
+                        if (range.Contains(","))
+                        {
+                            HttpContext.Response.Headers.Add("Content-Range", $"bytes {start}-{end}/{size}");
+                            return new StatusCodeResult(StatusCodes.Status416RangeNotSatisfiable);
+                        }
+
+                        // Parse the range request
+                        if (range.StartsWith("-"))
+                        {
+                            anotherStart = size - long.Parse(range.Substring(1));
+                        }
+                        else
+                        {
+                            var rangeBounds = range.Split(new char[] { '-' }, 2);
+                            anotherStart = long.Parse(rangeBounds[0]);
+                            long temp = 0;
+                            anotherEnd = (rangeBounds.Length > 1 && long.TryParse(rangeBounds[1], out temp)) ? long.Parse(rangeBounds[1]) : size;
+                        }
+
+                        // Validate the requested range
+                        anotherEnd = (anotherEnd > end) ? end : anotherEnd;
+                        if (anotherStart > anotherEnd || anotherStart > size - 1 || anotherEnd >= size)
+                        {
+                            HttpContext.Response.Headers.Add("Content-Range", $"bytes {start}-{end}/{size}");
+                            return new StatusCodeResult(StatusCodes.Status416RangeNotSatisfiable);
+                        }
+
+                        start = anotherStart;
+                        end = anotherEnd;
+                        length = end - start + 1;
+                        fp = reader.BaseStream.Seek(start, SeekOrigin.Begin);
+                        HttpContext.Response.StatusCode = StatusCodes.Status206PartialContent;
+                    }
+                }
+
+                HttpContext.Response.ContentType = fileType;
+                HttpContext.Response.Headers.Add("Cache-Control", "no-cache");
+                HttpContext.Response.Headers.Add("Content-Disposition", $"inline; filename=\"{VideoId}.{streamInfo.Container.Name}\"");
+                HttpContext.Response.Headers.Add("Content-Range", $"bytes {start}-{end}/{size}");
+                HttpContext.Response.Headers.Add("Content-Length", length.ToString());
+
+                return new FileContentResult(fileBytes, fileType); //fileName
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        //[HttpGet]
+        //public async Task<IActionResult> FetchAudioFile(string VideoId)
+        //{
+        //    try
+        //    {
+        //        var youtube = new YoutubeExplode.YoutubeClient();
+        //        var streamManifest = await youtube.Videos.Streams.GetManifestAsync($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}");
+        //        var allStreams = streamManifest.GetAudioOnlyStreams();
+        //        var streamInfo = allStreams.GetWithHighestBitrate();
+        //        var fileType = MimeTypes.GetMimeType($"tmpFileName.{streamInfo.Container.Name}");
+        //        var fileName = $"{VideoId.Trim()}.{streamInfo.Container.Name}";
+
+        //        string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
+        //        string downloadFolder = (IsLinux ? $"{rootPath}/AudioFiles/" : $"{rootPath}\\AudioFiles\\");
+        //        string endFileName = $"{downloadFolder}{fileName}";
+
+        //        if (!System.IO.Directory.Exists(downloadFolder))
+        //        {
+        //            System.IO.Directory.CreateDirectory(downloadFolder);
+        //        }
+
+        //        if (!System.IO.File.Exists(endFileName))
+        //        {
+        //            await youtube.Videos.Streams.DownloadAsync(streamInfo, endFileName);
+        //        }
+
+        //        byte[] fileBytes = System.IO.File.ReadAllBytes(endFileName);
+        //        long fileLength = fileBytes.Length;
+
+        //        var requestHeaders = Request.Headers;
+        //        if (requestHeaders.ContainsKey("Range"))
+        //        {
+        //            string rangeHeader = requestHeaders["Range"];
+        //            long start, end;
+        //            if (RangeHelper.TryParseRange(rangeHeader, fileLength, out start, out end))
+        //            {
+        //                Response.Headers.Add("Content-Range", $"bytes {start}-{end}/{fileLength}");
+        //                Response.StatusCode = (int)HttpStatusCode.PartialContent;
+        //                return new FileContentResult(fileBytes.AsSpan((int)start, (int)(end - start + 1)).ToArray(), "video/webm");
+        //            }
+        //        }
+
+        //        HttpContext.Response.StatusCode = StatusCodes.Status206PartialContent;
+
+        //        return new FileContentResult(fileBytes, fileType); //fileName
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+        //    }
+        //}
 
         [HttpGet]
         [Authorize]
@@ -799,6 +951,38 @@ namespace armaradio.Controllers
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        private class RangeHelper
+        {
+            public static bool TryParseRange(string rangeHeader, long fileLength, out long start, out long end)
+            {
+                start = 0;
+                end = fileLength - 1;
+
+                if (rangeHeader.StartsWith("bytes="))
+                {
+                    rangeHeader = rangeHeader.Substring("bytes=".Length);
+                    var parts = rangeHeader.Split('-');
+                    if (parts.Length == 2 && long.TryParse(parts[0], out start) && long.TryParse(parts[1], out end))
+                    {
+                        if (start > end)
+                        {
+                            (start, end) = (end, start);
+                        }
+                        if (start < 0)
+                        {
+                            start = 0;
+                        }
+                        if (end >= fileLength)
+                        {
+                            end = fileLength - 1;
+                        }
+                        return true;
+                    }
+                }
+                return false;
             }
         }
 

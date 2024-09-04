@@ -274,6 +274,8 @@
         </div>
     </div>
 
+    @* <iframe id="keepAliveFrm" src="about:blank" style="position: absolute; width: 1px; height: 1px; border: 0; top: -1000px; left: -1000px;"></iframe> *@
+
     @* <footer class="border-top footer text-muted">
         <div class="container">
             &copy; 2024 - armaradio  - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
@@ -293,6 +295,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.13.6/underscore-min.js" integrity="sha512-2V49R8ndaagCOnwmj8QnbT1Gz/rie17UouD9Re5WxbzRVUGoftCu5IuqqtAM9+UC3fwfHCSJR1hkzNQh/2wdtg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdn.jsdelivr.net/npm/@@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/worker-timer.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
