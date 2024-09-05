@@ -429,50 +429,80 @@ namespace armaradio.Repositories
         public List<TrackDataItem> GetCurrentTop100()
         {
             List<TrackDataItem> returnItem = new List<TrackDataItem>();
+            int? key_id = _dapper.GetFirstOrDefault<int?>("radioconn", "Top100_GetDailyKey");
 
-            string url = "https://www.billboard.com/charts/hot-100/";
-
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
-
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            if (key_id.HasValue)
             {
-                if (response.StatusCode == HttpStatusCode.OK)
+                returnItem = _dapper.GetList<TrackDataItem>("radioconn", "Top100_GetTodaysTopSongs", new
                 {
-                    string htmlContent;
-                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    key_id = key_id.Value
+                });
+            }
+            else
+            {
+                key_id = _dapper.GetFirstOrDefault<int?>("radioconn", "Top100_GenerateDailyKey");
+
+                if (key_id.HasValue)
+                {
+                    string url = "https://www.billboard.com/charts/hot-100/";
+
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                    request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
+
+                    using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                     {
-                        htmlContent = sr.ReadToEnd();
-                    }
-
-                    if (!string.IsNullOrEmpty(htmlContent))
-                    {
-                        var parser = new HtmlParser();
-                        var document = parser.ParseDocument(htmlContent);
-
-                        var chartHolder = document.QuerySelector("div.chart-results-list");
-
-                        var allDivs = chartHolder.QuerySelectorAll("div.o-chart-results-list-row-container");
-
-                        foreach (var div in allDivs)
+                        if (response.StatusCode == HttpStatusCode.OK)
                         {
-                            try
+                            string htmlContent;
+                            using (StreamReader sr = new StreamReader(response.GetResponseStream()))
                             {
-                                var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
-                                string songName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
-                                string artistName = (dataHolder.QuerySelector("span").Text() ?? "").Trim();
-
-                                returnItem.Add(new TrackDataItem()
-                                {
-                                    artist_name = artistName,
-                                    track_name = songName,
-                                    tid = -1,
-                                    usability_score = 0
-                                });
+                                htmlContent = sr.ReadToEnd();
                             }
-                            catch (Exception ex)
-                            {
 
+                            if (!string.IsNullOrEmpty(htmlContent))
+                            {
+                                var parser = new HtmlParser();
+                                var document = parser.ParseDocument(htmlContent);
+
+                                var chartHolder = document.QuerySelector("div.chart-results-list");
+
+                                var allDivs = chartHolder.QuerySelectorAll("div.o-chart-results-list-row-container");
+
+                                using (var con = _dapper.GetConnection("radioconn"))
+                                {
+                                    int rankId = 0;
+                                    foreach (var div in allDivs)
+                                    {
+                                        rankId++;
+
+                                        try
+                                        {
+                                            var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
+                                            string songName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
+                                            string artistName = (dataHolder.QuerySelector("span").Text() ?? "").Trim();
+
+                                            returnItem.Add(new TrackDataItem()
+                                            {
+                                                artist_name = artistName,
+                                                track_name = songName,
+                                                tid = -1,
+                                                usability_score = rankId
+                                            });
+
+                                            _dapper.ExecuteNonQuery(con, "Top100_InsertSongData", new
+                                            {
+                                                key_id = key_id.Value,
+                                                rank = rankId,
+                                                artist = artistName,
+                                                song = songName
+                                            });
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
