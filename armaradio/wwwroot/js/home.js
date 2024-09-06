@@ -1055,6 +1055,7 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                 });
                 localHomePlayer.soundWave({
                     waveColor: "#E77C7C",
+                    waveWidth: 356,
                     waveHeight: 200
                 });
 
@@ -1123,6 +1124,7 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                                 });
                                 localHomePlayer.soundWave({
                                     waveColor: "#E77C7C",
+                                    waveWidth: 356,
                                     waveHeight: 200
                                 });
 

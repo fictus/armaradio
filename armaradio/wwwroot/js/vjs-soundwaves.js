@@ -7,6 +7,7 @@
 
     const defaults = {
         waveColor: '#fff',
+        waveWidth: null,
         waveHeight: 30,
         barWidth: 2,
         barSpacing: 1,
@@ -35,7 +36,7 @@
         }
 
         onPlayerReady() {
-            this.canvas.width = this.player.el().offsetWidth;
+            this.canvas.width = (this.options.waveWidth || this.player.el().offsetWidth);
             this.canvas.height = this.options.waveHeight;
             this.canvas.style.position = "absolute";
             this.canvas.style.bottom = "0";
