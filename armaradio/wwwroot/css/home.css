@@ -3,6 +3,9 @@ html body .vjs-poster {
     background-position: center;
     display: block !important;
 }
+html body .vjs-poster img {
+    object-fit: cover !important;
+}
 .bottom-controls {
     position: fixed;
     bottom: 0;
