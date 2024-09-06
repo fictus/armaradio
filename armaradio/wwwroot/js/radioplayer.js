@@ -290,6 +290,10 @@ function playNextSong() {
                                     type: "audio/webm"
                                 }]
                             });
+                            radioPlayerMain.soundWave({
+                                waveColor: "#E77C7C",
+                                waveHeight: 100
+                            });
 
                             radioPlayerMain.on("error", function () {
                                 onRadioPlayerError();
@@ -354,6 +358,10 @@ function playNextSong() {
                     src: (ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + songData.videoId),
                     type: "audio/webm"
                 }]
+            });
+            radioPlayerMain.soundWave({
+                waveColor: "#E77C7C",
+                waveHeight: 100
             });
 
             radioPlayerMain.on("error", function () {
@@ -500,6 +508,10 @@ function replayWithAlternateId(videoId) {
             src: (ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId),
             type: "audio/webm"
         }]
+    });
+    radioPlayerMain.soundWave({
+        waveColor: "#E77C7C",
+        waveHeight: 100
     });
 
     radioPlayerMain.on("error", function () {

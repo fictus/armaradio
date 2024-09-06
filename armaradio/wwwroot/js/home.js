@@ -1053,6 +1053,10 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                         type: "audio/webm"
                     }]
                 });
+                localHomePlayer.soundWave({
+                    waveColor: "#E77C7C",
+                    waveHeight: 100
+                });
 
                 localHomePlayer.on("error", function () {
                     console.error("error:", player.error());
@@ -1116,6 +1120,10 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                                         src: (ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + response.videoId),
                                         type: "audio/webm"
                                     }]
+                                });
+                                localHomePlayer.soundWave({
+                                    waveColor: "#E77C7C",
+                                    waveHeight: 100
                                 });
 
                                 localHomePlayer.on("error", function () {
