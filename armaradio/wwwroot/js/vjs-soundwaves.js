@@ -1,5 +1,4 @@
 ﻿(function (videojs) {
-    // Ensure the Audio Context is supported
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) {
         console.error('AudioContext is not supported in this browser.');
@@ -14,7 +13,7 @@
         fftSize: 256
     };
 
-    const Plugin = videojs.getPlugin('plugin');
+    const Plugin = videojs.getPlugin("plugin");
 
     class SoundWavePlugin extends Plugin {
         constructor(player, options) {
@@ -36,7 +35,6 @@
         }
 
         onPlayerReady() {
-            // Create and insert canvas
             this.canvas.width = this.player.el().offsetWidth;
             this.canvas.height = this.options.waveHeight;
             this.canvas.style.position = "absolute";
@@ -51,16 +49,13 @@
             } else {
                 this.player.el().appendChild(this.canvas);
             }
-
-            // Connect audio nodes
+            
             const source = this.audioContext.createMediaElementSource(this.player.tech().el());
             source.connect(this.analyser);
             this.analyser.connect(this.audioContext.destination);
-
-            // Set analyser properties
+            
             this.analyser.fftSize = this.options.fftSize;
-
-            // Start visualization
+            
             this.player.on("play", () => {
                 this.startVisualization();
             });
@@ -101,13 +96,15 @@
             const barWidth = this.options.barWidth;
             const barSpacing = this.options.barSpacing;
 
+            const centerY = height / 2;
+
             for (let i = 0; i < barCount; i++) {
                 const percent = this.dataArray[i] / 255;
-                const barHeight = height * percent;
+                const barHeight = (height / 2) * percent;
                 const x = i * (barWidth + barSpacing);
-                const y = height - barHeight;
 
-                context.fillRect(x, y, barWidth, barHeight);
+                context.fillRect(x, centerY - barHeight, barWidth, barHeight);
+                context.fillRect(x, centerY, barWidth, barHeight);
             }
         }
     }
