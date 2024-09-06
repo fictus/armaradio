@@ -1,5 +1,6 @@
 var arma_mainSearchSelectedType = "1";
 var localHomePlayer;
+var soundWaveColor = "#E14B4B";
 
 $(document).ready(function () {
     mainload_attacheEvents();
@@ -1054,7 +1055,7 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                     }]
                 });
                 localHomePlayer.soundWave({
-                    waveColor: "#E77C7C",
+                    waveColor: soundWaveColor,
                     waveWidth: 356,
                     waveHeight: 200
                 });
@@ -1123,7 +1124,7 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                                     }]
                                 });
                                 localHomePlayer.soundWave({
-                                    waveColor: "#E77C7C",
+                                    waveColor: soundWaveColor,
                                     waveWidth: 356,
                                     waveHeight: 200
                                 });

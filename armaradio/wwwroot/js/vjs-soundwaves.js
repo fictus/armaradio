@@ -1,17 +1,18 @@
 ﻿(function (videojs) {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) {
-        console.error('AudioContext is not supported in this browser.');
+        console.error("AudioContext is not supported in this browser.");
         return;
     }
 
     const defaults = {
-        waveColor: '#fff',
+        waveColor: "#fff",
         waveWidth: null,
         waveHeight: 30,
         barWidth: 2,
         barSpacing: 1,
-        fftSize: 256
+        fftSize: 256,
+        visualizationType: "bars"
     };
 
     const Plugin = videojs.getPlugin("plugin");
@@ -70,7 +71,7 @@
             if (!this.animationFrame) {
                 const draw = () => {
                     this.animationFrame = requestAnimationFrame(draw);
-                    this.drawWave();
+                    this.drawVisualization();
                 };
                 draw();
             }
@@ -83,7 +84,29 @@
             }
         }
 
-        drawWave() {
+        drawVisualization() {
+            switch (this.options.visualizationType) {
+                case "circular":
+                    this.drawCircularVisualizer();
+                    break;
+                //case "particles":
+                //    this.drawParticleSystem();
+                //    break;
+                case "lineGraph":
+                    this.drawLineGraph();
+                    break;
+                case "waveform":
+                    this.drawWaveform();
+                    break;
+                case "frequencySpectrum":
+                    this.drawFrequencySpectrum();
+                    break;
+                default:
+                    this.drawBars();
+            }
+        }
+
+        drawBars() {
             const width = this.canvas.width;
             const height = this.canvas.height;
             const context = this.canvasContext;
@@ -93,19 +116,128 @@
             context.clearRect(0, 0, width, height);
             context.fillStyle = this.options.waveColor;
 
-            const barCount = Math.floor(width / (this.options.barWidth + this.options.barSpacing));
-            const barWidth = this.options.barWidth;
+            const barCount = Math.floor(this.dataArray.length / 2); //Math.floor(width / (this.options.barWidth + this.options.barSpacing));
+            const barWidth = (this.options.barWidth / 2);
             const barSpacing = this.options.barSpacing;
 
             const centerY = height / 2;
+            const centerX = width / 2;
 
             for (let i = 0; i < barCount; i++) {
                 const percent = this.dataArray[i] / 255;
                 const barHeight = (height / 2) * percent;
-                const x = i * (barWidth + barSpacing);
 
-                context.fillRect(x, centerY - barHeight, barWidth, barHeight);
-                context.fillRect(x, centerY, barWidth, barHeight);
+                const rightX = centerX + i * (barWidth + barSpacing);
+                context.fillRect(rightX, centerY - barHeight, barWidth, barHeight);
+                context.fillRect(rightX, centerY, barWidth, barHeight);
+
+                const leftX = centerX - (i + 1) * (barWidth + barSpacing);
+                context.fillRect(leftX, centerY - barHeight, barWidth, barHeight);
+                context.fillRect(leftX, centerY, barWidth, barHeight);
+            }
+        }
+
+        drawCircularVisualizer() {
+            const width = this.canvas.width;
+            const height = this.canvas.height;
+            const context = this.canvasContext;
+
+            this.analyser.getByteFrequencyData(this.dataArray);
+
+            context.clearRect(0, 0, width, height);
+            context.strokeStyle = this.options.waveColor;
+
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = Math.min(centerX, centerY) - 5;
+
+            context.beginPath();
+            for (let i = 0; i < this.dataArray.length; i++) {
+                const percent = this.dataArray[i] / 255;
+                const radian = (i / this.dataArray.length) * Math.PI * 2;
+                const barHeight = radius * percent;
+
+                const x = centerX + Math.cos(radian) * (radius - barHeight);
+                const y = centerY + Math.sin(radian) * (radius - barHeight);
+
+                if (i === 0) {
+                    context.moveTo(x, y);
+                } else {
+                    context.lineTo(x, y);
+                }
+            }
+            context.closePath();
+            context.stroke();
+        }
+
+        drawLineGraph() {
+            const width = this.canvas.width;
+            const height = this.canvas.height;
+            const context = this.canvasContext;
+
+            this.analyser.getByteFrequencyData(this.dataArray);
+
+            context.clearRect(0, 0, width, height);
+            context.strokeStyle = this.options.waveColor;
+            context.lineWidth = 2;
+
+            context.beginPath();
+            for (let i = 0; i < this.dataArray.length; i++) {
+                const x = (i / this.dataArray.length) * width;
+                const y = height - (this.dataArray[i] / 255) * height;
+
+                if (i === 0) {
+                    context.moveTo(x, y);
+                } else {
+                    context.lineTo(x, y);
+                }
+            }
+            context.stroke();
+        }
+
+        drawWaveform() {
+            const width = this.canvas.width;
+            const height = this.canvas.height;
+            const context = this.canvasContext;
+
+            this.analyser.getByteTimeDomainData(this.dataArray);
+
+            context.clearRect(0, 0, width, height);
+            context.strokeStyle = this.options.waveColor;
+            context.lineWidth = 2;
+
+            context.beginPath();
+            for (let i = 0; i < this.dataArray.length; i++) {
+                const x = (i / this.dataArray.length) * width;
+                const y = (this.dataArray[i] / 255) * height;
+
+                if (i === 0) {
+                    context.moveTo(x, y);
+                } else {
+                    context.lineTo(x, y);
+                }
+            }
+            context.stroke();
+        }
+
+        drawFrequencySpectrum() {
+            const width = this.canvas.width;
+            const height = this.canvas.height;
+            const context = this.canvasContext;
+
+            this.analyser.getByteFrequencyData(this.dataArray);
+
+            context.clearRect(0, 0, width, height);
+            context.fillStyle = this.options.waveColor;
+
+            const barWidth = width / this.dataArray.length;
+
+            for (let i = 0; i < this.dataArray.length; i++) {
+                const barHeight = (this.dataArray[i] / 255) * height;
+                const x = i * barWidth;
+                const y = height - barHeight;
+
+                context.fillRect(x, y, barWidth, barHeight);
             }
         }
     }

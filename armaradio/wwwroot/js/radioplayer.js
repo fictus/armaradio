@@ -291,7 +291,7 @@ function playNextSong() {
                                 }]
                             });
                             radioPlayerMain.soundWave({
-                                waveColor: "#E77C7C",
+                                waveColor: soundWaveColor,
                                 waveWidth: 356,
                                 waveHeight: 200
                             });
@@ -361,7 +361,7 @@ function playNextSong() {
                 }]
             });
             radioPlayerMain.soundWave({
-                waveColor: "#E77C7C",
+                waveColor: soundWaveColor,
                 waveWidth: 356,
                 waveHeight: 200
             });
@@ -512,7 +512,7 @@ function replayWithAlternateId(videoId) {
         }]
     });
     radioPlayerMain.soundWave({
-        waveColor: "#E77C7C",
+        waveColor: soundWaveColor,
         waveWidth: 356,
         waveHeight: 200
     });
