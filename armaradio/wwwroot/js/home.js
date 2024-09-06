@@ -1063,6 +1063,14 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                 localHomePlayer.on("ended", function () {
                     onPlayerStateChange();
                 });
+                localHomePlayer.on("previous", function () {
+                    localHomePlayer.stop();
+                    localHomePlayer.currentTime(0);
+                    localHomePlayer.play();
+                });
+                localHomePlayer.on("next", function () {
+                    playerPlayNext();
+                });
                 localHomePlayer.on("volumechange", function () {
                     saveVolume(localHomePlayer);
                 });
@@ -1118,6 +1126,14 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                                 });
                                 localHomePlayer.on("ended", function () {
                                     onPlayerStateChange();
+                                });
+                                localHomePlayer.on("previous", function () {
+                                    localHomePlayer.stop();
+                                    localHomePlayer.currentTime(0);
+                                    localHomePlayer.play();
+                                });
+                                localHomePlayer.on("next", function () {
+                                    playerPlayNext();
                                 });
                                 localHomePlayer.on("volumechange", function () {
                                     saveVolume(localHomePlayer);

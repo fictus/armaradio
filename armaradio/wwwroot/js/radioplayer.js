@@ -300,6 +300,15 @@ function playNextSong() {
                             radioPlayerMain.on("ended", function () {
                                 onRadioPlayerStateChange();
                             });
+                            radioPlayerMain.on("previous", function () {
+                                radioPlayerMain.stop();
+                                radioPlayerMain.currentTime(0);
+                                radioPlayerMain.play();
+                            });
+                            radioPlayerMain.on("next", function () {
+                                tallyUpSongId();
+                                playNextSong();
+                            });
                             radioPlayerMain.on("volumechange", function () {
                                 saveVolume(radioPlayerMain);
                             });
@@ -355,6 +364,15 @@ function playNextSong() {
             });
             radioPlayerMain.on("ended", function () {
                 onRadioPlayerStateChange();
+            });
+            radioPlayerMain.on("previous", function () {
+                radioPlayerMain.stop();
+                radioPlayerMain.currentTime(0);
+                radioPlayerMain.play();
+            });
+            radioPlayerMain.on("next", function () {
+                tallyUpSongId();
+                playNextSong();
             });
             radioPlayerMain.on("volumechange", function () {
                 saveVolume(radioPlayerMain);
@@ -492,6 +510,15 @@ function replayWithAlternateId(videoId) {
     });
     radioPlayerMain.on("ended", function () {
         onRadioPlayerStateChange();
+    });
+    radioPlayerMain.on("previous", function () {
+        radioPlayerMain.stop();
+        radioPlayerMain.currentTime(0);
+        radioPlayerMain.play();
+    });
+    radioPlayerMain.on("next", function () {
+        tallyUpSongId();
+        playNextSong();
     });
     radioPlayerMain.on("volumechange", function () {
         saveVolume(radioPlayerMain);
