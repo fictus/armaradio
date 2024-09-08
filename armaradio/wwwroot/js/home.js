@@ -1061,7 +1061,7 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                 });
 
                 localHomePlayer.on("error", function () {
-                    console.error("error:", player.error());
+                    onPlayerError(localHomePlayer.error());
                 });
                 localHomePlayer.on("ready", function () {
                     restoreVolume(localHomePlayer);
@@ -1130,7 +1130,7 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                                 });
 
                                 localHomePlayer.on("error", function () {
-                                    console.error("error:", player.error());
+                                    onPlayerError(localHomePlayer.error());
                                 });
                                 localHomePlayer.on("ready", function () {
                                     restoreVolume(localHomePlayer);
