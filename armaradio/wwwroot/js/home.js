@@ -1066,6 +1066,9 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                 localHomePlayer.on("ready", function () {
                     restoreVolume(localHomePlayer);
                 });
+                localHomePlayer.on("loadeddata", function () {
+                    localHomePlayer.play();
+                });
                 localHomePlayer.on("ended", function () {
                     onPlayerStateChange();
                 });
@@ -1134,6 +1137,9 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                                 });
                                 localHomePlayer.on("ready", function () {
                                     restoreVolume(localHomePlayer);
+                                });
+                                localHomePlayer.on("loadeddata", function () {
+                                    localHomePlayer.play();
                                 });
                                 localHomePlayer.on("ended", function () {
                                     onPlayerStateChange();

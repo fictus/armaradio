@@ -302,6 +302,9 @@ function playNextSong() {
                             radioPlayerMain.on("ready", function () {
                                 restoreVolume(radioPlayerMain);
                             });
+                            radioPlayerMain.on("loadeddata", function () {
+                                radioPlayerMain.play();
+                            });
                             radioPlayerMain.on("ended", function () {
                                 onRadioPlayerStateChange();
                             });
@@ -371,6 +374,9 @@ function playNextSong() {
             });
             radioPlayerMain.on("ready", function () {
                 restoreVolume(radioPlayerMain);
+            });
+            radioPlayerMain.on("loadeddata", function () {
+                radioPlayerMain.play();
             });
             radioPlayerMain.on("ended", function () {
                 onRadioPlayerStateChange();
@@ -522,6 +528,9 @@ function replayWithAlternateId(videoId) {
     });
     radioPlayerMain.on("ready", function () {
         restoreVolume(radioPlayerMain);
+    });
+    radioPlayerMain.on("loadeddata", function () {
+        radioPlayerMain.play();
     });
     radioPlayerMain.on("ended", function () {
         onRadioPlayerStateChange();
