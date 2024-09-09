@@ -1336,7 +1336,7 @@ function playerPlayNext(fromError) {
 }
 
 function getAlternateId(tr) {
-    let allIds = ($.trim(tr.attr("data-alternateids"))).split(",");
+    let allIds = ($.trim(tr.attr("data-alternateids")) == "" ? [] : ($.trim(tr.attr("data-alternateids"))).split(","));
 
     if (allIds.length) {
         tr.attr("data-videoid", allIds[0]);
