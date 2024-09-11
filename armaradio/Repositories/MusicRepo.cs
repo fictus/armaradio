@@ -506,6 +506,11 @@ namespace armaradio.Repositories
                             }
                         }
                     }
+
+                    _dapper.ExecuteNonQuery("radioconn", "Top100_BackupOldSongs", new
+                    {
+                        key_id = key_id.Value
+                    });
                 }
             }
 
