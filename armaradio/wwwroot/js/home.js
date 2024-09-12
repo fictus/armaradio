@@ -636,6 +636,7 @@ function mainload_attacheEvents() {
         if (radioPlayerMain) {
             try {
                 radioPlayerMain.dispose();
+                radioPlayerMain = null;
             } catch (ex) {
 
             }
@@ -1026,61 +1027,7 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
             currentRow.addClass("now-playing");
 
             if (videoId != "") {
-                let newIframe = $("<video></video");
-                newIframe.attr({
-                    "id": "armaMainPlayer",
-                    "class": "iframe-holder video-js vjs-default-skin"
-                });
-
-                if (localHomePlayer) {
-                    try {
-                        localHomePlayer.dispose();
-                    } catch (ex) {
-
-                    }
-                }
-
-                $("#dvMainPlay_currentlyPlaying").find(".iframe-holder").remove();
-                $("#dvMainPlay_currentlyPlaying").append(newIframe);
-                
-                localHomePlayer = videojs("armaMainPlayer", {
-                    width: 356,
-                    height: 200,
-                    autoplay: true,
-                    controls: true,
-                    poster: "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID(),
-                    sources: [{
-                        src: (ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId),
-                        type: "audio/webm"
-                    }]
-                });
-                localHomePlayer.soundWave({
-                    waveColor: soundWaveColor,
-                    waveWidth: 356,
-                    waveHeight: 200
-                });
-
-                localHomePlayer.on("error", function () {
-                    onPlayerError(localHomePlayer.error());
-                });
-                localHomePlayer.on("ready", function () {
-                    restoreVolume(localHomePlayer);
-                    localHomePlayer.play();
-                });
-                localHomePlayer.on("ended", function () {
-                    onPlayerStateChange();
-                });
-                localHomePlayer.on("previous", function () {
-                    localHomePlayer.stop();
-                    localHomePlayer.currentTime(0);
-                    localHomePlayer.play();
-                });
-                localHomePlayer.on("next", function () {
-                    playerPlayNext();
-                });
-                localHomePlayer.on("volumechange", function () {
-                    saveVolume(localHomePlayer);
-                });
+                initializeHomeRadio(videoId);
 
                 armaradio.masterPageWait(false);
             } else {
@@ -1096,61 +1043,7 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                                     "data-alternateids": (response.alternateIds || []).join(",")
                                 }); //videoId 
 
-                                let newIframe = $("<video></video");
-                                newIframe.attr({
-                                    "id": "armaMainPlayer",
-                                    "class": "iframe-holder video-js vjs-default-skin"
-                                });
-
-                                if (localHomePlayer) {
-                                    try {
-                                        localHomePlayer.dispose();
-                                    } catch (ex) {
-
-                                    }
-                                }
-
-                                $("#dvMainPlay_currentlyPlaying").find(".iframe-holder").remove();
-                                $("#dvMainPlay_currentlyPlaying").append(newIframe);
-
-                                localHomePlayer = videojs("armaMainPlayer", {
-                                    width: 356,
-                                    height: 200,
-                                    autoplay: true,
-                                    controls: true,
-                                    poster: "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID(),
-                                    sources: [{
-                                        src: (ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + response.videoId),
-                                        type: "audio/webm"
-                                    }]
-                                });
-                                localHomePlayer.soundWave({
-                                    waveColor: soundWaveColor,
-                                    waveWidth: 356,
-                                    waveHeight: 200
-                                });
-
-                                localHomePlayer.on("error", function () {
-                                    onPlayerError(localHomePlayer.error());
-                                });
-                                localHomePlayer.on("ready", function () {
-                                    restoreVolume(localHomePlayer);
-                                    localHomePlayer.play();
-                                });
-                                localHomePlayer.on("ended", function () {
-                                    onPlayerStateChange();
-                                });
-                                localHomePlayer.on("previous", function () {
-                                    localHomePlayer.stop();
-                                    localHomePlayer.currentTime(0);
-                                    localHomePlayer.play();
-                                });
-                                localHomePlayer.on("next", function () {
-                                    playerPlayNext();
-                                });
-                                localHomePlayer.on("volumechange", function () {
-                                    saveVolume(localHomePlayer);
-                                });
+                                initializeHomeRadio(response.videoId);
 
                                 armaradio.masterPageWait(false);
                             } else {
@@ -1165,6 +1058,7 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                                 if (localHomePlayer) {
                                     try {
                                         localHomePlayer.dispose();
+                                        localHomePlayer = null;
                                     } catch (ex) {
 
                                     }
@@ -1247,6 +1141,79 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
     }
 
     armaradio.masterPageWait(false);
+}
+
+function initializeHomeRadio(videoId, disponse) {
+    if (!localHomePlayer || disponse) {
+        let newIframe = $("<video></video");
+        newIframe.attr({
+            "id": "armaMainPlayer",
+            "class": "iframe-holder video-js vjs-default-skin"
+        });
+
+        if (localHomePlayer) {
+            try {
+                localHomePlayer.dispose();
+                localHomePlayer = null;
+            } catch (ex) {
+
+            }
+        }
+
+        $("#dvMainPlay_currentlyPlaying").find(".iframe-holder").remove();
+        $("#dvMainPlay_currentlyPlaying").append(newIframe);
+
+        localHomePlayer = videojs("armaMainPlayer", {
+            width: 356,
+            height: 200,
+            autoplay: true,
+            controls: true,
+            poster: "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID(),
+            sources: [{
+                src: (ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId),
+                type: "audio/webm"
+            }]
+        });
+        localHomePlayer.soundWave({
+            waveColor: soundWaveColor,
+            waveWidth: 356,
+            waveHeight: 200
+        });
+
+        localHomePlayer.on("error", function () {
+            onPlayerError(localHomePlayer.error());
+        });
+        localHomePlayer.on("ready", function () {
+            restoreVolume(localHomePlayer);
+            localHomePlayer.play();
+        });
+        localHomePlayer.on("ended", function () {
+            onPlayerStateChange();
+        });
+        localHomePlayer.on("previous", function () {
+            localHomePlayer.stop();
+            localHomePlayer.currentTime(0);
+            localHomePlayer.play();
+        });
+        localHomePlayer.on("next", function () {
+            playerPlayNext();
+        });
+        localHomePlayer.on("volumechange", function () {
+            saveVolume(localHomePlayer);
+        });
+    } else {
+        let newPoster = "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID();
+        let newSource = ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId;
+
+        localHomePlayer.poster(newPoster);        
+        localHomePlayer.src({
+            type: "audio/webm",
+            src: newSource
+        });
+        
+        localHomePlayer.load();
+        localHomePlayer.play();
+    }
 }
 
 function saveVolume(currentPlayer) {
