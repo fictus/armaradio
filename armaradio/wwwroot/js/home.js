@@ -1059,13 +1059,13 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                     waveWidth: 356,
                     waveHeight: 200
                 });
-                localHomePlayer.play();
 
                 localHomePlayer.on("error", function () {
                     onPlayerError(localHomePlayer.error());
                 });
                 localHomePlayer.on("ready", function () {
                     restoreVolume(localHomePlayer);
+                    localHomePlayer.play();
                 });
                 localHomePlayer.on("ended", function () {
                     onPlayerStateChange();
@@ -1129,13 +1129,13 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                                     waveWidth: 356,
                                     waveHeight: 200
                                 });
-                                localHomePlayer.play();
 
                                 localHomePlayer.on("error", function () {
                                     onPlayerError(localHomePlayer.error());
                                 });
                                 localHomePlayer.on("ready", function () {
                                     restoreVolume(localHomePlayer);
+                                    localHomePlayer.play();
                                 });
                                 localHomePlayer.on("ended", function () {
                                     onPlayerStateChange();
