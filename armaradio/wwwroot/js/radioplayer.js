@@ -68,6 +68,15 @@ function loadRadioPlayer(artistName, songName, fromPlaylist, reloadFromCache, fr
         }
     }
 
+    if (radioPlayerMain) {
+        try {
+            radioPlayerMain.dispose();
+            radioPlayerMain = null;
+        } catch (ex) {
+
+        }
+    }
+
     if (!fromRandomSongsPlayer) {
         if (artistName != "") {
             armaradio.masterPageWait(true);
