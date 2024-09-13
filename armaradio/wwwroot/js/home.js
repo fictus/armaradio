@@ -45,11 +45,27 @@ function mainload_attacheEvents() {
                 //$("#ulArtistsFound").find("li").remove();
 
                 if (arma_mainSearchSelectedType == "1") {
+                    $("#txtMainGeneralSearch").css("display", "");
                     $("#txtMainGeneralSearch").attr("placeholder", "Artist Search");
                     $("#btnMain_GeneralSearch").css("display", "none");
-                } else {
+                } else if (arma_mainSearchSelectedType == "2") {
+                    $("#txtMainGeneralSearch").css("display", "");
                     $("#txtMainGeneralSearch").attr("placeholder", "General Search");
                     $("#btnMain_GeneralSearch").css("display", "");
+                } else if (arma_mainSearchSelectedType == "3") {
+                    if ($("#lnkMainLogin").length) {
+                        armaradio.warningMsg({
+                            msg: "Radio Player requires you to login or create a free account",
+                            captionMsg: "Login Required",
+                            typeLayout: "red"
+                        });
+                    } else {
+                        if ("showRadioSearchBox" in window) {
+                            showRadioSearchBox();
+                        }
+                    }
+
+                    $("#cmbMasterSearchOptions").find("a.dropdown-item[data-type='1']").trigger("click");
                 }
 
                 $("#txtMainGeneralSearch")[0].focus();

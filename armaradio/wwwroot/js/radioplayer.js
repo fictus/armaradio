@@ -216,8 +216,21 @@ function loadRadioPlayer(artistName, songName, fromPlaylist, reloadFromCache, fr
 }
 
 function showNoRadioFound(artistName, songName) {
+    $("#lblRefineRadioParameters_Title").html("Refine Radio Parameters");
+    $("#lblRefineRadioParameters_Message").html("Unable to create a radio session from your selection. Please refine these parameters and try again:");
+
     $("#txtRefineParameters_ArtistName").val($.trim(artistName));
     $("#txtRefineParameters_SongName").val($.trim(songName));
+
+    $("#dvPopupRefineRadioParameters").modal("show");
+}
+
+function showRadioSearchBox() {
+    $("#lblRefineRadioParameters_Title").html("Start Radio Session");
+    $("#lblRefineRadioParameters_Message").html("Enter Artist/Song to start radio session:");
+
+    $("#txtRefineParameters_ArtistName").val("");
+    $("#txtRefineParameters_SongName").val("");
 
     $("#dvPopupRefineRadioParameters").modal("show");
 }
