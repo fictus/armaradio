@@ -52,6 +52,10 @@ div.div-thumbnail {
     margin: 5px;
 }
 
+#lblRadioPlayer_SongTitle {
+    color: #b54d00;
+}
+
 #tblMainPlayList td {
     padding-left: 8px;
     padding-right: 8px;
