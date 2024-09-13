@@ -425,7 +425,14 @@ namespace armaradio.Controllers
                 HttpContext.Response.Headers.Add("Content-Range", $"bytes {start}-{end}/{size}");
                 HttpContext.Response.Headers.Add("Content-Length", length.ToString());
 
-                return new FileContentResult(fileBytes, fileType); //fileName
+
+                System.IO.File.Delete(endFileName);
+
+                var returnItem = new FileContentResult(fileBytes, fileType);
+
+                //Response.RegisterForDispose(fileBytes);
+
+                return returnItem;
             }
             catch (Exception ex)
             {
