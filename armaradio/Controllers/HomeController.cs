@@ -11,18 +11,22 @@ namespace armaradio.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IArmaAuth _authControl;
+        private readonly IMusicRepo _musicRepo;
 
         public HomeController(
             ILogger<HomeController> logger,
-            IArmaAuth authControl
+            IArmaAuth authControl,
+            IMusicRepo musicRepo
         )
         {
             _logger = logger;
             _authControl = authControl;
+            _musicRepo = musicRepo;
         }
 
         public IActionResult Index()
         {
+            //_musicRepo.DuckDuckGo_PerformGeneralSearch("depeche mode - somebody");
             return View();
         }
 

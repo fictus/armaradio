@@ -14,6 +14,7 @@ using System.Globalization;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Web;
+using YoutubeExplode.Common;
 
 namespace armaradio.Repositories
 {
@@ -896,6 +897,85 @@ namespace armaradio.Repositories
                                             }
                                         }
                                     }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (returnItem.Count == 0)
+                {
+                    returnItem = DuckDuckGo_PerformGeneralSearch(searchText);
+                }
+            }
+
+            return returnItem;
+        }
+
+        // implement Creative Commons search from DuckDuckGo
+        // https://duckduckgo.com/?t=h_&q=depeche+mode+somebody&iax=videos&ia=videos&iaf=videoLicense%3AcreativeCommon
+        public List<YTGeneralSearchDataItem> DuckDuckGo_PerformGeneralSearch(string searchText)
+        {
+            List<YTGeneralSearchDataItem> returnItem = new List<YTGeneralSearchDataItem>();
+
+            if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                string userInput = Uri.EscapeDataString(searchText).Replace("%20", "+");
+
+                string url = $"https://duckduckgo.com/?t=h_&q={userInput}&iax=videos&ia=videos&iaf=videoLicense%3AcreativeCommon";
+
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
+
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                {
+                    if (response.StatusCode == HttpStatusCode.OK)
+                    {
+                        string htmlContent;
+                        using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                        {
+                            htmlContent = sr.ReadToEnd();
+                        }
+
+                        if (!string.IsNullOrEmpty(htmlContent))
+                        {
+                            var parser = new HtmlParser();
+                            var document = parser.ParseDocument(htmlContent);
+
+                            var chartHolder = document.QuerySelector("#links");
+                            var allDivs = chartHolder.QuerySelectorAll("div.result.web-result");
+
+                            foreach (var div in allDivs)
+                            {
+                                try
+                                {
+                                    var videoAlink = (div.QuerySelector("h2")).QuerySelector("a");
+                                    string videoUrl = videoAlink.GetAttribute("href");
+
+                                    if ((videoUrl ?? "").Contains("youtube"))
+                                    {
+                                        string videoId = videoUrl.Split('=').Last();
+
+                                        if (!(returnItem.Any(v => v.videoId == videoId)))
+                                        {
+                                            string nameText = videoAlink.Text().Trim();
+                                            nameText = (nameText.Replace("youtube", "", StringComparison.OrdinalIgnoreCase)).Trim().TrimEnd('-').TrimEnd('|').Trim();
+                                            string artistName = (nameText.Split('-').FirstOrDefault() ?? "").Trim();
+                                            string songName = (nameText.Contains("-") ? nameText.Substring(nameText.IndexOf("-") + 1).Trim() : "");
+
+                                            returnItem.Add(new YTGeneralSearchDataItem()
+                                            {
+                                                videoId = videoId,
+                                                artistName = artistName,
+                                                songName = songName,
+                                                thumbNail = null
+                                            });
+                                        }
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+
                                 }
                             }
                         }
