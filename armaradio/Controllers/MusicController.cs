@@ -322,7 +322,7 @@ namespace armaradio.Controllers
                 var streamManifest = await youtube.Videos.Streams.GetManifestAsync($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}");
                 var allStreams = streamManifest.GetAudioOnlyStreams();
                 var streamInfo = allStreams.GetWithHighestBitrate();
-                var fileType = MimeTypes.GetMimeType($"tmpFileName.{streamInfo.Container.Name}");
+                var fileType = MimeTypes.GetMimeType($"tmpFileName.{(streamInfo.Container.Name == "webm" ? "weba" : streamInfo.Container.Name)}");
 
                 return new JsonResult(new
                 {

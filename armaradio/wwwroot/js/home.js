@@ -1179,56 +1179,80 @@ function initializeHomeRadio(videoId, disponse) {
         $("#dvMainPlay_currentlyPlaying").find(".iframe-holder").remove();
         $("#dvMainPlay_currentlyPlaying").append(newIframe);
 
-        localHomePlayer = videojs("armaMainPlayer", {
-            width: 356,
-            height: 200,
-            autoplay: true,
-            controls: true,
-            poster: "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID(),
-            sources: [{
-                src: (ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId),
-                type: "audio/webm"
-            }]
-        });
-        localHomePlayer.soundWave({
-            waveColor: soundWaveColor,
-            waveWidth: 356,
-            waveHeight: 200
-        });
+        armaradio.masterAJAXGet({
+            VideoId: videoId
+        }, "Music", "GetAudioFileDetails")
+            .then(function (response) {
+                if (response) {
+                    if (response.error) {
+                        playerPlayNext(true);
+                    } else {
+                        localHomePlayer = videojs("armaMainPlayer", {
+                            width: 356,
+                            height: 200,
+                            autoplay: true,
+                            controls: true,
+                            poster: "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID(),
+                            sources: [{
+                                src: (ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId),
+                                type: response.mimeType
+                            }]
+                        });
+                        localHomePlayer.soundWave({
+                            waveColor: soundWaveColor,
+                            waveWidth: 356,
+                            waveHeight: 200
+                        });
 
-        localHomePlayer.on("error", function () {
-            onPlayerError(localHomePlayer.error());
-        });
-        localHomePlayer.on("ready", function () {
-            restoreVolume(localHomePlayer);
-            localHomePlayer.play();
-        });
-        localHomePlayer.on("ended", function () {
-            onPlayerStateChange();
-        });
-        localHomePlayer.on("previous", function () {
-            localHomePlayer.stop();
-            localHomePlayer.currentTime(0);
-            localHomePlayer.play();
-        });
-        localHomePlayer.on("next", function () {
-            playerPlayNext();
-        });
-        localHomePlayer.on("volumechange", function () {
-            saveVolume(localHomePlayer);
-        });
+                        localHomePlayer.on("error", function () {
+                            onPlayerError(localHomePlayer.error());
+                        });
+                        localHomePlayer.on("ready", function () {
+                            restoreVolume(localHomePlayer);
+                            localHomePlayer.play();
+                        });
+                        localHomePlayer.on("ended", function () {
+                            onPlayerStateChange();
+                        });
+                        localHomePlayer.on("previous", function () {
+                            localHomePlayer.pause();
+                            localHomePlayer.currentTime(0);
+                            localHomePlayer.play();
+                        });
+                        localHomePlayer.on("next", function () {
+                            playerPlayNext();
+                        });
+                        localHomePlayer.on("volumechange", function () {
+                            saveVolume(localHomePlayer);
+                        });
+                    }
+                }
+            });
     } else {
-        let newPoster = "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID();
-        let newSource = ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId;
+        localHomePlayer.pause();
 
-        localHomePlayer.poster(newPoster);        
-        localHomePlayer.src({
-            type: "audio/webm",
-            src: newSource
-        });
-        
-        localHomePlayer.load();
-        localHomePlayer.play();
+        armaradio.masterAJAXGet({
+            VideoId: videoId
+        }, "Music", "GetAudioFileDetails")
+            .then(function (response) {
+                if (response) {
+                    if (response.error) {
+                        playerPlayNext(true);
+                    } else {
+                        let newPoster = "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID();
+                        let newSource = ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId;
+
+                        localHomePlayer.poster(newPoster);
+                        localHomePlayer.src({
+                            type: response.mimeType,
+                            src: newSource
+                        });
+
+                        localHomePlayer.load();
+                        localHomePlayer.play();
+                    }
+                }
+            });
     }
 }
 
