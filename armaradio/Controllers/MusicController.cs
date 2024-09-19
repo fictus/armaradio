@@ -313,7 +313,6 @@ namespace armaradio.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetAudioFileDetails(string VideoId)
         {
             try
