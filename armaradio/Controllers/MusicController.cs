@@ -667,6 +667,8 @@ namespace armaradio.Controllers
                 .OutputToFile(outputFilePath, true, options => options
                     .WithAudioCodec("aac")
                     .WithAudioBitrate(192)
+                    .WithCustomArgument("-movflags faststart")
+                    .WithCustomArgument("-strict -2")
                 )
                 .ProcessSynchronously();
         }
