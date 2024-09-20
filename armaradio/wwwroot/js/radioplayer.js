@@ -30,29 +30,24 @@ function radioplayer_attachEvents() {
         if (videoId != "") {
             armaradio.masterPageWait(true);
 
-            armaradio.masterAJAXGet({
+            let fileExtension = "mp4";
+            let mimeType = "audio/mp4";
+
+            armaradio.getFileAsBlob(ajaxPointCall + "/Music/GetAudioFile", {
+                ArtistName: artistName,
+                SongName: songName,
                 VideoId: videoId
-            }, "Music", "GetAudioFileDetails")
-                .then(function (response) {
-                    let fileExtension = response.fileExtension || "mp3";
-                    let mimeType = response.mimeType || "audio/mpeg";
+            }, mimeType)
+                .then(function (blobResponse) {
+                    const url = window.URL.createObjectURL(blobResponse);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = fileName + "." + fileExtension;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
 
-                    armaradio.getFileAsBlob(ajaxPointCall + "/Music/GetAudioFile", {
-                        ArtistName: artistName,
-                        SongName: songName,
-                        VideoId: videoId
-                    }, mimeType)
-                        .then(function (blobResponse) {
-                            const url = window.URL.createObjectURL(blobResponse);
-                            const a = document.createElement("a");
-                            a.href = url;
-                            a.download = fileName + "." + fileExtension;
-                            document.body.appendChild(a);
-                            a.click();
-                            window.URL.revokeObjectURL(url);
-
-                            armaradio.masterPageWait(false);
-                        });
+                    armaradio.masterPageWait(false);
                 });
         }
     });
@@ -417,81 +412,59 @@ function initializeRadioPlayer(videoId, dispose) {
         $("#dvRadioPlayer_currentlyPlaying").find(".iframe-holder").remove();
         $("#dvRadioPlayer_currentlyPlaying").append(newIframe);
 
-        armaradio.masterAJAXGet({
-            VideoId: videoId
-        }, "Music", "GetAudioFileDetails")
-            .then(function (response) {
-                if (response) {
-                    if (response.error) {
-                        onRadioPlayerError();
-                    } else {
-                        radioPlayerMain = videojs("armaMainPlayer", {
-                            width: 356,
-                            height: 200,
-                            autoplay: true,
-                            controls: true,
-                            poster: "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID(),
-                            sources: [{
-                                src: (ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId),
-                                type: response.mimeType
-                            }]
-                        });
-                        radioPlayerMain.soundWave({
-                            waveColor: soundWaveColor,
-                            waveWidth: 356,
-                            waveHeight: 200
-                        });
+        radioPlayerMain = videojs("armaMainPlayer", {
+            width: 356,
+            height: 200,
+            autoplay: true,
+            controls: true,
+            poster: "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID(),
+            sources: [{
+                src: (ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId),
+                type: "audio/mp4"
+            }]
+        });
+        radioPlayerMain.soundWave({
+            waveColor: soundWaveColor,
+            waveWidth: 356,
+            waveHeight: 200
+        });
 
-                        radioPlayerMain.on("error", function () {
-                            onRadioPlayerError();
-                        });
-                        radioPlayerMain.on("ready", function () {
-                            restoreVolume(radioPlayerMain);
-                            radioPlayerMain.play();
-                        });
-                        radioPlayerMain.on("ended", function () {
-                            onRadioPlayerStateChange();
-                        });
-                        radioPlayerMain.on("previous", function () {
-                            radioPlayerMain.pause();
-                            radioPlayerMain.currentTime(0);
-                            radioPlayerMain.play();
-                        });
-                        radioPlayerMain.on("next", function () {
-                            tallyUpSongId();
-                            playNextSong();
-                        });
-                        radioPlayerMain.on("volumechange", function () {
-                            saveVolume(radioPlayerMain);
-                        });
-                    }
-                }
-            });
+        radioPlayerMain.on("error", function () {
+            onRadioPlayerError();
+        });
+        radioPlayerMain.on("ready", function () {
+            restoreVolume(radioPlayerMain);
+            radioPlayerMain.play();
+        });
+        radioPlayerMain.on("ended", function () {
+            onRadioPlayerStateChange();
+        });
+        radioPlayerMain.on("previous", function () {
+            radioPlayerMain.pause();
+            radioPlayerMain.currentTime(0);
+            radioPlayerMain.play();
+        });
+        radioPlayerMain.on("next", function () {
+            tallyUpSongId();
+            playNextSong();
+        });
+        radioPlayerMain.on("volumechange", function () {
+            saveVolume(radioPlayerMain);
+        });
     } else {
         radioPlayerMain.pause();
 
-        armaradio.masterAJAXGet({
-            VideoId: videoId
-        }, "Music", "GetAudioFileDetails")
-            .then(function (response) {
-                if (response) {
-                    if (response.error) {
-                        onRadioPlayerError();
-                    } else {
-                        let newPoster = "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID();
-                        let newSource = ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId;
+        let newPoster = "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID();
+        let newSource = ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId;
 
-                        radioPlayerMain.poster(newPoster);
-                        radioPlayerMain.src({
-                            type: response.mimeType,
-                            src: newSource
-                        });
+        radioPlayerMain.poster(newPoster);
+        radioPlayerMain.src({
+            type: "audio/mp4",
+            src: newSource
+        });
 
-                        radioPlayerMain.load();
-                        radioPlayerMain.play();
-                    }
-                }
-            });
+        radioPlayerMain.load();
+        radioPlayerMain.play();
     }
 }
 

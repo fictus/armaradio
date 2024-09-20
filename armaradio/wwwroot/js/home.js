@@ -248,6 +248,23 @@ function mainload_attacheEvents() {
         }
     });
 
+    $("#offcanvasSongOptionsRightLabel").on("click", function () {
+        if (!$("#lnkMainLogin").length) {
+            clearTimeout($("#offcanvasSongOptionsRightLabel").data("clicksTimeout"));
+
+            $("#offcanvasSongOptionsRightLabel").data("clicksTimeout", setTimeout(function () {
+                $("#offcanvasSongOptionsRightLabel").attr("data-clicks", "0");
+            }, 3000));
+
+            let currentClicks = parseInt($("#offcanvasSongOptionsRightLabel").attr("data-clicks")) + 1;
+            $("#offcanvasSongOptionsRightLabel").attr("data-clicks", currentClicks);
+
+            if (currentClicks > 5) {
+                $("#btnSongOptions_DownloadSong").css("display", "");
+            }
+        }
+    });
+
     $("#btnPopup_Apply").on("click", function () {
         let playlistTxt = $.trim($("#txtPastedPlaylist").val());
         let playlistName = $.trim($("#txtPasterPlaylistName").val());
@@ -1179,80 +1196,58 @@ function initializeHomeRadio(videoId, disponse) {
         $("#dvMainPlay_currentlyPlaying").find(".iframe-holder").remove();
         $("#dvMainPlay_currentlyPlaying").append(newIframe);
 
-        armaradio.masterAJAXGet({
-            VideoId: videoId
-        }, "Music", "GetAudioFileDetails")
-            .then(function (response) {
-                if (response) {
-                    if (response.error) {
-                        playerPlayNext(true);
-                    } else {
-                        localHomePlayer = videojs("armaMainPlayer", {
-                            width: 356,
-                            height: 200,
-                            autoplay: true,
-                            controls: true,
-                            poster: "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID(),
-                            sources: [{
-                                src: (ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId),
-                                type: response.mimeType
-                            }]
-                        });
-                        localHomePlayer.soundWave({
-                            waveColor: soundWaveColor,
-                            waveWidth: 356,
-                            waveHeight: 200
-                        });
+        localHomePlayer = videojs("armaMainPlayer", {
+            width: 356,
+            height: 200,
+            autoplay: true,
+            controls: true,
+            poster: "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID(),
+            sources: [{
+                src: (ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId),
+                type: "audio/mp4"
+            }]
+        });
+        localHomePlayer.soundWave({
+            waveColor: soundWaveColor,
+            waveWidth: 356,
+            waveHeight: 200
+        });
 
-                        localHomePlayer.on("error", function () {
-                            onPlayerError(localHomePlayer.error());
-                        });
-                        localHomePlayer.on("ready", function () {
-                            restoreVolume(localHomePlayer);
-                            localHomePlayer.play();
-                        });
-                        localHomePlayer.on("ended", function () {
-                            onPlayerStateChange();
-                        });
-                        localHomePlayer.on("previous", function () {
-                            localHomePlayer.pause();
-                            localHomePlayer.currentTime(0);
-                            localHomePlayer.play();
-                        });
-                        localHomePlayer.on("next", function () {
-                            playerPlayNext();
-                        });
-                        localHomePlayer.on("volumechange", function () {
-                            saveVolume(localHomePlayer);
-                        });
-                    }
-                }
-            });
+        localHomePlayer.on("error", function () {
+            onPlayerError(localHomePlayer.error());
+        });
+        localHomePlayer.on("ready", function () {
+            restoreVolume(localHomePlayer);
+            localHomePlayer.play();
+        });
+        localHomePlayer.on("ended", function () {
+            onPlayerStateChange();
+        });
+        localHomePlayer.on("previous", function () {
+            localHomePlayer.pause();
+            localHomePlayer.currentTime(0);
+            localHomePlayer.play();
+        });
+        localHomePlayer.on("next", function () {
+            playerPlayNext();
+        });
+        localHomePlayer.on("volumechange", function () {
+            saveVolume(localHomePlayer);
+        });
     } else {
         localHomePlayer.pause();
 
-        armaradio.masterAJAXGet({
-            VideoId: videoId
-        }, "Music", "GetAudioFileDetails")
-            .then(function (response) {
-                if (response) {
-                    if (response.error) {
-                        playerPlayNext(true);
-                    } else {
-                        let newPoster = "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID();
-                        let newSource = ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId;
+        let newPoster = "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID();
+        let newSource = ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId;
 
-                        localHomePlayer.poster(newPoster);
-                        localHomePlayer.src({
-                            type: response.mimeType,
-                            src: newSource
-                        });
+        localHomePlayer.poster(newPoster);
+        localHomePlayer.src({
+            type: "audio/mp4",
+            src: newSource
+        });
 
-                        localHomePlayer.load();
-                        localHomePlayer.play();
-                    }
-                }
-            });
+        localHomePlayer.load();
+        localHomePlayer.play();
     }
 }
 

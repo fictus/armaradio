@@ -5,6 +5,7 @@ using armaradio.Models.Request;
 using armaradio.Models.Response;
 using armaradio.Models.Youtube;
 using armaradio.Repositories;
+using FFMpegCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -340,25 +341,55 @@ namespace armaradio.Controllers
         {
             try
             {
-                var youtube = new YoutubeExplode.YoutubeClient();
-                var streamManifest = await youtube.Videos.Streams.GetManifestAsync($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}");
-                var allStreams = streamManifest.GetAudioOnlyStreams();
-                var streamInfo = allStreams.GetWithHighestBitrate();
-                var fileType = MimeTypes.GetMimeType($"tmpFileName.{streamInfo.Container.Name}");
-                var fileName = $"{VideoId.Trim()}.{streamInfo.Container.Name}";
-
                 string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
                 string downloadFolder = (IsLinux ? $"{rootPath}/AudioFiles/" : $"{rootPath}\\AudioFiles\\");
-                string endFileName = $"{downloadFolder}{fileName}";
+                string endFileName = "";
+                string fileType = MimeTypes.GetMimeType($"tmpFileName.m4a");
+                string containerName = "mp4";
+                bool fromConvertedFile = false;
 
                 if (!System.IO.Directory.Exists(downloadFolder))
                 {
                     System.IO.Directory.CreateDirectory(downloadFolder);
                 }
 
-                if (!System.IO.File.Exists(endFileName))
+                var youtube = new YoutubeExplode.YoutubeClient();
+                var streamManifest = await youtube.Videos.Streams.GetManifestAsync($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}");
+                var allStreams = streamManifest.GetAudioOnlyStreams();
+
+                var streamInfo = allStreams.GetWithHighestBitrate();
+                var backupStreamInfo = streamInfo;
+
+                if (!(streamInfo.Container.Name.ToLower() == "m4a" || streamInfo.Container.Name.ToLower() == "mp4"))
                 {
-                    await youtube.Videos.Streams.DownloadAsync(streamInfo, endFileName);
+                    streamInfo = streamManifest.GetAudioOnlyStreams()
+                        .Where(s => s.Container == Container.Mp4)
+                        .OrderByDescending(s => s.Bitrate)
+                        .FirstOrDefault();
+
+                    if (streamInfo != null)
+                    {
+                        backupStreamInfo = streamInfo;
+                    }
+                    else
+                    {
+                        fromConvertedFile = true;
+                        endFileName = $"{downloadFolder}{VideoId.Trim()}.mp4";
+
+                        ConvertToM4A(backupStreamInfo.Url, endFileName);
+                    }
+                }
+
+                if (!fromConvertedFile)
+                {
+                    var fileName = $"{VideoId.Trim()}.{backupStreamInfo.Container.Name}";
+
+                    endFileName = $"{downloadFolder}{fileName}";
+
+                    if (!System.IO.File.Exists(endFileName))
+                    {
+                        await youtube.Videos.Streams.DownloadAsync(backupStreamInfo, endFileName);
+                    }
                 }
 
                 byte[] fileBytes = System.IO.File.ReadAllBytes(endFileName);
@@ -420,7 +451,7 @@ namespace armaradio.Controllers
 
                 HttpContext.Response.ContentType = fileType;
                 HttpContext.Response.Headers.Add("Cache-Control", "no-cache");
-                HttpContext.Response.Headers.Add("Content-Disposition", $"inline; filename=\"{VideoId}.{streamInfo.Container.Name}\"");
+                HttpContext.Response.Headers.Add("Content-Disposition", $"inline; filename=\"{VideoId}.{containerName}\"");
                 HttpContext.Response.Headers.Add("Content-Range", $"bytes {start}-{end}/{size}");
                 HttpContext.Response.Headers.Add("Content-Length", length.ToString());
 
@@ -501,10 +532,19 @@ namespace armaradio.Controllers
         {
             try
             {
-                List<string> fileNameParts = new List<string>();
                 string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
-                string downloadFolder = (IsLinux ? $"{rootPath}/tempMp3/" : $"{rootPath}\\tempMp3\\");
-                string fileHandle = $"{Guid.NewGuid().ToString().ToLower()}.mp3";
+                string downloadFolder = (IsLinux ? $"{rootPath}/AudioFiles/" : $"{rootPath}\\tempMp3\\");
+                string endFileName = "";
+                string fileType = MimeTypes.GetMimeType($"tmpFileName.mp4");
+                string fileHandle = $"{Guid.NewGuid().ToString().ToLower()}.mp4";
+                bool fromConvertedFile = false;
+
+                if (!System.IO.Directory.Exists(downloadFolder))
+                {
+                    System.IO.Directory.CreateDirectory(downloadFolder);
+                }
+
+                List<string> fileNameParts = new List<string>();
                 string fileHandleTemp = $"{Guid.NewGuid().ToString().ToLower()}";
                 string endFile = $"{downloadFolder}{fileHandle}";
                 string endTempFile = $"{downloadFolder}{fileHandleTemp}";
@@ -520,20 +560,47 @@ namespace armaradio.Controllers
 
                 string fileName = $"{(SanitizeFileName(string.Join(" - ", fileNameParts.ToArray()))).Trim()}";
 
-                if (!System.IO.Directory.Exists(downloadFolder))
-                {
-                    System.IO.Directory.CreateDirectory(downloadFolder);
-                }
-
                 var youtube = new YoutubeExplode.YoutubeClient();
                 var streamManifest = await youtube.Videos.Streams.GetManifestAsync($"https://www.youtube.com/watch?v={VideoId}");
                 var allStreams = streamManifest.GetAudioOnlyStreams();
-                var streamInfo = allStreams.GetWithHighestBitrate();
-                fileName = $"{fileName}.{streamInfo.Container.Name}";
-                endTempFile = $"{endTempFile}.{streamInfo.Container.Name}";
-                fileHandleTemp = $"{fileHandleTemp}.{streamInfo.Container.Name}";
 
-                await youtube.Videos.Streams.DownloadAsync(streamInfo, endTempFile);
+                var streamInfo = allStreams.GetWithHighestBitrate();
+                var backupStreamInfo = streamInfo;
+
+                if (!(streamInfo.Container.Name.ToLower() == "m4a" || streamInfo.Container.Name.ToLower() == "mp4"))
+                {
+                    streamInfo = streamManifest.GetAudioOnlyStreams()
+                        .Where(s => s.Container == Container.Mp4)
+                        .OrderByDescending(s => s.Bitrate)
+                        .FirstOrDefault();
+
+                    if (streamInfo != null)
+                    {
+                        backupStreamInfo = streamInfo;
+                    }
+                    else
+                    {
+                        fromConvertedFile = true;
+                        fileName = $"{fileName}.mp4";
+                        endTempFile = $"{endTempFile}.{backupStreamInfo.Container.Name}";
+                        fileHandleTemp = $"{fileHandleTemp}.{backupStreamInfo.Container.Name}";
+
+                        ConvertToM4A(backupStreamInfo.Url, endTempFile);
+                    }
+                }
+
+                if (!fromConvertedFile)
+                {
+                    fileName = $"{fileName}.{backupStreamInfo.Container.Name}";
+                    endTempFile = $"{endTempFile}.{backupStreamInfo.Container.Name}";
+                    fileHandleTemp = $"{fileHandleTemp}.{backupStreamInfo.Container.Name}";
+
+                    if (!System.IO.File.Exists(endTempFile))
+                    {
+                        await youtube.Videos.Streams.DownloadAsync(streamInfo, endTempFile);
+                    }
+                }
+                
                 //await DownloadStreamAsync(streamInfo, endTempFile);
                 //ConvertToMp3(endTempFile, endFile);
 
@@ -550,7 +617,6 @@ namespace armaradio.Controllers
                 System.IO.File.Delete(endTempFile);
 
                 memoryStream.Position = 0;
-                var fileType = MimeTypes.GetMimeType(fileName);
                 var returnItem = new FileStreamResult(memoryStream, fileType)
                 {
                     FileDownloadName = fileName
@@ -592,6 +658,18 @@ namespace armaradio.Controllers
         //        )
         //        .ProcessSynchronously();
         //}
+
+        private static void ConvertToM4A(string inputUrl, string outputFilePath)
+        {
+            FFMpegArguments
+                .FromUrlInput(new Uri(inputUrl))
+                //.FromFileInput(inputFilePath)
+                .OutputToFile(outputFilePath, true, options => options
+                    .WithAudioCodec("aac")
+                    .WithAudioBitrate(192)
+                )
+                .ProcessSynchronously();
+        }
 
         [HttpGet]
         [Authorize]
