@@ -415,7 +415,7 @@ function initializeRadioPlayer(videoId, dispose) {
         radioPlayerMain = videojs("armaMainPlayer", {
             width: 356,
             height: 200,
-            autoplay: true,
+            autoplay: false,
             controls: true,
             poster: "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID(),
             sources: [{
@@ -423,19 +423,38 @@ function initializeRadioPlayer(videoId, dispose) {
                 type: "audio/mp4"
             }]
         });
-        radioPlayerMain.soundWave({
-            waveColor: soundWaveColor,
-            waveWidth: 356,
-            waveHeight: 200
+        radioPlayerMain.ready(function () {
+            restoreVolume(this);
+
+            this.soundWave({
+                waveColor: soundWaveColor,
+                waveWidth: 356,
+                waveHeight: 200
+            });
+
+            // Attempt to play only after user interaction
+            //const playButton = this.el().querySelector(".vjs-big-play-button") || this.el();
+            //playButton.addEventListener("click", function () {
+            //    radioPlayerMain.play().catch(error => {
+            //        console.error("Playback failed:", error);
+            //    });
+            //});
+
+            radioPlayerMain.play();
         });
+        //radioPlayerMain.soundWave({
+        //    waveColor: soundWaveColor,
+        //    waveWidth: 356,
+        //    waveHeight: 200
+        //});
 
         radioPlayerMain.on("error", function () {
             onRadioPlayerError();
         });
-        radioPlayerMain.on("ready", function () {
-            restoreVolume(radioPlayerMain);
-            radioPlayerMain.play();
-        });
+        //radioPlayerMain.on("ready", function () {
+        //    restoreVolume(radioPlayerMain);
+        //    radioPlayerMain.play();
+        //});
         radioPlayerMain.on("ended", function () {
             onRadioPlayerStateChange();
         });
@@ -463,8 +482,12 @@ function initializeRadioPlayer(videoId, dispose) {
             src: newSource
         });
 
-        radioPlayerMain.load();
-        radioPlayerMain.play();
+        $.when(radioPlayerMain.load())
+            .then(function () {
+                radioPlayerMain.play();
+            });
+
+        //radioPlayerMain.play();
     }
 }
 

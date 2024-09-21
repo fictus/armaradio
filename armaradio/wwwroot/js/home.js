@@ -1199,7 +1199,7 @@ function initializeHomeRadio(videoId, disponse) {
         localHomePlayer = videojs("armaMainPlayer", {
             width: 356,
             height: 200,
-            autoplay: true,
+            autoplay: false,
             controls: true,
             poster: "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID(),
             sources: [{
@@ -1207,19 +1207,38 @@ function initializeHomeRadio(videoId, disponse) {
                 type: "audio/mp4"
             }]
         });
-        localHomePlayer.soundWave({
-            waveColor: soundWaveColor,
-            waveWidth: 356,
-            waveHeight: 200
+        localHomePlayer.ready(function () {
+            restoreVolume(this);
+
+            this.soundWave({
+                waveColor: soundWaveColor,
+                waveWidth: 356,
+                waveHeight: 200
+            });
+
+            // Attempt to play only after user interaction
+            //const playButton = this.el().querySelector(".vjs-big-play-button") || this.el();
+            //playButton.addEventListener("click", function () {
+            //    localHomePlayer.play().catch(error => {
+            //        console.error("Playback failed:", error);
+            //    });
+            //});
+
+            localHomePlayer.play();
         });
+        //localHomePlayer.soundWave({
+        //    waveColor: soundWaveColor,
+        //    waveWidth: 356,
+        //    waveHeight: 200
+        //});
 
         localHomePlayer.on("error", function () {
             onPlayerError(localHomePlayer.error());
         });
-        localHomePlayer.on("ready", function () {
-            restoreVolume(localHomePlayer);
-            localHomePlayer.play();
-        });
+        //localHomePlayer.on("ready", function () {
+        //    restoreVolume(localHomePlayer);
+        //    localHomePlayer.play();
+        //});
         localHomePlayer.on("ended", function () {
             onPlayerStateChange();
         });
@@ -1246,8 +1265,12 @@ function initializeHomeRadio(videoId, disponse) {
             src: newSource
         });
 
-        localHomePlayer.load();
-        localHomePlayer.play();
+        $.when(localHomePlayer.load())
+            .then(function () {
+                localHomePlayer.play();
+            });
+
+        //localHomePlayer.play();
     }
 }
 
