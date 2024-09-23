@@ -343,9 +343,9 @@ namespace armaradio.Controllers
             {
                 string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
                 string downloadFolder = (IsLinux ? $"{rootPath}/AudioFiles/" : $"{rootPath}\\AudioFiles\\");
-                string endFileName = endFileName = $"{downloadFolder}{VideoId.Trim()}.mp4";
+                string endFileName = endFileName = $"{downloadFolder}{VideoId.Trim()}.m4a";
                 string fileType = "audio/mp4"; // MimeTypes.GetMimeType($"tmpFileName.m4a");
-                string containerName = "mp4";
+                string containerName = "m4a";
                 bool fromConvertedFile = false;
 
                 if (!System.IO.Directory.Exists(downloadFolder))
@@ -544,12 +544,12 @@ namespace armaradio.Controllers
             try
             {
                 string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
-                string downloadFolder = (IsLinux ? $"{rootPath}/AudioFiles/" : $"{rootPath}\\tempMp3\\");
+                string downloadFolder = (IsLinux ? $"{rootPath}/AudioFiles/" : $"{rootPath}\\AudioFiles\\");
                 string endFileName = "";
                 string fileType = "audio/mp4"; // MimeTypes.GetMimeType($"tmpFileName.mp4");
-                string fileHandle = $"{Guid.NewGuid().ToString().ToLower()}.mp4";
+                string fileHandle = $"{Guid.NewGuid().ToString().ToLower()}.m4a";
                 string fileHandleTemp = $"{Guid.NewGuid().ToString().ToLower()}";
-                string endTempFile = $"{downloadFolder}{fileHandleTemp}.mp4";
+                string endTempFile = $"{downloadFolder}{fileHandleTemp}.m4a";
                 string fileName = "";
                 bool fromConvertedFile = false;
 
@@ -595,7 +595,7 @@ namespace armaradio.Controllers
                         else
                         {
                             fromConvertedFile = true;
-                            fileName = $"{fileName}.mp4";
+                            fileName = $"{fileName}.m4a";
                             //endTempFile = $"{endTempFile}.{backupStreamInfo.Container.Name}";
                             fileHandleTemp = $"{fileHandleTemp}.{backupStreamInfo.Container.Name}";
 
