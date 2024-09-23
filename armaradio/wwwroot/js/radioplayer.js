@@ -30,8 +30,8 @@ function radioplayer_attachEvents() {
         if (videoId != "") {
             armaradio.masterPageWait(true);
 
-            let fileExtension = "mp4";
-            let mimeType = "audio/mp4";
+            let fileExtension = "m4a";
+            let mimeType = "audio/m4a";
 
             armaradio.getFileAsBlob(ajaxPointCall + "/Music/GetAudioFile", {
                 ArtistName: artistName,
@@ -421,7 +421,7 @@ function initializeRadioPlayer(videoId, dispose) {
             poster: "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID(),
             sources: [{
                 src: (ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId),
-                type: "audio/mp4"
+                type: "audio/m4a"
             }]
         });
         radioPlayerMain.ready(function () {
@@ -490,7 +490,7 @@ function initializeRadioPlayer(videoId, dispose) {
 
         radioPlayerMain.poster(newPoster);
         radioPlayerMain.src({
-            type: "audio/mp4",
+            type: "audio/m4a",
             src: newSource
         });
 

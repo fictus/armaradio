@@ -1205,7 +1205,7 @@ function initializeHomeRadio(videoId, disponse) {
             poster: "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID(),
             sources: [{
                 src: (ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId),
-                type: "audio/mp4"
+                type: "audio/m4a"
             }]
         });
         localHomePlayer.ready(function () {
@@ -1273,7 +1273,7 @@ function initializeHomeRadio(videoId, disponse) {
 
         localHomePlayer.poster(newPoster);
         localHomePlayer.src({
-            type: "audio/mp4",
+            type: "audio/m4a",
             src: newSource
         });
 
