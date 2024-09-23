@@ -344,7 +344,7 @@ namespace armaradio.Controllers
                 string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
                 string downloadFolder = (IsLinux ? $"{rootPath}/AudioFiles/" : $"{rootPath}\\AudioFiles\\");
                 string endFileName = endFileName = $"{downloadFolder}{VideoId.Trim()}.m4a";
-                string fileType = "audio/mp4"; // MimeTypes.GetMimeType($"tmpFileName.m4a");
+                string fileType = "audio/m4a"; // MimeTypes.GetMimeType($"tmpFileName.m4a");
                 string containerName = "m4a";
                 bool fromConvertedFile = false;
 
@@ -546,7 +546,7 @@ namespace armaradio.Controllers
                 string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
                 string downloadFolder = (IsLinux ? $"{rootPath}/AudioFiles/" : $"{rootPath}\\AudioFiles\\");
                 string endFileName = "";
-                string fileType = "audio/mp4"; // MimeTypes.GetMimeType($"tmpFileName.mp4");
+                string fileType = "audio/m4a"; // MimeTypes.GetMimeType($"tmpFileName.mp4");
                 string fileHandle = $"{Guid.NewGuid().ToString().ToLower()}.m4a";
                 string fileHandleTemp = $"{Guid.NewGuid().ToString().ToLower()}";
                 string endTempFile = $"{downloadFolder}{fileHandleTemp}.m4a";

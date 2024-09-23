@@ -1199,6 +1199,7 @@ function initializeHomeRadio(videoId, disponse) {
         localHomePlayer = videojs("armaMainPlayer", {
             width: 356,
             height: 200,
+            muted: true,
             autoplay: false,
             controls: true,
             poster: "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID(),
@@ -1224,7 +1225,18 @@ function initializeHomeRadio(videoId, disponse) {
             //    });
             //});
 
-            localHomePlayer.play();
+            if (!(navigator.platform == "iPad" || navigator.platform == "iPhone" || navigator.platform == "iPod")) {
+                $.when(localHomePlayer.play())
+                    .then(function () {
+                        setTimeout(function () {
+                            localHomePlayer.muted(false);
+                        }, 100);
+                    });
+            } else {
+                setTimeout(function () {
+                    localHomePlayer.muted(false);
+                }, 100);
+            }
         });
         //localHomePlayer.soundWave({
         //    waveColor: soundWaveColor,
@@ -1267,7 +1279,12 @@ function initializeHomeRadio(videoId, disponse) {
 
         $.when(localHomePlayer.load())
             .then(function () {
-                localHomePlayer.play();
+                $.when(localHomePlayer.play())
+                    .then(function () {
+                        setTimeout(function () {
+                            localHomePlayer.muted(false);
+                        }, 100);
+                    });
             });
 
         //localHomePlayer.play();

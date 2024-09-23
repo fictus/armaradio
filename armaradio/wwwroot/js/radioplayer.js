@@ -415,6 +415,7 @@ function initializeRadioPlayer(videoId, dispose) {
         radioPlayerMain = videojs("armaMainPlayer", {
             width: 356,
             height: 200,
+            muted: true,
             autoplay: false,
             controls: true,
             poster: "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID(),
@@ -440,7 +441,18 @@ function initializeRadioPlayer(videoId, dispose) {
             //    });
             //});
 
-            radioPlayerMain.play();
+            if (!(navigator.platform == "iPad" || navigator.platform == "iPhone" || navigator.platform == "iPod")) {
+                $.when(radioPlayerMain.play())
+                    .then(function () {
+                        setTimeout(function () {
+                            radioPlayerMain.muted(false);
+                        }, 100);
+                    });
+            } else {
+                setTimeout(function () {
+                    radioPlayerMain.muted(false);
+                }, 100);
+            }
         });
         //radioPlayerMain.soundWave({
         //    waveColor: soundWaveColor,
@@ -484,7 +496,12 @@ function initializeRadioPlayer(videoId, dispose) {
 
         $.when(radioPlayerMain.load())
             .then(function () {
-                radioPlayerMain.play();
+                $.when(radioPlayerMain.play())
+                    .then(function () {
+                        setTimeout(function () {
+                            radioPlayerMain.muted(false);
+                        }, 100);
+                    });
             });
 
         //radioPlayerMain.play();
