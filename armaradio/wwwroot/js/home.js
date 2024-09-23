@@ -1205,7 +1205,7 @@ function initializeHomeRadio(videoId, disponse) {
             poster: "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID(),
             sources: [{
                 src: (ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId),
-                type: "audio/m4a"
+                type: "audio/mp4"
             }]
         });
         localHomePlayer.ready(function () {
@@ -1225,18 +1225,18 @@ function initializeHomeRadio(videoId, disponse) {
             //    });
             //});
 
-            if (!(navigator.platform == "iPad" || navigator.platform == "iPhone" || navigator.platform == "iPod")) {
+            //if (navigator.platform != "iPad" && navigator.platform != "iPhone" && navigator.platform != "iPod") {
                 $.when(localHomePlayer.play())
                     .then(function () {
                         setTimeout(function () {
                             localHomePlayer.muted(false);
                         }, 100);
                     });
-            } else {
-                setTimeout(function () {
-                    localHomePlayer.muted(false);
-                }, 100);
-            }
+            //} else {
+            //    setTimeout(function () {
+            //        localHomePlayer.muted(false);
+            //    }, 100);
+            //}
         });
         //localHomePlayer.soundWave({
         //    waveColor: soundWaveColor,
@@ -1273,7 +1273,7 @@ function initializeHomeRadio(videoId, disponse) {
 
         localHomePlayer.poster(newPoster);
         localHomePlayer.src({
-            type: "audio/m4a",
+            type: "audio/mp4",
             src: newSource
         });
 

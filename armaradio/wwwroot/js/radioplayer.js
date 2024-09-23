@@ -30,8 +30,8 @@ function radioplayer_attachEvents() {
         if (videoId != "") {
             armaradio.masterPageWait(true);
 
-            let fileExtension = "m4a";
-            let mimeType = "audio/m4a";
+            let fileExtension = "mp4";
+            let mimeType = "audio/mp4";
 
             armaradio.getFileAsBlob(ajaxPointCall + "/Music/GetAudioFile", {
                 ArtistName: artistName,
@@ -421,7 +421,7 @@ function initializeRadioPlayer(videoId, dispose) {
             poster: "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID(),
             sources: [{
                 src: (ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId),
-                type: "audio/m4a"
+                type: "audio/mp4"
             }]
         });
         radioPlayerMain.ready(function () {
@@ -441,18 +441,18 @@ function initializeRadioPlayer(videoId, dispose) {
             //    });
             //});
 
-            if (!(navigator.platform == "iPad" || navigator.platform == "iPhone" || navigator.platform == "iPod")) {
+            //if (navigator.platform != "iPad" && navigator.platform != "iPhone" && navigator.platform != "iPod") {
                 $.when(radioPlayerMain.play())
                     .then(function () {
                         setTimeout(function () {
                             radioPlayerMain.muted(false);
                         }, 100);
                     });
-            } else {
-                setTimeout(function () {
-                    radioPlayerMain.muted(false);
-                }, 100);
-            }
+            //} else {
+            //    setTimeout(function () {
+            //        radioPlayerMain.muted(false);
+            //    }, 100);
+            //}
         });
         //radioPlayerMain.soundWave({
         //    waveColor: soundWaveColor,
@@ -490,7 +490,7 @@ function initializeRadioPlayer(videoId, dispose) {
 
         radioPlayerMain.poster(newPoster);
         radioPlayerMain.src({
-            type: "audio/m4a",
+            type: "audio/mp4",
             src: newSource
         });
 
