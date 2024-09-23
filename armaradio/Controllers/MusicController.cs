@@ -406,7 +406,7 @@ namespace armaradio.Controllers
                     length = size;
 
                     // Set the "Accept-Ranges" header to indicate that we support range requests
-                    HttpContext.Response.Headers.Add("Accept-Ranges", "0-" + size);
+                    HttpContext.Response.Headers.Append("Accept-Ranges", "0-" + size);
 
                     // Handle range requests
                     if (!string.IsNullOrEmpty(HttpContext.Request.Headers["Range"]))
@@ -419,7 +419,7 @@ namespace armaradio.Controllers
                         // Ensure the client hasn't sent a multi-byte range
                         if (range.Contains(","))
                         {
-                            HttpContext.Response.Headers.Add("Content-Range", $"bytes {start}-{end}/{size}");
+                            HttpContext.Response.Headers.Append("Content-Range", $"bytes {start}-{end}/{size}");
                             return new StatusCodeResult(StatusCodes.Status416RangeNotSatisfiable);
                         }
 
@@ -440,7 +440,7 @@ namespace armaradio.Controllers
                         anotherEnd = (anotherEnd > end) ? end : anotherEnd;
                         if (anotherStart > anotherEnd || anotherStart > size - 1 || anotherEnd >= size)
                         {
-                            HttpContext.Response.Headers.Add("Content-Range", $"bytes {start}-{end}/{size}");
+                            HttpContext.Response.Headers.Append("Content-Range", $"bytes {start}-{end}/{size}");
                             return new StatusCodeResult(StatusCodes.Status416RangeNotSatisfiable);
                         }
 
@@ -453,10 +453,10 @@ namespace armaradio.Controllers
                 }
 
                 HttpContext.Response.ContentType = fileType;
-                HttpContext.Response.Headers.Add("Cache-Control", "no-cache");
-                HttpContext.Response.Headers.Add("Content-Disposition", $"inline; filename=\"{VideoId}.{containerName}\"");
-                HttpContext.Response.Headers.Add("Content-Range", $"bytes {start}-{end}/{size}");
-                HttpContext.Response.Headers.Add("Content-Length", length.ToString());
+                HttpContext.Response.Headers.Append("Cache-Control", "no-cache");
+                HttpContext.Response.Headers.Append("Content-Disposition", $"inline; filename=\"{VideoId}.{containerName}\"");
+                HttpContext.Response.Headers.Append("Content-Range", $"bytes {start}-{end}/{size}");
+                HttpContext.Response.Headers.Append("Content-Length", length.ToString());
 
 
                 //System.IO.File.Delete(endFileName);
