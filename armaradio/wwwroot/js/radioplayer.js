@@ -441,7 +441,7 @@ function initializeRadioPlayer(videoId, dispose) {
             //    });
             //});
 
-            //if (navigator.platform != "iPad" && navigator.platform != "iPhone" && navigator.platform != "iPod") {
+            //if (!isIOSDevice) {
                 $.when(radioPlayerMain.play())
                     .then(function () {
                         setTimeout(function () {

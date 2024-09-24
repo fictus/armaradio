@@ -1,8 +1,11 @@
 var arma_mainSearchSelectedType = "1";
+var isIOSDevice = false;
 var localHomePlayer;
 var soundWaveColor = "#E14B4B";
 
 $(document).ready(function () {
+    isIOSDevice = (navigator.platform == "iPad" || navigator.platform == "iPhone" || navigator.platform == "iPod");
+
     mainload_attacheEvents();
 
     if ("radioplayer_attachEvents" in window) {
@@ -1225,7 +1228,7 @@ function initializeHomeRadio(videoId, disponse) {
             //    });
             //});
 
-            //if (navigator.platform != "iPad" && navigator.platform != "iPhone" && navigator.platform != "iPod") {
+            //if (!isIOSDevice) {
                 $.when(localHomePlayer.play())
                     .then(function () {
                         setTimeout(function () {

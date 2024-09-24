@@ -469,49 +469,58 @@ namespace armaradio.Repositories
 
                                 var allDivs = chartHolder.QuerySelectorAll("div.o-chart-results-list-row-container");
 
-                                using (var con = _dapper.GetConnection("radioconn"))
+                                int rankId = 0;
+
+                                foreach (var div in allDivs)
                                 {
-                                    int rankId = 0;
-                                    foreach (var div in allDivs)
+                                    rankId++;
+
+                                    try
                                     {
-                                        rankId++;
+                                        var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
+                                        string songName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
+                                        string artistName = (dataHolder.QuerySelector("span").Text() ?? "").Trim();
 
-                                        try
+                                        returnItem.Add(new TrackDataItem()
                                         {
-                                            var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
-                                            string songName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
-                                            string artistName = (dataHolder.QuerySelector("span").Text() ?? "").Trim();
+                                            artist_name = artistName,
+                                            track_name = songName,
+                                            tid = key_id.Value,
+                                            usability_score = rankId
+                                        });
+                                    }
+                                    catch (Exception ex)
+                                    {
 
-                                            returnItem.Add(new TrackDataItem()
-                                            {
-                                                artist_name = artistName,
-                                                track_name = songName,
-                                                tid = -1,
-                                                usability_score = rankId
-                                            });
-
-                                            _dapper.ExecuteNonQuery(con, "Top100_InsertSongData", new
-                                            {
-                                                key_id = key_id.Value,
-                                                rank = rankId,
-                                                artist = artistName,
-                                                song = songName
-                                            });
-                                        }
-                                        catch (Exception ex)
-                                        {
-
-                                        }
                                     }
                                 }
                             }
                         }
                     }
 
-                    _dapper.ExecuteNonQuery("radioconn", "Top100_BackupOldSongs", new
-                    {
-                        key_id = key_id.Value
-                    });
+                    Task.Delay(TimeSpan.FromSeconds(1))
+                        .ContinueWith(_ => {
+                            using (var con = _dapper.GetConnection("radioconn"))
+                            {
+                                int keyId = returnItem[0].tid;
+
+                                foreach (var song in returnItem)
+                                {
+                                    _dapper.ExecuteNonQuery(con, "Top100_InsertSongData", new
+                                    {
+                                        key_id = keyId,
+                                        rank = song.usability_score,
+                                        artist = song.artist_name,
+                                        song = song.track_name
+                                    });
+                                }
+
+                                _dapper.ExecuteNonQuery(con, "Top100_BackupOldSongs", new
+                                {
+                                    key_id = keyId
+                                });
+                            }
+                        });                    
                 }
             }
 
