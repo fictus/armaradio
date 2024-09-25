@@ -23,6 +23,7 @@ using YoutubeExplode.Videos;
 using System.Diagnostics;
 using FFMpegCore.Enums;
 using System.Runtime.InteropServices;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace armaradio.Repositories
 {
@@ -953,13 +954,27 @@ namespace armaradio.Repositories
 
             var options = new OptionSet
             {
-                Format = "bestaudio",          // Download best available audio
-                Output = endFileName, //$"{outputDirectory}/%(title)s.%(ext)s",  // Specify output file format
-                ExtractAudio = true,           // Extract audio only
+                Format = "bestaudio[ext=m4a]/bestaudio", // Prefer m4a, but fall back to best audio if not available
+                Output = endFileName,
+                ExtractAudio = true,
                 AudioFormat = AudioConversionFormat.M4a,
+                NoPlaylist = true,
+                NoCheckCertificates = true,
+                NoWarnings = true,
                 PostprocessorArgs = "-strict -2"
+                //PreferFfmpeg = true,
+                //ExternalDownloader = ExternalDownloader.Native // Use native downloader for potentially faster downloads
             };
-            
+
+            //var options = new OptionSet
+            //{
+            //    Format = "bestaudio",          // Download best available audio
+            //    Output = endFileName, //$"{outputDirectory}/%(title)s.%(ext)s",  // Specify output file format
+            //    ExtractAudio = true,           // Extract audio only
+            //    AudioFormat = AudioConversionFormat.M4a,
+            //    PostprocessorArgs = "'ba[ext=m4a]' --no-check-certificates --no-warnings -strict -2"
+            //};
+
 
             var result = youtubeDl.RunAudioDownload(
                     url, AudioConversionFormat.M4a, progress: null,
