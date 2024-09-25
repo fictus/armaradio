@@ -30,7 +30,7 @@ function radioplayer_attachEvents() {
         if (videoId != "") {
             armaradio.masterPageWait(true);
 
-            let fileExtension = "mp4";
+            let fileExtension = "m4a";
             let mimeType = "audio/mp4";
 
             armaradio.getFileAsBlob(ajaxPointCall + "/Music/GetAudioFile", {
