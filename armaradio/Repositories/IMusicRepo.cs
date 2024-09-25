@@ -21,6 +21,9 @@ namespace armaradio.Repositories
         List<TrackDataItem> GetCurrentTop40DanceSingles();
         List<TrackDataItem> GetCurrentTranceTop100();
         List<TrackDataItem> GetCurrentTranceHype100();
+        List<ProxySocks4DataItem> GetSocks4ProxyList();
+        List<AdaptiveFormatDataItem> GetAudioStreams(string VideoId);
+        void DownloadMp4File(string url, string endFileName);
         YTVideoIdsDataItem Youtube_GetUrlByArtistNameSongName(string artistName, string songName);
         List<YTGeneralSearchDataItem> Youtube_PerformGeneralSearch(string searchText);
         List<YTGeneralSearchDataItem> DuckDuckGo_PerformGeneralSearch(string searchText);

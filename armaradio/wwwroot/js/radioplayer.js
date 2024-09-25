@@ -460,7 +460,8 @@ function initializeRadioPlayer(videoId, dispose) {
         //    waveHeight: 200
         //});
 
-        radioPlayerMain.on("error", function () {
+        radioPlayerMain.on("error", function (e) {
+            console.log(e);
             onRadioPlayerError();
         });
         //radioPlayerMain.on("ready", function () {

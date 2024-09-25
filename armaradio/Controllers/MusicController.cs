@@ -341,10 +341,11 @@ namespace armaradio.Controllers
         {
             try
             {
+                //List<AdaptiveFormatDataItem> audioStreams = _musicRepo.GetAudioStreams(VideoId);
                 string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
                 string downloadFolder = (IsLinux ? $"{rootPath}/AudioFiles/" : $"{rootPath}\\AudioFiles\\");
                 string endFileName = endFileName = $"{downloadFolder}{VideoId.Trim()}.m4a";
-                string fileType = "audio/m4a"; // MimeTypes.GetMimeType($"tmpFileName.m4a");
+                string fileType = "audio/mp4"; // MimeTypes.GetMimeType($"tmpFileName.m4a");
                 string containerName = "m4a";
                 bool fromConvertedFile = false;
 
@@ -355,44 +356,85 @@ namespace armaradio.Controllers
 
                 if (!System.IO.File.Exists(endFileName))
                 {
-                    var youtube = new YoutubeExplode.YoutubeClient();
-                    var streamManifest = await youtube.Videos.Streams.GetManifestAsync($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}");
-                    var allStreams = streamManifest.GetAudioOnlyStreams();
+                    _musicRepo.DownloadMp4File($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}", endFileName);
 
-                    var streamInfo = allStreams.GetWithHighestBitrate();
-                    var backupStreamInfo = streamInfo;
+                    //AdaptiveFormatDataItem maxBitrateStream = audioStreams.OrderByDescending(br => br.bitrate).FirstOrDefault();
+                    //var backupStreamInfo = maxBitrateStream;
 
-                    if (!(streamInfo.Container.Name.ToLower() == "m4a" || streamInfo.Container.Name.ToLower() == "mp4"))
-                    {
-                        streamInfo = streamManifest.GetAudioOnlyStreams()
-                            .Where(s => s.Container == Container.Mp4)
-                            .OrderByDescending(s => s.Bitrate)
-                            .FirstOrDefault();
+                    //if (!(maxBitrateStream.containerName.ToLower() == "m4a" || maxBitrateStream.containerName.ToLower() == "mp4"))
+                    //{
+                    //    maxBitrateStream = audioStreams
+                    //        .Where(s => s.containerName.ToLower() == "mp4")
+                    //        .OrderByDescending(s => s.bitrate)
+                    //        .FirstOrDefault();
 
-                        if (streamInfo != null)
-                        {
-                            backupStreamInfo = streamInfo;
-                        }
-                        else
-                        {
-                            fromConvertedFile = true;
-                            //endFileName = $"{downloadFolder}{VideoId.Trim()}.mp4";
+                    //    if (maxBitrateStream != null)
+                    //    {
+                    //        backupStreamInfo = maxBitrateStream;
+                    //    }
+                    //    else
+                    //    {
+                    //        fromConvertedFile = true;
+                    //        //endFileName = $"{downloadFolder}{VideoId.Trim()}.mp4";
 
-                            ConvertToM4A(backupStreamInfo.Url, endFileName);
-                        }
-                    }
+                    //        ConvertToM4A(backupStreamInfo.streamUrl, endFileName);
+                    //    }
+                    //}
 
-                    if (!fromConvertedFile)
-                    {
-                        var fileName = $"{VideoId.Trim()}.{backupStreamInfo.Container.Name}";
+                    //if (!fromConvertedFile)
+                    //{
+                    //    var fileName = $"{VideoId.Trim()}.{backupStreamInfo.containerName}";
 
-                        //endFileName = $"{downloadFolder}{fileName}";
+                    //    //endFileName = $"{downloadFolder}{fileName}";
 
-                        if (!System.IO.File.Exists(endFileName))
-                        {
-                            await youtube.Videos.Streams.DownloadAsync(backupStreamInfo, endFileName);
-                        }
-                    }
+                    //    if (!System.IO.File.Exists(endFileName))
+                    //    {
+                    //        _musicRepo.DownloadMp4File(backupStreamInfo.streamUrl, endFileName);
+                    //    }
+                    //}
+
+
+
+
+
+                    //var youtube = new YoutubeExplode.YoutubeClient();
+                    //var streamManifest = await youtube.Videos.Streams.GetManifestAsync($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}");
+                    //var allStreams = streamManifest.GetAudioOnlyStreams();
+
+                    //var streamInfo = allStreams.GetWithHighestBitrate();
+                    //var backupStreamInfo = streamInfo;
+
+                    //if (!(streamInfo.Container.Name.ToLower() == "m4a" || streamInfo.Container.Name.ToLower() == "mp4"))
+                    //{
+                    //    streamInfo = streamManifest.GetAudioOnlyStreams()
+                    //        .Where(s => s.Container == Container.Mp4)
+                    //        .OrderByDescending(s => s.Bitrate)
+                    //        .FirstOrDefault();
+
+                    //    if (streamInfo != null)
+                    //    {
+                    //        backupStreamInfo = streamInfo;
+                    //    }
+                    //    else
+                    //    {
+                    //        fromConvertedFile = true;
+                    //        //endFileName = $"{downloadFolder}{VideoId.Trim()}.mp4";
+
+                    //        ConvertToM4A(backupStreamInfo.Url, endFileName);
+                    //    }
+                    //}
+
+                    //if (!fromConvertedFile)
+                    //{
+                    //    var fileName = $"{VideoId.Trim()}.{backupStreamInfo.Container.Name}";
+
+                    //    //endFileName = $"{downloadFolder}{fileName}";
+
+                    //    if (!System.IO.File.Exists(endFileName))
+                    //    {
+                    //        await youtube.Videos.Streams.DownloadAsync(backupStreamInfo, endFileName);
+                    //    }
+                    //}
                 }
 
                 byte[] fileBytes = System.IO.File.ReadAllBytes(endFileName);
@@ -546,10 +588,10 @@ namespace armaradio.Controllers
                 string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
                 string downloadFolder = (IsLinux ? $"{rootPath}/AudioFiles/" : $"{rootPath}\\AudioFiles\\");
                 string endFileName = "";
-                string fileType = "audio/m4a"; // MimeTypes.GetMimeType($"tmpFileName.mp4");
-                string fileHandle = $"{Guid.NewGuid().ToString().ToLower()}.m4a";
+                string fileType = "audio/mp4"; // MimeTypes.GetMimeType($"tmpFileName.mp4");
+                string fileHandle = $"{Guid.NewGuid().ToString().ToLower()}.mp4";
                 string fileHandleTemp = $"{Guid.NewGuid().ToString().ToLower()}";
-                string endTempFile = $"{downloadFolder}{fileHandleTemp}.m4a";
+                string endTempFile = $"{downloadFolder}{fileHandleTemp}.mp4";
                 string fileName = "";
                 bool fromConvertedFile = false;
 
@@ -595,7 +637,7 @@ namespace armaradio.Controllers
                         else
                         {
                             fromConvertedFile = true;
-                            fileName = $"{fileName}.m4a";
+                            fileName = $"{fileName}.mp4";
                             //endTempFile = $"{endTempFile}.{backupStreamInfo.Container.Name}";
                             fileHandleTemp = $"{fileHandleTemp}.{backupStreamInfo.Container.Name}";
 

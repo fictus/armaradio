@@ -25,10 +25,12 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.1" />
+    <PackageReference Include="YoutubeDLSharp" Version="1.1.1" />
     <PackageReference Include="YoutubeExplode.Converter" Version="6.3.14" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="wwwroot\AudioFiles\" />
     <Folder Include="wwwroot\images\" />
     <Folder Include="wwwroot\files\" />
     <Folder Include="wwwroot\tempMp3\" />

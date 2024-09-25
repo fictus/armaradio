@@ -7,14 +7,22 @@ using armaradio.Models.Request;
 using armaradio.Models.Response;
 using armaradio.Models.Youtube;
 using Dapper;
+using Microsoft.Extensions.Logging.Abstractions;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Web;
+using YoutubeDLSharp.Options;
+using YoutubeDLSharp;
 using YoutubeExplode.Common;
+using YoutubeExplode.Videos;
+using System.Diagnostics;
+using FFMpegCore.Enums;
+using System.Runtime.InteropServices;
 
 namespace armaradio.Repositories
 {
@@ -775,6 +783,266 @@ namespace armaradio.Repositories
             }
 
             return returnItem;
+        }
+
+        public List<ProxySocks4DataItem> GetSocks4ProxyList()
+        {
+            ProxySocks4Request requestItem = null;
+            List<ProxySocks4DataItem> returnItem = new List<ProxySocks4DataItem>();
+
+            string url = $"https://api.proxyscrape.com/v4/free-proxy-list/get?request=get_proxies&skip=0&proxy_format=protocolipport&format=json&limit=25&protocol=socks4";
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
+
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    string htmlContent;
+                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    {
+                        htmlContent = sr.ReadToEnd();
+                    }
+
+                    if (!string.IsNullOrEmpty(htmlContent))
+                    {
+                        requestItem = Newtonsoft.Json.JsonConvert.DeserializeObject<ProxySocks4Request>(htmlContent);
+
+                        if (requestItem != null && requestItem.proxies != null && requestItem.proxies.Count > 0)
+                        {
+                            returnItem = requestItem.proxies;
+                        }
+                    }
+                }
+            }
+
+            return returnItem;
+        }
+
+        public List<AdaptiveFormatDataItem> GetAudioStreams(string VideoId)
+        {
+            string fullVideoUrl = $"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}";
+            List<AdaptiveFormatDataItem> returnItem = new List<AdaptiveFormatDataItem>();
+
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(fullVideoUrl);
+            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/119.0.0.0 Safari/537.36";
+
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    string htmlContent;
+                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    {
+                        htmlContent = sr.ReadToEnd();
+                    }
+
+                    if (!string.IsNullOrEmpty(htmlContent))
+                    {
+                        var match = Regex.Match(htmlContent, @"ytInitialPlayerResponse\s*=\s*(\{.+?\});");
+                        if (match.Success)
+                        {
+                            var jsonStr = match.Groups[1].Value;
+                            AudioStreamsRequest streamRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<AudioStreamsRequest>(jsonStr);
+
+                            if (streamRequest != null && streamRequest.streamingData != null && streamRequest.streamingData.adaptiveFormats != null && streamRequest.streamingData.adaptiveFormats.Count > 0)
+                            {
+                                returnItem = streamRequest.streamingData.adaptiveFormats.Where(st => (st.mimeType ?? "").ToLower().Contains("audio")).ToList();
+
+                                foreach (var stream in returnItem)
+                                {
+                                    List<string> mimeParts = stream.mimeType.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList();
+
+                                    stream.mimeTypeSimple = mimeParts[0].Trim();
+                                    stream.containerName = stream.mimeTypeSimple.Split('/').Last();
+                                    stream.codec = (mimeParts.Count > 1 ? (mimeParts[1].Trim().Split('=').Last().Trim().TrimStart('"').TrimEnd('"')) : "");
+                                    stream.streamUrl = DecodeSignatureCipher(stream.signatureCipher);
+                                }
+                            }
+                        }                        
+                    }
+                }
+            }
+
+            return returnItem;
+
+            //List<ProxySocks4DataItem> proxies = GetSocks4ProxyList();
+
+            //foreach (var proxy in proxies)
+            //{
+            //    try
+            //    {
+            //var proxyUri = new Uri(proxy.proxy);
+
+            //var httpClientHandler = new SocketsHttpHandler
+            //{
+            //    Proxy = new WebProxy(proxyUri),
+            //    UseProxy = true,
+            //    ConnectTimeout = TimeSpan.FromSeconds(5)
+            //};
+
+            //using (var client = new HttpClient(httpClientHandler))
+            //{
+            //            var response = client.GetStringAsync(fullVideoUrl).Result;
+
+            //            var match = Regex.Match(response, @"ytInitialPlayerResponse\s*=\s*(\{.+?\});");
+            //            if (!match.Success)
+            //            {
+            //                Console.WriteLine("Failed to find ytInitialPlayerResponse");
+            //                return;
+            //            }
+
+            //            var jsonStr = match.Groups[1].Value;
+            //            var json = JObject.Parse(jsonStr);
+
+            //            var streamingData = json["streamingData"];
+            //            if (streamingData == null)
+            //            {
+            //                Console.WriteLine("Failed to find streaming data");
+            //                return;
+            //            }
+
+            //            var adaptiveFormats = streamingData["adaptiveFormats"] as JArray;
+            //            if (adaptiveFormats == null)
+            //            {
+            //                Console.WriteLine("Failed to find adaptive formats");
+            //                return;
+            //            }
+
+            //            foreach (var format in adaptiveFormats)
+            //            {
+            //                var mimeType = format["mimeType"].ToString();
+            //                if (mimeType.StartsWith("audio/"))
+            //                {
+            //                    var url = format["url"].ToString();
+            //                    var bitrate = format["bitrate"].ToString();
+            //                    Console.WriteLine($"Audio stream: {mimeType}, Bitrate: {bitrate}");
+            //                    Console.WriteLine($"URL: {url}\n");
+            //                }
+            //            }
+            //        }
+            //    }
+            //    catch (Exception ex)
+            //    {
+
+            //    }
+            //}
+        }
+
+        private string DecodeSignatureCipher(string signatureCipher)
+        {
+            var components = HttpUtility.ParseQueryString(signatureCipher);
+            var encodedUrl = components["url"];
+            var decodedUrl = HttpUtility.UrlDecode(encodedUrl);
+            var signature = components["s"];
+
+            return $"{decodedUrl}&sig={signature}";
+        }
+
+        public void DownloadMp4File(string url, string endFileName)
+        {
+            bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+
+            var youtubeDl = new YoutubeDL
+            {
+                YoutubeDLPath = (isLinux ? "/usr/bin/yt-dlp" : "C:\\YTDL\\yt-dlp.exe"), //GetYoutubeDlPath(), // Get the correct path based on the OS
+                FFmpegPath = (isLinux ? "/usr/bin/ffmpeg" : "C:\\ffmpeg\\ffmpeg.exe") //GetFFmpegPath() // Get the correct FFmpeg path based on the OS
+            };
+
+            var options = new OptionSet
+            {
+                Format = "bestaudio",          // Download best available audio
+                Output = endFileName, //$"{outputDirectory}/%(title)s.%(ext)s",  // Specify output file format
+                ExtractAudio = true,           // Extract audio only
+                AudioFormat = AudioConversionFormat.M4a,
+                PostprocessorArgs = "-strict -2"
+            };
+            
+
+            var result = youtubeDl.RunAudioDownload(
+                    url, AudioConversionFormat.M4a, progress: null,
+                    output: null, overrideOptions: options
+                ).Result;
+
+            if (!result.Success)
+            {
+                throw new Exception((result.ErrorOutput != null && result.ErrorOutput.Length > 0 ? string.Join("; ", result.ErrorOutput) : "An error occurred"));
+            }
+
+            //List<ProxySocks4DataItem> proxies = GetSocks4ProxyList();
+
+            //foreach (var proxy in proxies)
+            //{
+            //    try
+            //    {
+            //        var proxyUri = new Uri(proxy.proxy);
+
+            //        var httpClientHandler = new SocketsHttpHandler
+            //        {
+            //            Proxy = new WebProxy(proxyUri),
+            //            UseProxy = true,
+            //            ConnectTimeout = TimeSpan.FromSeconds(5)
+            //        };
+
+            //        using (var httpClient = new HttpClient(httpClientHandler))
+            //        {
+            //            httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+            //            using (var response = httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead).Result)
+            //            {
+            //                if (response.IsSuccessStatusCode)
+            //                {
+            //                    using (var fileStream = new FileStream(endFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+            //                    {
+            //                        using (var downloadStream = response.Content.ReadAsStreamAsync().Result)
+            //                        {
+            //                            downloadStream.CopyToAsync(fileStream).Wait();
+
+            //                            break;
+            //                        }
+            //                    }
+            //                }
+            //            }
+            //        }
+            //    }
+            //    catch (Exception ex)
+            //    {
+
+            //    }
+            //}
+
+
+
+
+            //using (var httpClient = new HttpClient())
+            //{
+            //    try
+            //    {
+            //        httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+            //        using (var response = httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead).Result)
+            //        {
+            //            if (response.IsSuccessStatusCode)
+            //            {
+            //                using (var fileStream = new FileStream(endFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+            //                {
+            //                    using (var downloadStream = response.Content.ReadAsStreamAsync().Result)
+            //                    {
+            //                        downloadStream.CopyToAsync(fileStream).Wait();
+            //                    }
+            //                }
+            //            }
+            //        }
+            //    }
+            //    catch (HttpRequestException e)
+            //    {
+            //        Console.WriteLine($"Error downloading video: {e.Message}");
+            //    }
+            //    catch (IOException e)
+            //    {
+            //        Console.WriteLine($"Error saving video: {e.Message}");
+            //    }
+            //}
         }
 
         public YTVideoIdsDataItem Youtube_GetUrlByArtistNameSongName(string artistName, string songName)
