@@ -1,5 +1,6 @@
 ﻿using YoutubeDLSharp.Options;
 using YoutubeDLSharp;
+using System.Runtime.InteropServices;
 
 namespace armaradio.Repositories
 {
@@ -25,8 +26,30 @@ namespace armaradio.Repositories
                 NoPlaylist = true,
                 NoCheckCertificates = true,
                 NoWarnings = true,
-                Downloader = "native"
+                Downloader = "native",
+                BufferSize = 16000, // Increased buffer size
+                ConcurrentFragments = 4, // Download multiple fragments concurrently
+                FragmentRetries = 10, // Retry failed fragments
+                ForceIPv4 = true, // Force IPv4 to potentially avoid slow IPv6 connections
+                SocketTimeout = 10
             };
+            //var options = new OptionSet
+            //{
+            //    Format = "bestaudio[ext=m4a]/bestaudio",
+            //    Output = endFileName,
+            //    ExtractAudio = true,
+            //    AudioFormat = AudioConversionFormat.M4a,
+            //    NoPlaylist = true,
+            //    NoCheckCertificates = true,
+            //    NoWarnings = true,
+            //    Downloader = "native"
+            //};
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                options.NoCacheDir = true; // Disable cache directory on Linux
+                options.DownloaderArgs = "native:buffer_size=16k"; // Set native downloader buffer size
+            }
 
             var result = await _youtubeDl.RunAudioDownload(
                 url,
