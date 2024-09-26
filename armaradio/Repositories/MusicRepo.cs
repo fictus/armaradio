@@ -31,13 +31,16 @@ namespace armaradio.Repositories
     {
         private readonly IDapperHelper _dapper;
         private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
+        private readonly ArmaYoutubeDownloader _armaYTDownloader;
         public MusicRepo(
             IDapperHelper dapper,
-            Microsoft.Extensions.Configuration.IConfiguration configuration
+            Microsoft.Extensions.Configuration.IConfiguration configuration,
+            ArmaYoutubeDownloader armaYTDownloader
         )
         {
             _dapper = dapper;
             _configuration = configuration;
+            _armaYTDownloader = armaYTDownloader;
         }
 
         public List<ArmaArtistDataItem> Artist_FindArtists(string search)
@@ -944,51 +947,53 @@ namespace armaradio.Repositories
 
         public void DownloadMp4File(string url, string endFileName)
         {
-            bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+            _armaYTDownloader.DownloadAudioFileAsync(url, endFileName).Wait();
 
-            var youtubeDl = new YoutubeDL
-            {
-                YoutubeDLPath = (isLinux ? "/usr/bin/yt-dlp" : "C:\\YTDL\\yt-dlp.exe"),
-                FFmpegPath = (isLinux ? "/usr/bin/ffmpeg" : "C:\\ffmpeg\\ffmpeg.exe")
-            };
+            //bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
-            var options = new OptionSet
-            {
-                Format = "bestaudio[ext=m4a]/bestaudio", // Prefer m4a, but fall back to best audio if not available
-                Output = endFileName,
-                ExtractAudio = true,
-                AudioFormat = AudioConversionFormat.M4a,
-                NoPlaylist = true,
-                NoCheckCertificates = true,
-                NoWarnings = true,
-                //HlsPreferFfmpeg = true,
-                //PostprocessorArgs = "-strict -2",
-                Downloader = "native",
-                //DownloaderArgs = "native:buffer_size=16k"
-            };
+            //var youtubeDl = new YoutubeDL
+            //{
+            //    YoutubeDLPath = (isLinux ? "/usr/bin/yt-dlp" : "C:\\YTDL\\yt-dlp.exe"),
+            //    FFmpegPath = (isLinux ? "/usr/bin/ffmpeg" : "C:\\ffmpeg\\ffmpeg.exe")
+            //};
 
             //var options = new OptionSet
             //{
-            //    Format = "bestaudio",          // Download best available audio
-            //    Output = endFileName, //$"{outputDirectory}/%(title)s.%(ext)s",  // Specify output file format
-            //    ExtractAudio = true,           // Extract audio only
+            //    Format = "bestaudio[ext=m4a]/bestaudio", // Prefer m4a, but fall back to best audio if not available
+            //    Output = endFileName,
+            //    ExtractAudio = true,
             //    AudioFormat = AudioConversionFormat.M4a,
-            //    PostprocessorArgs = "'ba[ext=m4a]' --no-check-certificates --no-warnings -strict -2"
+            //    NoPlaylist = true,
+            //    NoCheckCertificates = true,
+            //    NoWarnings = true,
+            //    //HlsPreferFfmpeg = true,
+            //    //PostprocessorArgs = "-strict -2",
+            //    Downloader = "native",
+            //    //DownloaderArgs = "native:buffer_size=16k"
             //};
 
+            ////var options = new OptionSet
+            ////{
+            ////    Format = "bestaudio",          // Download best available audio
+            ////    Output = endFileName, //$"{outputDirectory}/%(title)s.%(ext)s",  // Specify output file format
+            ////    ExtractAudio = true,           // Extract audio only
+            ////    AudioFormat = AudioConversionFormat.M4a,
+            ////    PostprocessorArgs = "'ba[ext=m4a]' --no-check-certificates --no-warnings -strict -2"
+            ////};
 
-            var result = youtubeDl.RunAudioDownload(
-                    url,
-                    AudioConversionFormat.M4a,
-                    progress: null,
-                    output: null,
-                    overrideOptions: options
-                ).Result;
 
-            if (!result.Success)
-            {
-                throw new Exception((result.ErrorOutput != null && result.ErrorOutput.Length > 0 ? string.Join("; ", result.ErrorOutput) : "An error occurred"));
-            }
+            //var result = youtubeDl.RunAudioDownload(
+            //        url,
+            //        AudioConversionFormat.M4a,
+            //        progress: null,
+            //        output: null,
+            //        overrideOptions: options
+            //    ).Result;
+
+            //if (!result.Success)
+            //{
+            //    throw new Exception((result.ErrorOutput != null && result.ErrorOutput.Length > 0 ? string.Join("; ", result.ErrorOutput) : "An error occurred"));
+            //}
 
             //List<ProxySocks4DataItem> proxies = GetSocks4ProxyList();
 

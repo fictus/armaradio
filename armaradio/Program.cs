@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Filters;
+using System.Runtime.InteropServices;
+using YoutubeDLSharp;
 
 var builder = WebApplication.CreateBuilder(args);
 IWebHostEnvironment hostEnvironment = builder.Environment;
@@ -60,6 +62,18 @@ builder.Services.AddTransient<IDapperHelper, DapperHelper>();
 builder.Services.AddTransient<IMusicRepo, MusicRepo>();
 builder.Services.AddTransient<IArmaWebRequest, ArmaWebRequest>();
 builder.Services.AddTransient<IArmaAuth, ArmaAuth>();
+
+builder.Services.AddSingleton<YoutubeDL>(sp =>
+{
+    bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+    return new YoutubeDL
+    {
+        YoutubeDLPath = (isLinux ? "/usr/bin/yt-dlp" : "C:\\YTDL\\yt-dlp.exe"),
+        FFmpegPath = (isLinux ? "/usr/bin/ffmpeg" : "C:\\ffmpeg\\ffmpeg.exe")
+    };
+});
+
+builder.Services.AddTransient<ArmaYoutubeDownloader>();
 
 builder.Services.AddDbContext<DataContext>(options =>
 {
