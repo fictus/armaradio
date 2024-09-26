@@ -948,8 +948,8 @@ namespace armaradio.Repositories
 
             var youtubeDl = new YoutubeDL
             {
-                YoutubeDLPath = (isLinux ? "/usr/bin/yt-dlp" : "C:\\YTDL\\yt-dlp.exe"), //GetYoutubeDlPath(), // Get the correct path based on the OS
-                FFmpegPath = (isLinux ? "/usr/bin/ffmpeg" : "C:\\ffmpeg\\ffmpeg.exe") //GetFFmpegPath() // Get the correct FFmpeg path based on the OS
+                YoutubeDLPath = (isLinux ? "/usr/bin/yt-dlp" : "C:\\YTDL\\yt-dlp.exe"),
+                FFmpegPath = (isLinux ? "/usr/bin/ffmpeg" : "C:\\ffmpeg\\ffmpeg.exe")
             };
 
             var options = new OptionSet
@@ -961,9 +961,10 @@ namespace armaradio.Repositories
                 NoPlaylist = true,
                 NoCheckCertificates = true,
                 NoWarnings = true,
-                PostprocessorArgs = "-strict -2"
-                //PreferFfmpeg = true,
-                //ExternalDownloader = ExternalDownloader.Native // Use native downloader for potentially faster downloads
+                //HlsPreferFfmpeg = true,
+                //PostprocessorArgs = "-strict -2",
+                Downloader = "native",
+                //DownloaderArgs = "native:buffer_size=16k"
             };
 
             //var options = new OptionSet
@@ -977,8 +978,11 @@ namespace armaradio.Repositories
 
 
             var result = youtubeDl.RunAudioDownload(
-                    url, AudioConversionFormat.M4a, progress: null,
-                    output: null, overrideOptions: options
+                    url,
+                    AudioConversionFormat.M4a,
+                    progress: null,
+                    output: null,
+                    overrideOptions: options
                 ).Result;
 
             if (!result.Success)
