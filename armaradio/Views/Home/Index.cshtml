@@ -17,9 +17,7 @@
         <div class="row">
             <div class="col">
                 <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputGroup-sizing-default">Popular:</span>
-                    </div>
+                    <span class="input-group-text" id="inputGroup-sizing-default">Popular:</span>
                     <select id="cmbMainOptions" class="form-select">
                         <option value="1" selected="selected">Top 100</option>
                         <option value="2">Top 40 Dance Singles</option>
@@ -35,29 +33,25 @@
     <div class="col-md-6">
         <div class="row">
             <div class="col-9">
-                <div class="input-group relative mb-3">
-                    <div class="input-group-prepend">
-                        <div id="cmbMasterSearchOptions" class="dropdown">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fa-solid fa-user"></i>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item active" href="#" data-type="1"><i class="fa-solid fa-user"></i> Artists</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#" data-type="2"><i class="fa-brands fa-youtube"></i> General</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#" data-type="3"><i class="fa-solid fa-radio"></i> Radio</a>
-                                </li>
-                                @* 
-                                <li>
-                                    <a class="dropdown-item" href="#" data-type="3"><i class="fa-solid fa-shuffle"></i> Radio</a>
-                                </li> *@
-                            </ul>
-                        </div>
-                    </div>
+                <div id="cmbMasterSearchOptions" class="input-group relative mb-3">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-user"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item active" href="#" data-type="1"><i class="fa-solid fa-user"></i> Artists</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#" data-type="2"><i class="fa-brands fa-youtube"></i> General</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#" data-type="3"><i class="fa-solid fa-radio"></i> Radio</a>
+                        </li>
+                        @*
+                        <li>
+                        <a class="dropdown-item" href="#" data-type="3"><i class="fa-solid fa-shuffle"></i> Radio</a>
+                        </li> *@
+                    </ul>
                     <input id="txtMainGeneralSearch" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" autocomplete="off_hack_987dfa9df9" placeholder="Artist Search" />
                     <div id="dvTypeAheadSearch_Artists">
                         <ul id="ulArtistsFound" class="dropdown-menu show" style="display:none;"></ul>
@@ -133,9 +127,7 @@
                     </div>
                     <div id="dvPastePlaylist_PlaylistNameHolder" class="mt-2" style="display:none;">
                         <div class="input-group mb-3">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="inputGroup-sizing-default">Playlist Name:</span>
-                            </div>
+                            <span class="input-group-text" id="inputGroup-sizing-default">Playlist Name:</span>
                             <input id="txtPasterPlaylistName" type="text" class="form-control" aria-label="" aria-describedby="inputGroup-sizing-default" atocomplete="off_hack3463453453">
                         </div>
                     </div>
@@ -221,18 +213,14 @@
             </div>
             <div id="dvAddToPlaylistName_Holder" class="add-to-playlist-holder-dv mt-2" style="display:none;">
                 <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputGroup-sizing-default">Playlist Name:</span>
-                    </div>
+                    <span class="input-group-text" id="inputGroup-sizing-default">Playlist Name:</span>
                     <input id="txtAddToPlaylistNewPlaylistName" type="text" class="form-control" aria-label="" aria-describedby="inputGroup-sizing-default" atocomplete="off_hack3463453453">
                 </div>
             </div>
             <div id="dvAddToPlaylistCmbList_Holder" class="add-to-playlist-holder-dv mt-2">
                 <div class="col">
                     <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="inputGroup-sizing-default">Playlist:</span>
-                        </div>
+                        <span class="input-group-text" id="inputGroup-sizing-default">Playlist:</span>
                         <select id="cmbAddToPlaylistNames" class="form-select"></select>
                     </div>
                 </div>
@@ -274,9 +262,7 @@
                     <div>
                         <div class="col">
                             <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text" id="inputGroup-sizing-default">Load:</span>
-                                </div>
+                                <span class="input-group-text" id="inputGroup-sizing-default">Load:</span>
                                 <select id="cmbLoadPlaylistNames" class="form-select"></select>
                             </div>
                         </div>
@@ -304,9 +290,7 @@
                     <div class="mt-3">
                         <div class="col">
                             <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text" id="inputGroup-sizing-default">Artist:</span>
-                                </div>
+                                <span class="input-group-text" id="inputGroup-sizing-default">Artist:</span>
                                 <input id="txtRefineParameters_ArtistName" type="text" class="form-control" aria-label="" aria-describedby="inputGroup-sizing-default" atocomplete="off_hack3463453453">
                             </div>
                         </div>
@@ -314,9 +298,7 @@
                     <div>
                         <div class="col">
                             <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text" id="inputGroup-sizing-default">Song:</span>
-                                </div>
+                                <span class="input-group-text" id="inputGroup-sizing-default">Song:</span>
                                 <input id="txtRefineParameters_SongName" type="text" class="form-control" aria-label="" aria-describedby="inputGroup-sizing-default" atocomplete="off_hack3463453453">
                             </div>
                         </div>
