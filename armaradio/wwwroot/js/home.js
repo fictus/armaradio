@@ -46,6 +46,7 @@ function mainload_attacheEvents() {
                 $("#btnArtistAlbumsOpen").css("display", "none");
 
                 //$("#ulArtistsFound").find("li").remove();
+                $("#spSearchSpinner").css("display", "none");
 
                 if (arma_mainSearchSelectedType == "1") {
                     $("#txtMainGeneralSearch").css("display", "");
@@ -82,14 +83,17 @@ function mainload_attacheEvents() {
             if (mainSearchDeff) {
                 try {
                     mainSearchDeff.cancel();
+                    $("#spSearchSpinner").css("display", "none");
                 } catch {
 
                 }
             }
 
             clearTimeout($("#txtMainGeneralSearch").data("timeout"));
-
+            $("#spSearchSpinner").css("display", "");
+            
             $("#txtMainGeneralSearch").data("timeout", setTimeout(function () {
+
                 let searchPhrase = $("#txtMainGeneralSearch").val();
 
                 if ($.trim(searchPhrase) != "") {
@@ -98,15 +102,19 @@ function mainload_attacheEvents() {
                     }, "Music", "FindArtists")
                         .then(function (response) {
                             if (response && response.error) {
-                                
+
                             } else {
                                 attachArtistResponseFromSearch(response || []);
+
+                                $("#spSearchSpinner").css("display", "none");
                             }
                         });
                 } else {
                     attachArtistResponseFromSearch([]);
+
+                    $("#spSearchSpinner").css("display", "none");
                 }
-            }, 700));
+            }, 700));           
         }
     });
 
