@@ -105,9 +105,9 @@ function mainload_attacheEvents() {
 
                             } else {
                                 attachArtistResponseFromSearch(response || []);
-
-                                $("#spSearchSpinner").css("display", "none");
                             }
+
+                            $("#spSearchSpinner").css("display", "none");
                         });
                 } else {
                     attachArtistResponseFromSearch([]);
@@ -195,18 +195,39 @@ function mainload_attacheEvents() {
         } else if (selectedId == "2") {
             armaradio.masterPageWait(true);
 
-            armaradio.masterAJAXGet({}, "Music", "GetCurrentTop40DanceSingles")
+            armaradio.masterAJAXGet({}, "Music", "GetCurrentLatinTop50")
                 .then(function (response) {
                     attachListToTable(response);
                 });
         } else if (selectedId == "3") {
             armaradio.masterPageWait(true);
 
-            armaradio.masterAJAXGet({}, "Music", "GetCurrentTranceTop100")
+            armaradio.masterAJAXGet({}, "Music", "GetCurrentTopDanceElectronic")
                 .then(function (response) {
                     attachListToTable(response);
                 });
         } else if (selectedId == "4") {
+            armaradio.masterPageWait(true);
+
+            armaradio.masterAJAXGet({}, "Music", "GetCurrentTopRockAlternative")
+                .then(function (response) {
+                    attachListToTable(response);
+                });
+        } else if (selectedId == "5") {
+            armaradio.masterPageWait(true);
+
+            armaradio.masterAJAXGet({}, "Music", "GetCurrentTop40DanceSingles")
+                .then(function (response) {
+                    attachListToTable(response);
+                });
+        } else if (selectedId == "6") {
+            armaradio.masterPageWait(true);
+
+            armaradio.masterAJAXGet({}, "Music", "GetCurrentTranceTop100")
+                .then(function (response) {
+                    attachListToTable(response);
+                });
+        } else if (selectedId == "7") {
             armaradio.masterPageWait(true);
 
             armaradio.masterAJAXGet({}, "Music", "GetCurrentTranceHype100")

@@ -145,6 +145,78 @@ namespace armaradio.Controllers
             }
         }
 
+        [HttpGet]
+        public IActionResult GetCurrentLatinTop50()
+        {
+            try
+            {
+                List<TrackDataItem> returnItem = _musicRepo.GetCurrentLatinTop50();
+                var finalList = returnItem.Select(sg =>
+                {
+                    return new
+                    {
+                        tid = sg.tid,
+                        artistName = sg.artist_name,
+                        songName = sg.track_name
+                    };
+                });
+
+                return new JsonResult(finalList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetCurrentTopDanceElectronic()
+        {
+            try
+            {
+                List<TrackDataItem> returnItem = _musicRepo.GetCurrentTopDanceElectronic();
+                var finalList = returnItem.Select(sg =>
+                {
+                    return new
+                    {
+                        tid = sg.tid,
+                        artistName = sg.artist_name,
+                        songName = sg.track_name
+                    };
+                });
+
+                return new JsonResult(finalList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetCurrentTopRockAlternative()
+        {
+            try
+            {
+                List<TrackDataItem> returnItem = _musicRepo.GetCurrentTopRockAlternative();
+                var finalList = returnItem.Select(sg =>
+                {
+                    return new
+                    {
+                        tid = sg.tid,
+                        artistName = sg.artist_name,
+                        songName = sg.track_name
+                    };
+                });
+
+                return new JsonResult(finalList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
         [HttpPost]
         public IActionResult FindArtists([FromBody] MusicSearchArtistRequest value)
         {

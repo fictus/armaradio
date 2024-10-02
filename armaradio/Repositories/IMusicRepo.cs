@@ -21,6 +21,9 @@ namespace armaradio.Repositories
         List<TrackDataItem> GetCurrentTop40DanceSingles();
         List<TrackDataItem> GetCurrentTranceTop100();
         List<TrackDataItem> GetCurrentTranceHype100();
+        List<TrackDataItem> GetCurrentLatinTop50();
+        List<TrackDataItem> GetCurrentTopDanceElectronic();
+        List<TrackDataItem> GetCurrentTopRockAlternative();
         List<ProxySocks4DataItem> GetSocks4ProxyList();
         List<AdaptiveFormatDataItem> GetAudioStreams(string VideoId);
         void DownloadMp4File(string url, string endFileName);
