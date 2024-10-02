@@ -182,6 +182,10 @@ div.list-container {
     font-size: 9pt;
 }
 
+html body #ulArtistsFound li a {
+    padding-left: 18px;
+}
+
 #dvTypeAheadSearch_Artists {
     position: absolute;
     top: 100%;
