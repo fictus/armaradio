@@ -750,6 +750,7 @@ function mainload_attacheEvents() {
 }
 
 function setSelectedArtist(artistName) {
+    $("#btnArtistAlbumsOpen").attr("title", "View Albums: " + artistName);
     $("#btnArtistAlbumsOpen").find("span").html("View Albums: " + artistName);
 
     $("#txtMainGeneralSearch").css("display", "none");

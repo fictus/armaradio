@@ -178,15 +178,6 @@ div.list-container {
     visibility: visible !important;
 }*/
 
-/*#btnArtistAlbumsOpen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    margin-right: -3px;
-    margin-top: 49px;
-    z-index: 444;
-}*/
-
 #ulArtistsFound {
     font-size: 9pt;
 }
@@ -204,6 +195,13 @@ div.list-container {
     bottom: 0;
     left: 0;
     margin-left: 6px;
+}
+
+#btnArtistAlbumsOpen {
+    width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #btnClearSelectedArtist {
