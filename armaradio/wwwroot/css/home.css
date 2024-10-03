@@ -226,7 +226,7 @@ html body #ulArtistsFound li a {
 #btnClearSelectedArtist i {
     position: absolute;
     font-size: 16pt;
-    color: #ff0021;
+    color: #ff7800;
 }
 
 #tblArtistAlbums {
