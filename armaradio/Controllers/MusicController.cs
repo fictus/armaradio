@@ -509,83 +509,126 @@ namespace armaradio.Controllers
                     //}
                 }
 
-                byte[] fileBytes = System.IO.File.ReadAllBytes(endFileName);
+                //byte[] fileBytes = System.IO.File.ReadAllBytes(endFileName);
 
-                long size, start, end, length, fp = 0;
-                using (var reader = new System.IO.StreamReader(endFileName))
+                //long size, start, end, length, fp = 0;
+                //using (var reader = new System.IO.StreamReader(endFileName))
+                //{
+                //    size = reader.BaseStream.Length;
+                //    start = 0;
+                //    end = size - 1;
+                //    length = size;
+
+                //    // Set the "Accept-Ranges" header to indicate that we support range requests
+                //    HttpContext.Response.Headers.Append("Accept-Ranges", "0-" + size);
+
+                //    // Handle range requests
+                //    if (!string.IsNullOrEmpty(HttpContext.Request.Headers["Range"]))
+                //    {
+                //        long anotherStart = start;
+                //        long anotherEnd = end;
+                //        var rangeParts = HttpContext.Request.Headers["Range"].ToString().Split(new char[] { '=' }, 2);
+                //        var range = rangeParts[1];
+
+                //        // Ensure the client hasn't sent a multi-byte range
+                //        if (range.Contains(","))
+                //        {
+                //            HttpContext.Response.Headers.Append("Content-Range", $"bytes {start}-{end}/{size}");
+                //            return new StatusCodeResult(StatusCodes.Status416RangeNotSatisfiable);
+                //        }
+
+                //        // Parse the range request
+                //        if (range.StartsWith("-"))
+                //        {
+                //            anotherStart = size - long.Parse(range.Substring(1));
+                //        }
+                //        else
+                //        {
+                //            var rangeBounds = range.Split(new char[] { '-' }, 2);
+                //            anotherStart = long.Parse(rangeBounds[0]);
+                //            long temp = 0;
+                //            anotherEnd = (rangeBounds.Length > 1 && long.TryParse(rangeBounds[1], out temp)) ? long.Parse(rangeBounds[1]) : size;
+                //        }
+
+                //        // Validate the requested range
+                //        anotherEnd = (anotherEnd > end) ? end : anotherEnd;
+                //        if (anotherStart > anotherEnd || anotherStart > size - 1 || anotherEnd >= size)
+                //        {
+                //            HttpContext.Response.Headers.Append("Content-Range", $"bytes {start}-{end}/{size}");
+                //            return new StatusCodeResult(StatusCodes.Status416RangeNotSatisfiable);
+                //        }
+
+                //        start = anotherStart;
+                //        end = anotherEnd;
+                //        length = end - start + 1;
+                //        fp = reader.BaseStream.Seek(start, SeekOrigin.Begin);
+                //        HttpContext.Response.StatusCode = StatusCodes.Status206PartialContent;
+                //    }
+                //}
+
+                //HttpContext.Response.ContentType = fileType;
+                //HttpContext.Response.Headers.Append("Cache-Control", "no-cache");
+                //HttpContext.Response.Headers.Append("Content-Disposition", $"inline; filename=\"{VideoId}.{containerName}\"");
+                //HttpContext.Response.Headers.Append("Content-Range", $"bytes {start}-{end}/{size}");
+                //HttpContext.Response.Headers.Append("Content-Length", length.ToString());
+
+
+                ////System.IO.File.Delete(endFileName);
+
+                //Task.Delay(TimeSpan.FromHours(1))
+                //    .ContinueWith(_ => {
+                //        if (System.IO.File.Exists(endFileName))
+                //        {
+                //            System.IO.File.Delete(endFileName);
+                //        }
+                //    });
+
+                //var returnItem = new FileContentResult(fileBytes, fileType);
+
+                var fileInfo = new FileInfo(endFileName);
+                long fileLength = fileInfo.Length;
+
+                // Handle range requests
+                var rangeHeader = Request.Headers["Range"].ToString();
+                if (string.IsNullOrEmpty(rangeHeader))
                 {
-                    size = reader.BaseStream.Length;
-                    start = 0;
-                    end = size - 1;
-                    length = size;
+                    // No range requested, return full file
+                    Response.Headers.Append("Accept-Ranges", "bytes");
+                    Response.ContentType = fileType;
+                    Response.Headers.Append("Content-Disposition", $"inline; filename=\"{VideoId}.{containerName}\"");
 
-                    // Set the "Accept-Ranges" header to indicate that we support range requests
-                    HttpContext.Response.Headers.Append("Accept-Ranges", "0-" + size);
+                    //FlagFileForDeletion(endFileName);
 
-                    // Handle range requests
-                    if (!string.IsNullOrEmpty(HttpContext.Request.Headers["Range"]))
-                    {
-                        long anotherStart = start;
-                        long anotherEnd = end;
-                        var rangeParts = HttpContext.Request.Headers["Range"].ToString().Split(new char[] { '=' }, 2);
-                        var range = rangeParts[1];
-
-                        // Ensure the client hasn't sent a multi-byte range
-                        if (range.Contains(","))
-                        {
-                            HttpContext.Response.Headers.Append("Content-Range", $"bytes {start}-{end}/{size}");
-                            return new StatusCodeResult(StatusCodes.Status416RangeNotSatisfiable);
-                        }
-
-                        // Parse the range request
-                        if (range.StartsWith("-"))
-                        {
-                            anotherStart = size - long.Parse(range.Substring(1));
-                        }
-                        else
-                        {
-                            var rangeBounds = range.Split(new char[] { '-' }, 2);
-                            anotherStart = long.Parse(rangeBounds[0]);
-                            long temp = 0;
-                            anotherEnd = (rangeBounds.Length > 1 && long.TryParse(rangeBounds[1], out temp)) ? long.Parse(rangeBounds[1]) : size;
-                        }
-
-                        // Validate the requested range
-                        anotherEnd = (anotherEnd > end) ? end : anotherEnd;
-                        if (anotherStart > anotherEnd || anotherStart > size - 1 || anotherEnd >= size)
-                        {
-                            HttpContext.Response.Headers.Append("Content-Range", $"bytes {start}-{end}/{size}");
-                            return new StatusCodeResult(StatusCodes.Status416RangeNotSatisfiable);
-                        }
-
-                        start = anotherStart;
-                        end = anotherEnd;
-                        length = end - start + 1;
-                        fp = reader.BaseStream.Seek(start, SeekOrigin.Begin);
-                        HttpContext.Response.StatusCode = StatusCodes.Status206PartialContent;
-                    }
+                    return PhysicalFile(endFileName, fileType, enableRangeProcessing: true);
                 }
 
-                HttpContext.Response.ContentType = fileType;
-                HttpContext.Response.Headers.Append("Cache-Control", "no-cache");
-                HttpContext.Response.Headers.Append("Content-Disposition", $"inline; filename=\"{VideoId}.{containerName}\"");
-                HttpContext.Response.Headers.Append("Content-Range", $"bytes {start}-{end}/{size}");
-                HttpContext.Response.Headers.Append("Content-Length", length.ToString());
+                // Parse range
+                var rangeValue = rangeHeader.Replace("bytes=", string.Empty);
+                var rangeParts = rangeValue.Split('-');
+                var rangeStart = long.Parse(rangeParts[0]);
+                var rangeEnd = rangeParts.Length > 1 && long.TryParse(rangeParts[1], out var temp)
+                    ? Math.Min(temp, fileLength - 1)
+                    : fileLength - 1;
 
+                // Validate range
+                if (rangeStart > rangeEnd || rangeStart > fileLength - 1 || rangeEnd >= fileLength)
+                {
+                    Response.Headers.Append("Content-Range", $"bytes */{fileLength}");
+                    return StatusCode(StatusCodes.Status416RangeNotSatisfiable);
+                }
 
-                //System.IO.File.Delete(endFileName);
+                Response.StatusCode = StatusCodes.Status206PartialContent;
+                Response.Headers.Append("Content-Range", $"bytes {rangeStart}-{rangeEnd}/{fileLength}");
+                Response.Headers.Append("Accept-Ranges", "bytes");
+                Response.Headers.Append("Content-Type", fileType);
+                Response.Headers.Append("Content-Disposition", $"inline; filename=\"{VideoId}.{containerName}\"");
 
-                Task.Delay(TimeSpan.FromHours(1))
-                    .ContinueWith(_ => {
-                        if (System.IO.File.Exists(endFileName))
-                        {
-                            System.IO.File.Delete(endFileName);
-                        }
-                    });
+                var returnItem = new FileStreamResult(new FileStream(endFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite), fileType)
+                {
+                    EnableRangeProcessing = true
+                };
 
-                var returnItem = new FileContentResult(fileBytes, fileType);
-
-                //Response.RegisterForDispose(fileBytes);
+                FlagFileForDeletion(endFileName);
 
                 return returnItem;
             }
@@ -593,6 +636,18 @@ namespace armaradio.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
             }
+        }
+
+        private void FlagFileForDeletion(string FullDirFIleName)
+        {
+            Task.Delay(TimeSpan.FromHours(1))
+                    .ContinueWith(_ =>
+                    {
+                        if (System.IO.File.Exists(FullDirFIleName))
+                        {
+                            System.IO.File.Delete(FullDirFIleName);
+                        }
+                    });
         }
 
         //[HttpGet]
