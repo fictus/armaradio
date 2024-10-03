@@ -585,6 +585,7 @@ namespace armaradio.Controllers
 
                 //var returnItem = new FileContentResult(fileBytes, fileType);
 
+                bool fileWasFlaggedForDeletion = false;
                 var fileInfo = new FileInfo(endFileName);
                 long fileLength = fileInfo.Length;
 
@@ -597,7 +598,9 @@ namespace armaradio.Controllers
                     Response.ContentType = fileType;
                     Response.Headers.Append("Content-Disposition", $"inline; filename=\"{VideoId}.{containerName}\"");
 
-                    //FlagFileForDeletion(endFileName);
+                    FlagFileForDeletion(endFileName);
+
+                    fileWasFlaggedForDeletion = true;
 
                     return PhysicalFile(endFileName, fileType, enableRangeProcessing: true);
                 }
@@ -623,14 +626,15 @@ namespace armaradio.Controllers
                 Response.Headers.Append("Content-Type", fileType);
                 Response.Headers.Append("Content-Disposition", $"inline; filename=\"{VideoId}.{containerName}\"");
 
-                var returnItem = new FileStreamResult(new FileStream(endFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite), fileType)
+                if (!fileWasFlaggedForDeletion)
+                {
+                    FlagFileForDeletion(endFileName);
+                }
+
+                return new FileStreamResult(new FileStream(endFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite), fileType)
                 {
                     EnableRangeProcessing = true
                 };
-
-                FlagFileForDeletion(endFileName);
-
-                return returnItem;
             }
             catch (Exception ex)
             {
@@ -802,13 +806,7 @@ namespace armaradio.Controllers
 
                 //System.IO.File.Delete(endTempFile);
 
-                Task.Delay(TimeSpan.FromHours(1))
-                    .ContinueWith(_ => {
-                        if (System.IO.File.Exists(endTempFile))
-                        {
-                            System.IO.File.Delete(endTempFile);
-                        }
-                    });
+                FlagFileForDeletion(endTempFile);
 
                 memoryStream.Position = 0;
                 var returnItem = new FileStreamResult(memoryStream, fileType)
