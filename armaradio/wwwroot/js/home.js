@@ -1114,6 +1114,10 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
             currentRow.addClass("now-playing");
 
             if (videoId != "") {
+                $("a.lnk-attribution-notice").attr("data-artistname", artistName);
+                $("a.lnk-attribution-notice").attr("data-songname", songName);
+                $("a.lnk-attribution-notice").attr("data-url", "https://www.youtube.com/watch?v=" + videoId);
+
                 initializeHomeRadio(videoId);
 
                 armaradio.masterPageWait(false);
@@ -1129,6 +1133,10 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                                     "data-videoid": response.videoId,
                                     "data-alternateids": (response.alternateIds || []).join(",")
                                 }); //videoId 
+
+                                $("a.lnk-attribution-notice").attr("data-artistname", artistName);
+                                $("a.lnk-attribution-notice").attr("data-songname", songName);
+                                $("a.lnk-attribution-notice").attr("data-url", "https://www.youtube.com/watch?v=" + response.videoId);
 
                                 initializeHomeRadio(response.videoId);
 
@@ -1231,6 +1239,8 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
 }
 
 function initializeHomeRadio(videoId, disponse) {
+    $("a.lnk-attribution-notice").css("display", "none");
+
     if (!localHomePlayer || disponse) {
         let newIframe = $("<video></video");
         newIframe.attr({
@@ -1283,6 +1293,8 @@ function initializeHomeRadio(videoId, disponse) {
                 $.when(localHomePlayer.play())
                     .then(function () {
                         setTimeout(function () {
+                            $("a.lnk-attribution-notice").css("display", "");
+
                             localHomePlayer.muted(false);
                         }, 100);
                     });
@@ -1299,6 +1311,8 @@ function initializeHomeRadio(videoId, disponse) {
         //});
 
         localHomePlayer.on("error", function () {
+            $("a.lnk-attribution-notice").css("display", "none");
+
             onPlayerError(localHomePlayer.error());
         });
         //localHomePlayer.on("ready", function () {
@@ -1306,6 +1320,8 @@ function initializeHomeRadio(videoId, disponse) {
         //    localHomePlayer.play();
         //});
         localHomePlayer.on("ended", function () {
+            $("a.lnk-attribution-notice").css("display", "none");
+
             onPlayerStateChange();
         });
         localHomePlayer.on("previous", function () {
@@ -1336,6 +1352,8 @@ function initializeHomeRadio(videoId, disponse) {
                 $.when(localHomePlayer.play())
                     .then(function () {
                         setTimeout(function () {
+                            $("a.lnk-attribution-notice").css("display", "");
+
                             localHomePlayer.muted(false);
                         }, 100);
                     });

@@ -17,6 +17,30 @@ function wireKeepAliveHack() {
 
 function pageMainAttachEvents() {    
     $("#dvMasterWarning").modal();
+    $("#dvPopupSongAttribution").modal();
+
+    $("a.lnk-attribution-notice").on("click", function (e) {
+        e.preventDefault();
+
+        let currentLink = $(this);
+        let artistName = $.trim(currentLink.attr("data-artistname"));
+        let songName = $.trim(currentLink.attr("data-songname"));
+        let videoUrl = $.trim(currentLink.attr("data-url"));
+        let artistSong = $.trim(artistName + (songName != "" ? " " : "") + songName);
+
+        $("#lblSongAttributionDetails").html("This audio is from the video \"" + artistSong + "\", used under CC BY 3.0.");
+
+        let newLink = $("<a>View the original video and license details</a>");
+        newLink.attr({
+            "id": "lnkViewSourceAttibution",
+            "href": videoUrl,
+            "target": "_blank"
+        });
+
+        $("#lnkViewSourceAttibution").replaceWith(newLink);
+
+        $("#dvPopupSongAttribution").modal("show");
+    });
 }
 
 function attachLoginRegisterEvents() {

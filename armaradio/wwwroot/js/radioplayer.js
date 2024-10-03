@@ -280,6 +280,10 @@ function playNextSong() {
                             $("#lblRadioPlayer_SongTitle").html(songData.songName);
                             $("#lblRadioPlayer_ArtistName").html(songData.artistName);
 
+                            $("a.lnk-attribution-notice").attr("data-artistname", songData.artistName);
+                            $("a.lnk-attribution-notice").attr("data-songname", songData.songName);
+                            $("a.lnk-attribution-notice").attr("data-url", "https://www.youtube.com/watch?v=" + response.videoId);
+
                             initializeRadioPlayer(response.videoId);
                         }
                     }
@@ -295,6 +299,10 @@ function playNextSong() {
             });
             $("#lblRadioPlayer_SongTitle").html(songData.song);
             $("#lblRadioPlayer_ArtistName").html(songData.artist);
+
+            $("a.lnk-attribution-notice").attr("data-artistname", songData.artist);
+            $("a.lnk-attribution-notice").attr("data-songname", songData.song);
+            $("a.lnk-attribution-notice").attr("data-url", "https://www.youtube.com/watch?v=" + songData.videoId);
 
             initializeRadioPlayer(songData.videoId);
         }
@@ -393,6 +401,8 @@ function onRadioPlayerError(e) {
 }
 
 function initializeRadioPlayer(videoId, dispose) {
+    $("a.lnk-attribution-notice").css("display", "none");
+
     if (!radioPlayerMain || dispose) {
         let newIframe = $("<video></video");
         newIframe.attr({
@@ -445,6 +455,8 @@ function initializeRadioPlayer(videoId, dispose) {
                 $.when(radioPlayerMain.play())
                     .then(function () {
                         setTimeout(function () {
+                            $("a.lnk-attribution-notice").css("display", "");
+
                             radioPlayerMain.muted(false);
                         }, 100);
                     });
@@ -462,6 +474,8 @@ function initializeRadioPlayer(videoId, dispose) {
 
         radioPlayerMain.on("error", function (e) {
             console.log(e);
+
+            $("a.lnk-attribution-notice").css("display", "none");
             onRadioPlayerError();
         });
         //radioPlayerMain.on("ready", function () {
@@ -469,6 +483,8 @@ function initializeRadioPlayer(videoId, dispose) {
         //    radioPlayerMain.play();
         //});
         radioPlayerMain.on("ended", function () {
+            $("a.lnk-attribution-notice").css("display", "none");
+
             onRadioPlayerStateChange();
         });
         radioPlayerMain.on("previous", function () {
@@ -500,6 +516,8 @@ function initializeRadioPlayer(videoId, dispose) {
                 $.when(radioPlayerMain.play())
                     .then(function () {
                         setTimeout(function () {
+                            $("a.lnk-attribution-notice").css("display", "");
+
                             radioPlayerMain.muted(false);
                         }, 100);
                     });
@@ -510,5 +528,7 @@ function initializeRadioPlayer(videoId, dispose) {
 }
 
 function replayWithAlternateId(videoId) {
+    $("a.lnk-attribution-notice").attr("data-url", "https://www.youtube.com/watch?v=" + videoId);
+
     initializeRadioPlayer(videoId);
 }

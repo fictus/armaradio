@@ -99,10 +99,11 @@
                 <div id="dvMainPlay_currentlyPlaying">
                     <div class="iframe-holder"></div>
                 </div>
-                <div class="pb-1">
-                    <button id="btnMainPlayerToggleRepeat" class="btn btn-primary font-sz-0 pt-1 pb-1" data-status="0" title="repeat off">
+                <div id="dvHomePlayerBottomControls" class="pb-1">
+                    <button id="btnMainPlayerToggleRepeat" class="btn btn-primary font-sz-0 pt-1 pb-1 mr-5" data-status="0" title="repeat off">
                         <i class="fa-solid fa-repeat font-sz-11pt"></i>
                     </button>
+                    <a href="#" class="lnk-attribution-notice" style="display:none;" title="song attribution"><i class="fas fa-info-circle"></i></a>
                 </div>
             </div>
             <div class="col-md-7">
@@ -192,7 +193,8 @@
             <div class="align-center pl-3 pr-3">
                 <h6 id="lblRadioPlayer_ArtistName" class="mb-0"></h6>
             </div>
-            <div class="align-center mt-3">
+            <div class="align-center relative mt-3">
+                <a href="#" class="lnk-attribution-notice" style="display:none;" title="song attribution"><i class="fas fa-info-circle"></i></a>
                 <a id="lnkRadioPlayer_LikeSong" class="playercontrol-button mr-4"><i class="fa-solid fa-thumbs-up"></i></a>
                 <a id="lnkRadioPlayer_HateSong" class="playercontrol-button relative"><i class="fa-solid fa-arrow-rotate-right"></i></a>
             </div>

@@ -14,6 +14,25 @@ html {
   }
 }
 
+#dvHomePlayerBottomControls a.lnk-attribution-notice {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    margin-left: 115px;
+    color: #007bff;
+    font-size: 16pt;
+}
+
+#dvRadioPlayerHolder a.lnk-attribution-notice {
+    position: absolute;
+    top: 0;
+    margin-top: 18px;
+    left: 0;
+    margin-left: 10px;
+    color: #007bff;
+    font-size: 18pt;
+}
+
 .site-icon-color {
     color: #f75252;
 }
