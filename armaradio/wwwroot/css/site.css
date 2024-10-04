@@ -33,6 +33,12 @@ html {
     font-size: 18pt;
 }
 
+.text-justify {
+    text-align: justify;
+    display: table-row;
+    text-align-last: left;
+}
+
 .site-icon-color {
     color: #f75252;
 }

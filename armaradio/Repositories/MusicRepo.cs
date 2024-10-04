@@ -713,6 +713,122 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
+        public List<TrackDataItem> GetTopEmergingArtists()
+        {
+            List<TrackDataItem> returnItem = new List<TrackDataItem>();
+
+            string url = "https://www.billboard.com/charts/emerging-artists/";
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
+
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    string htmlContent;
+                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    {
+                        htmlContent = sr.ReadToEnd();
+                    }
+
+                    if (!string.IsNullOrEmpty(htmlContent))
+                    {
+                        var parser = new HtmlParser();
+                        var document = parser.ParseDocument(htmlContent);
+
+                        var allDivs = document.QuerySelectorAll("div.o-chart-results-list-row-container");
+
+                        int rankId = 0;
+
+                        foreach (var div in allDivs)
+                        {
+                            rankId++;
+
+                            try
+                            {
+                                var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
+                                string artistName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
+                                string songName = (dataHolder.QuerySelector("span") != null ? dataHolder.QuerySelector("span").Text() ?? "" : "").Trim();
+
+                                returnItem.Add(new TrackDataItem()
+                                {
+                                    artist_name = artistName,
+                                    track_name = songName,
+                                    tid = 0,
+                                    usability_score = rankId
+                                });
+                            }
+                            catch (Exception ex)
+                            {
+
+                            }
+                        }
+                    }
+                }
+            }
+
+            return returnItem;
+        }
+
+        public List<TrackDataItem> GetCurrentTopCountrySongs()
+        {
+            List<TrackDataItem> returnItem = new List<TrackDataItem>();
+
+            string url = "https://www.billboard.com/charts/country-songs/";
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
+
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    string htmlContent;
+                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    {
+                        htmlContent = sr.ReadToEnd();
+                    }
+
+                    if (!string.IsNullOrEmpty(htmlContent))
+                    {
+                        var parser = new HtmlParser();
+                        var document = parser.ParseDocument(htmlContent);
+
+                        var allDivs = document.QuerySelectorAll("div.o-chart-results-list-row-container");
+
+                        int rankId = 0;
+
+                        foreach (var div in allDivs)
+                        {
+                            rankId++;
+
+                            try
+                            {
+                                var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
+                                string songName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
+                                string artistName = (dataHolder.QuerySelector("span").Text() ?? "").Trim();
+
+                                returnItem.Add(new TrackDataItem()
+                                {
+                                    artist_name = artistName,
+                                    track_name = songName,
+                                    tid = 0,
+                                    usability_score = rankId
+                                });
+                            }
+                            catch (Exception ex)
+                            {
+
+                            }
+                        }
+                    }
+                }
+            }
+
+            return returnItem;
+        }
+
         public List<TrackDataItem> GetCurrentTop40DanceSingles()
         {
             List<TrackDataItem> returnItem = new List<TrackDataItem>();

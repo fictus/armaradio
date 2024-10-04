@@ -241,6 +241,20 @@ function mainload_attacheEvents() {
                 .then(function (response) {
                     attachListToTable(response);
                 });
+        } else if (selectedId == "8") {
+            armaradio.masterPageWait(true);
+
+            armaradio.masterAJAXGet({}, "Music", "GetTopEmergingArtists")
+                .then(function (response) {
+                    attachListToTable(response);
+                });
+        } else if (selectedId == "9") {
+            armaradio.masterPageWait(true);
+
+            armaradio.masterAJAXGet({}, "Music", "GetCurrentTopCountrySongs")
+                .then(function (response) {
+                    attachListToTable(response);
+                });
         }
         //else if (selectedId == "3") {
         //    if ($("#dvPopupLoadPlaylists").length) {

@@ -217,6 +217,54 @@ namespace armaradio.Controllers
             }
         }
 
+        [HttpGet]
+        public IActionResult GetTopEmergingArtists()
+        {
+            try
+            {
+                List<TrackDataItem> returnItem = _musicRepo.GetTopEmergingArtists();
+                var finalList = returnItem.Select(sg =>
+                {
+                    return new
+                    {
+                        tid = sg.tid,
+                        artistName = sg.artist_name,
+                        songName = sg.track_name
+                    };
+                });
+
+                return new JsonResult(finalList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetCurrentTopCountrySongs()
+        {
+            try
+            {
+                List<TrackDataItem> returnItem = _musicRepo.GetCurrentTopCountrySongs();
+                var finalList = returnItem.Select(sg =>
+                {
+                    return new
+                    {
+                        tid = sg.tid,
+                        artistName = sg.artist_name,
+                        songName = sg.track_name
+                    };
+                });
+
+                return new JsonResult(finalList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
         [HttpPost]
         public IActionResult FindArtists([FromBody] MusicSearchArtistRequest value)
         {
