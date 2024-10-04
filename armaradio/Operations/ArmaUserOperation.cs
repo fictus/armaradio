@@ -39,7 +39,7 @@ namespace armaradio.Operations
 
             _currentLog = new OperationLog
             {
-                Timestamp = DateTime.UtcNow,
+                Timestamp = DateTime.Now,
                 IpAddress = GetRealIpAddress(context), //context.Connection.RemoteIpAddress?.ToString(),
                 UserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value,
                 UserName = user.Identity?.Name,
@@ -56,7 +56,7 @@ namespace armaradio.Operations
         {
             if (!_disposed)
             {
-                _currentLog.Duration = (DateTime.UtcNow - _currentLog.Timestamp).TotalMilliseconds;
+                _currentLog.Duration = (DateTime.Now - _currentLog.Timestamp).TotalMilliseconds;
 
                 _dapper.ExecuteNonQuery("radioconn", "Operations_LogUserActivity", new
                 {
