@@ -16,16 +16,59 @@ $(document).ready(function () {
 function mainload_attacheEvents() {
     $("#dvPopupPastePlaylist").modal();
     $("#dvPopupLoadPlaylists").modal();
+    $("#dvPopupSharePlaylist").modal();
     $("#dvPopupRefineRadioParameters").modal();
 
-    armaradio.masterAJAXGet({}, "Music", "GetCurrentTop100")
-        .then(function (response) {
-            attachListToTable(response, true);
-        });
+    let sharedPlaylistToken = $.trim($("#dvMasterAttribures").attr("data-sharedplaylisttoken"));
 
-    //$("#cmbMasterSearchOptions").on("hide.bs.dropdown", function (e) {
-    //    console.log(e);
-    //});
+    if (sharedPlaylistToken == "") {
+        armaradio.masterAJAXGet({}, "Music", "GetCurrentTop100")
+            .then(function (response) {
+                attachListToTable(response, true);
+            });
+    } else {
+        armaradio.masterAJAXGet({
+            token: sharedPlaylistToken
+        }, "Music", "GetSharedPlaylist")
+            .then(function (response) {
+                if (response) {
+                    let loadedPlaylist = {
+                        playlistId: -1,
+                        playlistTitle: response.playlistName
+                    };
+
+                    attachListToTable(response.playlistData, true, loadedPlaylist, true);
+                } else {
+                    armaradio.masterAJAXGet({}, "Music", "GetCurrentTop100")
+                        .then(function (response) {
+                            attachListToTable(response, true);
+                        });
+                }
+            });
+    }
+
+    $("#lnkSharePlaylist").on("click", function (e) {
+        e.preventDefault();
+
+        let playlistId = $.trim($("#lblTblHeaderPlaylistName").attr("data-playlistid"));
+
+        if (playlistId != "" && !isNaN(playlistId)) {
+            armaradio.masterPageWait(true);
+
+            armaradio.masterAJAXGet({
+                PlaylistId: playlistId
+            }, "Music", "GetSharedPlaylistToken")
+                .then(function (response) {
+                    if (response && response.token) {
+                        $("#lblSharePlaylistUrl").html("https://armarad.com?playlist=" + response.token);
+
+                        $("#dvPopupSharePlaylist").modal("show");
+                    }
+
+                    armaradio.masterPageWait(false);
+                });
+        }
+    });
 
     $("#cmbMasterSearchOptions").find("a.dropdown-item").each(function () {
         $(this).on("click", function (e) {
@@ -452,6 +495,12 @@ function mainload_attacheEvents() {
     $("#offcanvasSongOptions").on("show.bs.offcanvas", function () {
         if ($(document).data("allowDownload")) {
             $(".btn-options-download").css("display", "");
+        }
+
+        $("#btnSongOptions_RemoveFromPlaylist").css("display", "");
+
+        if ($.trim($("#lblTblHeaderPlaylistName").attr("data-issharedplaylist")) == "1") {
+            $("#btnSongOptions_RemoveFromPlaylist").css("display", "none");
         }
     });
 
@@ -1003,13 +1052,25 @@ function loadAlbumSongs(artistId, albumId, artistName, albumTitle) {
         });
 }
 
-function attachListToTable(response, isPageLoad, loadedPlaylist) {
+function attachListToTable(response, isPageLoad, loadedPlaylist, isSharedPlaylist) {
+    $("#lnkSharePlaylist").css("display", "none");
+
     if (loadedPlaylist) {
-        $("#lblTblHeaderPlaylistName").attr("data-playlistid", loadedPlaylist.playlistId);
-        $("#lblTblHeaderPlaylistName").html("Playlist: " + loadedPlaylist.playlistTitle);
+        $("#lblTblHeaderPlaylistName").attr({
+            "data-playlistid": loadedPlaylist.playlistId,
+            "data-issharedplaylist": (isSharedPlaylist ? "1" : "")
+        });
+        $("#lblTblHeaderPlaylistName").html((isSharedPlaylist ? "Shared " : "") + "Playlist: " + loadedPlaylist.playlistTitle);
+
+        if (!isSharedPlaylist) {
+            $("#lnkSharePlaylist").css("display", "");
+        }
     } else {
         $("#lblTblHeaderPlaylistName")
-            .attr("data-playlistid", "")
+            .attr({
+                "data-playlistid": "",
+                "data-issharedplaylist": ""
+            })
             .html("");
     }
 

@@ -1633,6 +1633,39 @@ namespace armaradio.Repositories
             });
         }
 
+        public string GetSharedPlaylistToken(int PlaylistId, string UserId)
+        {
+            return _dapper.GetList<string>("radioconn", "ArmaPlayList_GetSharedPlaylistToken", new
+            {
+                playlist_id = PlaylistId,
+                user_id = UserId
+            }).FirstOrDefault();
+        }
+
+        public ArmaSharedPlaylistDataItem GetSharedPlaylist(string Token)
+        {
+            ArmaSharedPlaylistDataItem returnItem = null;
+
+            using (var con = _dapper.GetConnection("radioconn"))
+            {
+                var qParams = new DynamicParameters();
+                qParams.Add("@token", Token);
+
+                var currentDataset = con.QueryMultiple("ArmaPlayList_GetSharedPlaylistByToken",
+                    qParams,
+                    commandType: CommandType.StoredProcedure);
+
+                returnItem = currentDataset.Read<ArmaSharedPlaylistDataItem>().FirstOrDefault();
+
+                if (returnItem != null)
+                {
+                    returnItem.PlaylistData = currentDataset.Read<ArmaPlaylistDataItem>().ToList() ?? new List<ArmaPlaylistDataItem>();
+                }
+            }
+
+            return returnItem;
+        }
+
         public List<ArmaUserPlaylistDataItem> GetUserPlaylists(string UserId)
         {
             return _dapper.GetList<ArmaUserPlaylistDataItem>("radioconn", "ArmaPlayList_GetUserPlaylists", new

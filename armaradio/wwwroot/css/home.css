@@ -6,6 +6,17 @@ html body .vjs-poster {
 html body .vjs-poster img {
     object-fit: cover !important;
 }
+#lnkSharePlaylist {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-right: 15px;
+    color: #007bff;
+    cursor: pointer;
+}
+#lnkSharePlaylist i {
+    font-size: 16pt;
+}
 .bottom-controls {
     position: fixed;
     bottom: 0;

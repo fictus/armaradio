@@ -21,6 +21,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using YoutubeExplode;
 using YoutubeExplode.Converter;
+using YoutubeExplode.Playlists;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 
@@ -929,6 +930,75 @@ namespace armaradio.Controllers
                 List<ArmaUserPlaylistDataItem> returnItem = _musicRepo.GetUserPlaylists(currentUser.UserId);
 
                 return new JsonResult(returnItem);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult GetSharedPlaylistToken(int PlaylistId)
+        {
+            try
+            {
+                ArmaUser currentUser = _authControl.GetCurrentUser();
+
+                if (currentUser == null)
+                {
+                    throw new Exception("Invalid request");
+                }
+
+                string returnItem = _musicRepo.GetSharedPlaylistToken(PlaylistId, currentUser.UserId);
+
+                return new JsonResult(new
+                {
+                    token = returnItem
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetSharedPlaylist(string token)
+        {
+            try
+            {
+                ArmaUser currentUser = _authControl.GetCurrentUser();
+
+                if (string.IsNullOrWhiteSpace(token))
+                {
+                    return new JsonResult(null);
+                }
+
+                ArmaSharedPlaylistDataItem returnItem = _musicRepo.GetSharedPlaylist(token);
+
+                if (returnItem == null || returnItem.PlaylistData == null || returnItem.PlaylistData.Count == 0)
+                {
+                    return new JsonResult(null);
+                }
+
+                var finalList = new
+                {
+                    playlistId = -1,
+                    playlistName = returnItem.PlaylistName,
+                    playlistData = returnItem.PlaylistData.Select(sg =>
+                    {
+                        return new
+                        {
+                            tid = sg.Id,
+                            artistName = sg.Artist,
+                            songName = sg.Song,
+                            videoId = sg.VideoId
+                        };
+                    })
+                };
+
+                return new JsonResult(finalList);
             }
             catch (Exception ex)
             {
