@@ -2,6 +2,7 @@ using armaradio.Data;
 using armaradio.Operations;
 using armaradio.Repositories;
 using armaradio.Tools;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -80,6 +81,18 @@ builder.Services.AddTransient<ArmaYoutubeDownloader>();
 builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("adminconn"));
+});
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor |
+        ForwardedHeaders.XForwardedProto;
+    // If you're behind a reverse proxy or load balancer, you might need to clear and add
+    // your proxy server's IP range:
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+    // options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse("10.0.0.0"), 8));
 });
 
 builder.Services.AddAuthorization();

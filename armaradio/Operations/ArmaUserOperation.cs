@@ -1,6 +1,7 @@
 ﻿using armaradio.Repositories;
 using Azure.Core;
 using System.Net;
+using System.Net.Sockets;
 using System.Security.Claims;
 using YoutubeExplode.Channels;
 
@@ -39,7 +40,7 @@ namespace armaradio.Operations
             _currentLog = new OperationLog
             {
                 Timestamp = DateTime.UtcNow,
-                IpAddress = context.Connection.RemoteIpAddress?.ToString(),
+                IpAddress = GetRealIpAddress(context), //context.Connection.RemoteIpAddress?.ToString(),
                 UserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value,
                 UserName = user.Identity?.Name,
                 RequestPath = fullUrl,
@@ -75,6 +76,48 @@ namespace armaradio.Operations
                 _disposed = true;
                 _operationInProgress.Value = false;
             }
+        }
+
+        private string GetRealIpAddress(HttpContext context)
+        {
+            string ip = null;
+
+            // Check for X-Forwarded-For header
+            ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(ip))
+            {
+                // X-Forwarded-For may contain multiple IPs, take the first one
+                return ip.Split(',')[0].Trim();
+            }
+
+            // Check for X-Real-IP header
+            ip = context.Request.Headers["X-Real-IP"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(ip))
+            {
+                return ip;
+            }
+
+            // Fall back to remote IP address
+            ip = context.Connection.RemoteIpAddress?.ToString();
+
+            // If IP is localhost (::1 or 127.0.0.1), try to get local IP
+            if (ip == "::1" || ip == "127.0.0.1")
+            {
+                try
+                {
+                    // Get local IP address
+                    var host = Dns.GetHostEntry(Dns.GetHostName());
+                    ip = host.AddressList
+                        .FirstOrDefault(i => i.AddressFamily == AddressFamily.InterNetwork)
+                        ?.ToString();
+                }
+                catch
+                {
+                    // If we can't get the local IP, just use what we have
+                }
+            }
+
+            return ip;
         }
     }
 
