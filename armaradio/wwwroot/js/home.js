@@ -729,6 +729,7 @@ function mainload_attacheEvents() {
         }
 
         $("#dvRadioPlayerHolder").css("display", "none");
+        $("a.lnk-attribution-notice").css("display", "none");
         $("#dvRadioPlayer_currentlyPlaying").find(".iframe-holder").replaceWith("<div class=\"iframe-holder pl-0 pt-0\"></div>");
     });
 

@@ -28,7 +28,7 @@ function pageMainAttachEvents() {
         let videoUrl = $.trim(currentLink.attr("data-url"));
         let artistSong = $.trim(artistName + (songName != "" ? " " : "") + songName);
 
-        $("#lblSongAttributionDetails").html("This audio is from the video \"" + artistSong + "\", used under CC BY 3.0.");
+        $("#lblSongAttributionDetails").html("This audio is from the video \"" + artistSong + "\", used under Creative Commons BY 3.0.");
 
         let newLink = $("<a>View the original video and license details</a>");
         newLink.attr({
