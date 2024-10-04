@@ -1,4 +1,5 @@
 using armaradio.Data;
+using armaradio.Operations;
 using armaradio.Repositories;
 using armaradio.Tools;
 using Microsoft.AspNetCore.Identity;
@@ -62,6 +63,7 @@ builder.Services.AddTransient<IDapperHelper, DapperHelper>();
 builder.Services.AddTransient<IMusicRepo, MusicRepo>();
 builder.Services.AddTransient<IArmaWebRequest, ArmaWebRequest>();
 builder.Services.AddTransient<IArmaAuth, ArmaAuth>();
+builder.Services.AddScoped<ArmaUserOperation>();
 
 builder.Services.AddSingleton<YoutubeDL>(sp =>
 {

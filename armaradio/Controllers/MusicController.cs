@@ -34,17 +34,20 @@ namespace armaradio.Controllers
         private readonly IMusicRepo _musicRepo;
         private readonly IArmaAuth _authControl;
         private readonly IWebHostEnvironment _hostEnvironment;
+        private readonly Operations.ArmaUserOperation _operation;
         //private IPage _page;
         public MusicController(
             IMusicRepo musicRepo,
             IArmaAuth authControl,
-            IWebHostEnvironment hostEnvironment
-            //IPage page
+            IWebHostEnvironment hostEnvironment,
+            Operations.ArmaUserOperation operation
+        //IPage page
         )
         {
             _musicRepo = musicRepo;
             _authControl = authControl;
             _hostEnvironment = hostEnvironment;
+            _operation = operation;
             //_page = page;
 
             IsLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
@@ -55,18 +58,21 @@ namespace armaradio.Controllers
         {
             try
             {
-                List<TrackDataItem> returnItem = _musicRepo.GetCurrentTop100();
-                var finalList = returnItem.Select(sg =>
+                using (_operation)
                 {
-                    return new
+                    List<TrackDataItem> returnItem = _musicRepo.GetCurrentTop100();
+                    var finalList = returnItem.Select(sg =>
                     {
-                        tid = sg.tid,
-                        artistName = sg.artist_name,
-                        songName = sg.track_name
-                    };
-                });
+                        return new
+                        {
+                            tid = sg.tid,
+                            artistName = sg.artist_name,
+                            songName = sg.track_name
+                        };
+                    });
 
-                return new JsonResult(finalList);
+                    return new JsonResult(finalList);
+                }
             }
             catch (Exception ex)
             {
@@ -79,18 +85,21 @@ namespace armaradio.Controllers
         {
             try
             {
-                List<TrackDataItem> returnItem = _musicRepo.GetCurrentTop40DanceSingles();
-                var finalList = returnItem.Select(sg =>
+                using (_operation)
                 {
-                    return new
+                    List<TrackDataItem> returnItem = _musicRepo.GetCurrentTop40DanceSingles();
+                    var finalList = returnItem.Select(sg =>
                     {
-                        tid = sg.tid,
-                        artistName = sg.artist_name,
-                        songName = sg.track_name
-                    };
-                });
+                        return new
+                        {
+                            tid = sg.tid,
+                            artistName = sg.artist_name,
+                            songName = sg.track_name
+                        };
+                    });
 
-                return new JsonResult(finalList);
+                    return new JsonResult(finalList);
+                }
             }
             catch (Exception ex)
             {
@@ -103,18 +112,21 @@ namespace armaradio.Controllers
         {
             try
             {
-                List<TrackDataItem> returnItem = _musicRepo.GetCurrentTranceTop100();
-                var finalList = returnItem.Select(sg =>
+                using (_operation)
                 {
-                    return new
+                    List<TrackDataItem> returnItem = _musicRepo.GetCurrentTranceTop100();
+                    var finalList = returnItem.Select(sg =>
                     {
-                        tid = sg.tid,
-                        artistName = sg.artist_name,
-                        songName = sg.track_name
-                    };
-                });
+                        return new
+                        {
+                            tid = sg.tid,
+                            artistName = sg.artist_name,
+                            songName = sg.track_name
+                        };
+                    });
 
-                return new JsonResult(finalList);
+                    return new JsonResult(finalList);
+                }
             }
             catch (Exception ex)
             {
@@ -127,18 +139,21 @@ namespace armaradio.Controllers
         {
             try
             {
-                List<TrackDataItem> returnItem = _musicRepo.GetCurrentTranceHype100();
-                var finalList = returnItem.Select(sg =>
+                using (_operation)
                 {
-                    return new
+                    List<TrackDataItem> returnItem = _musicRepo.GetCurrentTranceHype100();
+                    var finalList = returnItem.Select(sg =>
                     {
-                        tid = sg.tid,
-                        artistName = sg.artist_name,
-                        songName = sg.track_name
-                    };
-                });
+                        return new
+                        {
+                            tid = sg.tid,
+                            artistName = sg.artist_name,
+                            songName = sg.track_name
+                        };
+                    });
 
-                return new JsonResult(finalList);
+                    return new JsonResult(finalList);
+                }
             }
             catch (Exception ex)
             {
@@ -151,18 +166,21 @@ namespace armaradio.Controllers
         {
             try
             {
-                List<TrackDataItem> returnItem = _musicRepo.GetCurrentLatinTop50();
-                var finalList = returnItem.Select(sg =>
+                using (_operation)
                 {
-                    return new
+                    List<TrackDataItem> returnItem = _musicRepo.GetCurrentLatinTop50();
+                    var finalList = returnItem.Select(sg =>
                     {
-                        tid = sg.tid,
-                        artistName = sg.artist_name,
-                        songName = sg.track_name
-                    };
-                });
+                        return new
+                        {
+                            tid = sg.tid,
+                            artistName = sg.artist_name,
+                            songName = sg.track_name
+                        };
+                    });
 
-                return new JsonResult(finalList);
+                    return new JsonResult(finalList);
+                }
             }
             catch (Exception ex)
             {
@@ -175,18 +193,21 @@ namespace armaradio.Controllers
         {
             try
             {
-                List<TrackDataItem> returnItem = _musicRepo.GetCurrentTopDanceElectronic();
-                var finalList = returnItem.Select(sg =>
+                using (_operation)
                 {
-                    return new
+                    List<TrackDataItem> returnItem = _musicRepo.GetCurrentTopDanceElectronic();
+                    var finalList = returnItem.Select(sg =>
                     {
-                        tid = sg.tid,
-                        artistName = sg.artist_name,
-                        songName = sg.track_name
-                    };
-                });
+                        return new
+                        {
+                            tid = sg.tid,
+                            artistName = sg.artist_name,
+                            songName = sg.track_name
+                        };
+                    });
 
-                return new JsonResult(finalList);
+                    return new JsonResult(finalList);
+                }
             }
             catch (Exception ex)
             {
@@ -199,18 +220,21 @@ namespace armaradio.Controllers
         {
             try
             {
-                List<TrackDataItem> returnItem = _musicRepo.GetCurrentTopRockAlternative();
-                var finalList = returnItem.Select(sg =>
+                using (_operation)
                 {
-                    return new
+                    List<TrackDataItem> returnItem = _musicRepo.GetCurrentTopRockAlternative();
+                    var finalList = returnItem.Select(sg =>
                     {
-                        tid = sg.tid,
-                        artistName = sg.artist_name,
-                        songName = sg.track_name
-                    };
-                });
+                        return new
+                        {
+                            tid = sg.tid,
+                            artistName = sg.artist_name,
+                            songName = sg.track_name
+                        };
+                    });
 
-                return new JsonResult(finalList);
+                    return new JsonResult(finalList);
+                }
             }
             catch (Exception ex)
             {
@@ -223,18 +247,21 @@ namespace armaradio.Controllers
         {
             try
             {
-                List<TrackDataItem> returnItem = _musicRepo.GetTopEmergingArtists();
-                var finalList = returnItem.Select(sg =>
+                using (_operation)
                 {
-                    return new
+                    List<TrackDataItem> returnItem = _musicRepo.GetTopEmergingArtists();
+                    var finalList = returnItem.Select(sg =>
                     {
-                        tid = sg.tid,
-                        artistName = sg.artist_name,
-                        songName = sg.track_name
-                    };
-                });
+                        return new
+                        {
+                            tid = sg.tid,
+                            artistName = sg.artist_name,
+                            songName = sg.track_name
+                        };
+                    });
 
-                return new JsonResult(finalList);
+                    return new JsonResult(finalList);
+                }
             }
             catch (Exception ex)
             {
@@ -247,18 +274,21 @@ namespace armaradio.Controllers
         {
             try
             {
-                List<TrackDataItem> returnItem = _musicRepo.GetCurrentTopCountrySongs();
-                var finalList = returnItem.Select(sg =>
+                using (_operation)
                 {
-                    return new
+                    List<TrackDataItem> returnItem = _musicRepo.GetCurrentTopCountrySongs();
+                    var finalList = returnItem.Select(sg =>
                     {
-                        tid = sg.tid,
-                        artistName = sg.artist_name,
-                        songName = sg.track_name
-                    };
-                });
+                        return new
+                        {
+                            tid = sg.tid,
+                            artistName = sg.artist_name,
+                            songName = sg.track_name
+                        };
+                    });
 
-                return new JsonResult(finalList);
+                    return new JsonResult(finalList);
+                }
             }
             catch (Exception ex)
             {
@@ -271,9 +301,12 @@ namespace armaradio.Controllers
         {
             try
             {
-                List<ArmaArtistDataItem> returnItem = _musicRepo.Artist_FindArtists(value.SearchPhrase) ?? new List<ArmaArtistDataItem>();
+                using (_operation)
+                {
+                    List<ArmaArtistDataItem> returnItem = _musicRepo.Artist_FindArtists(value.SearchPhrase) ?? new List<ArmaArtistDataItem>();
 
-                return new JsonResult(returnItem);
+                    return new JsonResult(returnItem);
+                }
             }
             catch (Exception ex)
             {
@@ -286,9 +319,12 @@ namespace armaradio.Controllers
         {
             try
             {
-                ArmaArtistAlbumsResponse returnItem = _musicRepo.Albums_GetArtistsAlbums(value.ArtistId);
+                using (_operation)
+                {
+                    ArmaArtistAlbumsResponse returnItem = _musicRepo.Albums_GetArtistsAlbums(value.ArtistId);
 
-                return new JsonResult(returnItem);
+                    return new JsonResult(returnItem);
+                }
             }
             catch (Exception ex)
             {
@@ -301,18 +337,21 @@ namespace armaradio.Controllers
         {
             try
             {
-                List<ArmaAlbumSongDataItem> returnItem = _musicRepo.Albums_GetAlbumSongs(value.ArtistId, value.AlbumId);
-                var finalList = returnItem.Select(sg =>
+                using (_operation)
                 {
-                    return new
+                    List<ArmaAlbumSongDataItem> returnItem = _musicRepo.Albums_GetAlbumSongs(value.ArtistId, value.AlbumId);
+                    var finalList = returnItem.Select(sg =>
                     {
-                        tid = sg.Id,
-                        artistName = sg.NameSearch,
-                        songName = sg.SongTitleFlat
-                    };
-                });
+                        return new
+                        {
+                            tid = sg.Id,
+                            artistName = sg.NameSearch,
+                            songName = sg.SongTitleFlat
+                        };
+                    });
 
-                return new JsonResult(finalList);
+                    return new JsonResult(finalList);
+                }
             }
             catch (Exception ex)
             {
@@ -325,17 +364,20 @@ namespace armaradio.Controllers
         {
             try
             {
-                List<ArtistDataItem> returnItem = _musicRepo.Artist_GetArtistList(seach) ?? new List<ArtistDataItem>();
-                var finalList = returnItem.Select(a =>
+                using (_operation)
                 {
-                    return new
+                    List<ArtistDataItem> returnItem = _musicRepo.Artist_GetArtistList(seach) ?? new List<ArtistDataItem>();
+                    var finalList = returnItem.Select(a =>
                     {
-                        label = a.artist_name,
-                        value = a.id
-                    };
-                });
+                        return new
+                        {
+                            label = a.artist_name,
+                            value = a.id
+                        };
+                    });
 
-                return new JsonResult(finalList);
+                    return new JsonResult(finalList);
+                }
             }
             catch (Exception ex)
             {
@@ -349,61 +391,64 @@ namespace armaradio.Controllers
         {
             try
             {
-                if (value == null)
+                using (_operation)
                 {
-                    throw new Exception("Invalid Request");
-                }
-
-                RadioSessionRecommendedResponse songs = _musicRepo.GetRadioSessionRecommendedSongsFromArtist(value.ArtistName, value.SongName);
-                List<ArmaAlbumSongDataItem> tracks = new List<ArmaAlbumSongDataItem>();
-
-                if (songs != null && songs.tracks != null && songs.tracks.Count > 0)
-                {
-                    int tempId = 0;
-                    foreach (var track in songs.tracks)
+                    if (value == null)
                     {
-                        tempId++;
-
-                        tracks.Add(new ArmaAlbumSongDataItem()
-                        {
-                            Id = tempId,
-                            NameSearch = (track.artists != null && track.artists.Count > 0 ? track.artists[0].name ?? "" : ""),
-                            SongTitle = track.name
-                        });
+                        throw new Exception("Invalid Request");
                     }
-                }
 
-                //RadioSessionSongsResponse songs = _musicRepo.GetRadioSessionSongsFromArtist(value.ArtistName);
-                //List<ArmaAlbumSongDataItem> tracks = new List<ArmaAlbumSongDataItem>();
+                    RadioSessionRecommendedResponse songs = _musicRepo.GetRadioSessionRecommendedSongsFromArtist(value.ArtistName, value.SongName);
+                    List<ArmaAlbumSongDataItem> tracks = new List<ArmaAlbumSongDataItem>();
 
-                //if (songs != null && songs.items != null && songs.items.Count > 0)
-                //{
-                //    int tempId = 0;
-                //    foreach (var song in  songs.items)
-                //    {
-                //        if (song.track != null)
-                //        {
-                //            tempId++;
-
-                //            tracks.Add(new ArmaAlbumSongDataItem()
-                //            {
-                //                Id = tempId,
-                //                NameSearch = (song.track.artists != null && song.track.artists.Count > 0 ? song.track.artists[0].name ?? "" : ""),
-                //                SongTitle = song.track.name
-                //            });
-                //        }
-                //    }
-                //}
-
-                return new JsonResult(tracks.Select(tr =>
-                {
-                    return new
+                    if (songs != null && songs.tracks != null && songs.tracks.Count > 0)
                     {
-                        Id = tr.Id,
-                        ArtistName = tr.NameSearch,
-                        SongName = tr.SongTitle
-                    };
-                }));
+                        int tempId = 0;
+                        foreach (var track in songs.tracks)
+                        {
+                            tempId++;
+
+                            tracks.Add(new ArmaAlbumSongDataItem()
+                            {
+                                Id = tempId,
+                                NameSearch = (track.artists != null && track.artists.Count > 0 ? track.artists[0].name ?? "" : ""),
+                                SongTitle = track.name
+                            });
+                        }
+                    }
+
+                    //RadioSessionSongsResponse songs = _musicRepo.GetRadioSessionSongsFromArtist(value.ArtistName);
+                    //List<ArmaAlbumSongDataItem> tracks = new List<ArmaAlbumSongDataItem>();
+
+                    //if (songs != null && songs.items != null && songs.items.Count > 0)
+                    //{
+                    //    int tempId = 0;
+                    //    foreach (var song in  songs.items)
+                    //    {
+                    //        if (song.track != null)
+                    //        {
+                    //            tempId++;
+
+                    //            tracks.Add(new ArmaAlbumSongDataItem()
+                    //            {
+                    //                Id = tempId,
+                    //                NameSearch = (song.track.artists != null && song.track.artists.Count > 0 ? song.track.artists[0].name ?? "" : ""),
+                    //                SongTitle = song.track.name
+                    //            });
+                    //        }
+                    //    }
+                    //}
+
+                    return new JsonResult(tracks.Select(tr =>
+                    {
+                        return new
+                        {
+                            Id = tr.Id,
+                            ArtistName = tr.NameSearch,
+                            SongName = tr.SongTitle
+                        };
+                    }));
+                }
             }
             catch (Exception ex)
             {
@@ -417,16 +462,19 @@ namespace armaradio.Controllers
         {
             try
             {
-                ArmaUser currentUser = _authControl.GetCurrentUser();
-
-                if (currentUser == null)
+                using (_operation)
                 {
-                    throw new Exception("Authentication required");
+                    ArmaUser currentUser = _authControl.GetCurrentUser();
+
+                    if (currentUser == null)
+                    {
+                        throw new Exception("Authentication required");
+                    }
+
+                    List<ArmaRandomSongDataItem> retunItem = _musicRepo.Songs_GetRandomFromPlaylists(currentUser.UserId);
+
+                    return new JsonResult(retunItem);
                 }
-
-                List<ArmaRandomSongDataItem> retunItem = _musicRepo.Songs_GetRandomFromPlaylists(currentUser.UserId);
-
-                return new JsonResult(retunItem);
             }
             catch (Exception ex)
             {
@@ -439,17 +487,20 @@ namespace armaradio.Controllers
         {
             try
             {
-                var youtube = new YoutubeExplode.YoutubeClient();
-                var streamManifest = await youtube.Videos.Streams.GetManifestAsync($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}");
-                var allStreams = streamManifest.GetAudioOnlyStreams();
-                var streamInfo = allStreams.GetWithHighestBitrate();
-                var fileType = MimeTypes.GetMimeType($"tmpFileName.{(streamInfo.Container.Name == "webm" ? "weba" : streamInfo.Container.Name)}");
-
-                return new JsonResult(new
+                using (_operation)
                 {
-                    FileExtension = streamInfo.Container.Name,
-                    MimeType = fileType
-                });
+                    var youtube = new YoutubeExplode.YoutubeClient();
+                    var streamManifest = await youtube.Videos.Streams.GetManifestAsync($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}");
+                    var allStreams = streamManifest.GetAudioOnlyStreams();
+                    var streamInfo = allStreams.GetWithHighestBitrate();
+                    var fileType = MimeTypes.GetMimeType($"tmpFileName.{(streamInfo.Container.Name == "webm" ? "weba" : streamInfo.Container.Name)}");
+
+                    return new JsonResult(new
+                    {
+                        FileExtension = streamInfo.Container.Name,
+                        MimeType = fileType
+                    });
+                }
             }
             catch (Exception ex)
             {
@@ -462,228 +513,231 @@ namespace armaradio.Controllers
         {
             try
             {
-                //List<AdaptiveFormatDataItem> audioStreams = _musicRepo.GetAudioStreams(VideoId);
-                string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
-                string downloadFolder = (IsLinux ? $"{rootPath}/AudioFiles/" : $"{rootPath}\\AudioFiles\\");
-                string endFileName = endFileName = $"{downloadFolder}{VideoId.Trim()}.m4a";
-                string fileType = "audio/mp4"; // MimeTypes.GetMimeType($"tmpFileName.m4a");
-                string containerName = "m4a";
-                bool fromConvertedFile = false;
-
-                if (!System.IO.Directory.Exists(downloadFolder))
+                using (_operation)
                 {
-                    System.IO.Directory.CreateDirectory(downloadFolder);
-                }
+                    //List<AdaptiveFormatDataItem> audioStreams = _musicRepo.GetAudioStreams(VideoId);
+                    string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
+                    string downloadFolder = (IsLinux ? $"{rootPath}/AudioFiles/" : $"{rootPath}\\AudioFiles\\");
+                    string endFileName = endFileName = $"{downloadFolder}{VideoId.Trim()}.m4a";
+                    string fileType = "audio/mp4"; // MimeTypes.GetMimeType($"tmpFileName.m4a");
+                    string containerName = "m4a";
+                    bool fromConvertedFile = false;
 
-                if (!System.IO.File.Exists(endFileName))
-                {
-                    _musicRepo.DownloadMp4File($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}", endFileName);
+                    if (!System.IO.Directory.Exists(downloadFolder))
+                    {
+                        System.IO.Directory.CreateDirectory(downloadFolder);
+                    }
 
-                    //AdaptiveFormatDataItem maxBitrateStream = audioStreams.OrderByDescending(br => br.bitrate).FirstOrDefault();
-                    //var backupStreamInfo = maxBitrateStream;
+                    if (!System.IO.File.Exists(endFileName))
+                    {
+                        _musicRepo.DownloadMp4File($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}", endFileName);
 
-                    //if (!(maxBitrateStream.containerName.ToLower() == "m4a" || maxBitrateStream.containerName.ToLower() == "mp4"))
+                        //AdaptiveFormatDataItem maxBitrateStream = audioStreams.OrderByDescending(br => br.bitrate).FirstOrDefault();
+                        //var backupStreamInfo = maxBitrateStream;
+
+                        //if (!(maxBitrateStream.containerName.ToLower() == "m4a" || maxBitrateStream.containerName.ToLower() == "mp4"))
+                        //{
+                        //    maxBitrateStream = audioStreams
+                        //        .Where(s => s.containerName.ToLower() == "mp4")
+                        //        .OrderByDescending(s => s.bitrate)
+                        //        .FirstOrDefault();
+
+                        //    if (maxBitrateStream != null)
+                        //    {
+                        //        backupStreamInfo = maxBitrateStream;
+                        //    }
+                        //    else
+                        //    {
+                        //        fromConvertedFile = true;
+                        //        //endFileName = $"{downloadFolder}{VideoId.Trim()}.mp4";
+
+                        //        ConvertToM4A(backupStreamInfo.streamUrl, endFileName);
+                        //    }
+                        //}
+
+                        //if (!fromConvertedFile)
+                        //{
+                        //    var fileName = $"{VideoId.Trim()}.{backupStreamInfo.containerName}";
+
+                        //    //endFileName = $"{downloadFolder}{fileName}";
+
+                        //    if (!System.IO.File.Exists(endFileName))
+                        //    {
+                        //        _musicRepo.DownloadMp4File(backupStreamInfo.streamUrl, endFileName);
+                        //    }
+                        //}
+
+
+
+
+
+                        //var youtube = new YoutubeExplode.YoutubeClient();
+                        //var streamManifest = await youtube.Videos.Streams.GetManifestAsync($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}");
+                        //var allStreams = streamManifest.GetAudioOnlyStreams();
+
+                        //var streamInfo = allStreams.GetWithHighestBitrate();
+                        //var backupStreamInfo = streamInfo;
+
+                        //if (!(streamInfo.Container.Name.ToLower() == "m4a" || streamInfo.Container.Name.ToLower() == "mp4"))
+                        //{
+                        //    streamInfo = streamManifest.GetAudioOnlyStreams()
+                        //        .Where(s => s.Container == Container.Mp4)
+                        //        .OrderByDescending(s => s.Bitrate)
+                        //        .FirstOrDefault();
+
+                        //    if (streamInfo != null)
+                        //    {
+                        //        backupStreamInfo = streamInfo;
+                        //    }
+                        //    else
+                        //    {
+                        //        fromConvertedFile = true;
+                        //        //endFileName = $"{downloadFolder}{VideoId.Trim()}.mp4";
+
+                        //        ConvertToM4A(backupStreamInfo.Url, endFileName);
+                        //    }
+                        //}
+
+                        //if (!fromConvertedFile)
+                        //{
+                        //    var fileName = $"{VideoId.Trim()}.{backupStreamInfo.Container.Name}";
+
+                        //    //endFileName = $"{downloadFolder}{fileName}";
+
+                        //    if (!System.IO.File.Exists(endFileName))
+                        //    {
+                        //        await youtube.Videos.Streams.DownloadAsync(backupStreamInfo, endFileName);
+                        //    }
+                        //}
+                    }
+
+                    //byte[] fileBytes = System.IO.File.ReadAllBytes(endFileName);
+
+                    //long size, start, end, length, fp = 0;
+                    //using (var reader = new System.IO.StreamReader(endFileName))
                     //{
-                    //    maxBitrateStream = audioStreams
-                    //        .Where(s => s.containerName.ToLower() == "mp4")
-                    //        .OrderByDescending(s => s.bitrate)
-                    //        .FirstOrDefault();
+                    //    size = reader.BaseStream.Length;
+                    //    start = 0;
+                    //    end = size - 1;
+                    //    length = size;
 
-                    //    if (maxBitrateStream != null)
-                    //    {
-                    //        backupStreamInfo = maxBitrateStream;
-                    //    }
-                    //    else
-                    //    {
-                    //        fromConvertedFile = true;
-                    //        //endFileName = $"{downloadFolder}{VideoId.Trim()}.mp4";
+                    //    // Set the "Accept-Ranges" header to indicate that we support range requests
+                    //    HttpContext.Response.Headers.Append("Accept-Ranges", "0-" + size);
 
-                    //        ConvertToM4A(backupStreamInfo.streamUrl, endFileName);
+                    //    // Handle range requests
+                    //    if (!string.IsNullOrEmpty(HttpContext.Request.Headers["Range"]))
+                    //    {
+                    //        long anotherStart = start;
+                    //        long anotherEnd = end;
+                    //        var rangeParts = HttpContext.Request.Headers["Range"].ToString().Split(new char[] { '=' }, 2);
+                    //        var range = rangeParts[1];
+
+                    //        // Ensure the client hasn't sent a multi-byte range
+                    //        if (range.Contains(","))
+                    //        {
+                    //            HttpContext.Response.Headers.Append("Content-Range", $"bytes {start}-{end}/{size}");
+                    //            return new StatusCodeResult(StatusCodes.Status416RangeNotSatisfiable);
+                    //        }
+
+                    //        // Parse the range request
+                    //        if (range.StartsWith("-"))
+                    //        {
+                    //            anotherStart = size - long.Parse(range.Substring(1));
+                    //        }
+                    //        else
+                    //        {
+                    //            var rangeBounds = range.Split(new char[] { '-' }, 2);
+                    //            anotherStart = long.Parse(rangeBounds[0]);
+                    //            long temp = 0;
+                    //            anotherEnd = (rangeBounds.Length > 1 && long.TryParse(rangeBounds[1], out temp)) ? long.Parse(rangeBounds[1]) : size;
+                    //        }
+
+                    //        // Validate the requested range
+                    //        anotherEnd = (anotherEnd > end) ? end : anotherEnd;
+                    //        if (anotherStart > anotherEnd || anotherStart > size - 1 || anotherEnd >= size)
+                    //        {
+                    //            HttpContext.Response.Headers.Append("Content-Range", $"bytes {start}-{end}/{size}");
+                    //            return new StatusCodeResult(StatusCodes.Status416RangeNotSatisfiable);
+                    //        }
+
+                    //        start = anotherStart;
+                    //        end = anotherEnd;
+                    //        length = end - start + 1;
+                    //        fp = reader.BaseStream.Seek(start, SeekOrigin.Begin);
+                    //        HttpContext.Response.StatusCode = StatusCodes.Status206PartialContent;
                     //    }
                     //}
 
-                    //if (!fromConvertedFile)
-                    //{
-                    //    var fileName = $"{VideoId.Trim()}.{backupStreamInfo.containerName}";
-
-                    //    //endFileName = $"{downloadFolder}{fileName}";
-
-                    //    if (!System.IO.File.Exists(endFileName))
-                    //    {
-                    //        _musicRepo.DownloadMp4File(backupStreamInfo.streamUrl, endFileName);
-                    //    }
-                    //}
+                    //HttpContext.Response.ContentType = fileType;
+                    //HttpContext.Response.Headers.Append("Cache-Control", "no-cache");
+                    //HttpContext.Response.Headers.Append("Content-Disposition", $"inline; filename=\"{VideoId}.{containerName}\"");
+                    //HttpContext.Response.Headers.Append("Content-Range", $"bytes {start}-{end}/{size}");
+                    //HttpContext.Response.Headers.Append("Content-Length", length.ToString());
 
 
+                    ////System.IO.File.Delete(endFileName);
 
+                    //Task.Delay(TimeSpan.FromHours(1))
+                    //    .ContinueWith(_ => {
+                    //        if (System.IO.File.Exists(endFileName))
+                    //        {
+                    //            System.IO.File.Delete(endFileName);
+                    //        }
+                    //    });
 
+                    //var returnItem = new FileContentResult(fileBytes, fileType);
 
-                    //var youtube = new YoutubeExplode.YoutubeClient();
-                    //var streamManifest = await youtube.Videos.Streams.GetManifestAsync($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}");
-                    //var allStreams = streamManifest.GetAudioOnlyStreams();
+                    bool fileWasFlaggedForDeletion = false;
+                    var fileInfo = new FileInfo(endFileName);
+                    long fileLength = fileInfo.Length;
 
-                    //var streamInfo = allStreams.GetWithHighestBitrate();
-                    //var backupStreamInfo = streamInfo;
+                    // Handle range requests
+                    var rangeHeader = Request.Headers["Range"].ToString();
+                    if (string.IsNullOrEmpty(rangeHeader))
+                    {
+                        // No range requested, return full file
+                        Response.Headers.Append("Accept-Ranges", "bytes");
+                        Response.ContentType = fileType;
+                        Response.Headers.Append("Content-Disposition", $"inline; filename=\"{VideoId}.{containerName}\"");
 
-                    //if (!(streamInfo.Container.Name.ToLower() == "m4a" || streamInfo.Container.Name.ToLower() == "mp4"))
-                    //{
-                    //    streamInfo = streamManifest.GetAudioOnlyStreams()
-                    //        .Where(s => s.Container == Container.Mp4)
-                    //        .OrderByDescending(s => s.Bitrate)
-                    //        .FirstOrDefault();
+                        FlagFileForDeletion(endFileName);
 
-                    //    if (streamInfo != null)
-                    //    {
-                    //        backupStreamInfo = streamInfo;
-                    //    }
-                    //    else
-                    //    {
-                    //        fromConvertedFile = true;
-                    //        //endFileName = $"{downloadFolder}{VideoId.Trim()}.mp4";
+                        fileWasFlaggedForDeletion = true;
 
-                    //        ConvertToM4A(backupStreamInfo.Url, endFileName);
-                    //    }
-                    //}
+                        return PhysicalFile(endFileName, fileType, enableRangeProcessing: true);
+                    }
 
-                    //if (!fromConvertedFile)
-                    //{
-                    //    var fileName = $"{VideoId.Trim()}.{backupStreamInfo.Container.Name}";
+                    // Parse range
+                    var rangeValue = rangeHeader.Replace("bytes=", string.Empty);
+                    var rangeParts = rangeValue.Split('-');
+                    var rangeStart = long.Parse(rangeParts[0]);
+                    var rangeEnd = rangeParts.Length > 1 && long.TryParse(rangeParts[1], out var temp)
+                        ? Math.Min(temp, fileLength - 1)
+                        : fileLength - 1;
 
-                    //    //endFileName = $"{downloadFolder}{fileName}";
+                    // Validate range
+                    if (rangeStart > rangeEnd || rangeStart > fileLength - 1 || rangeEnd >= fileLength)
+                    {
+                        Response.Headers.Append("Content-Range", $"bytes */{fileLength}");
+                        return StatusCode(StatusCodes.Status416RangeNotSatisfiable);
+                    }
 
-                    //    if (!System.IO.File.Exists(endFileName))
-                    //    {
-                    //        await youtube.Videos.Streams.DownloadAsync(backupStreamInfo, endFileName);
-                    //    }
-                    //}
-                }
-
-                //byte[] fileBytes = System.IO.File.ReadAllBytes(endFileName);
-
-                //long size, start, end, length, fp = 0;
-                //using (var reader = new System.IO.StreamReader(endFileName))
-                //{
-                //    size = reader.BaseStream.Length;
-                //    start = 0;
-                //    end = size - 1;
-                //    length = size;
-
-                //    // Set the "Accept-Ranges" header to indicate that we support range requests
-                //    HttpContext.Response.Headers.Append("Accept-Ranges", "0-" + size);
-
-                //    // Handle range requests
-                //    if (!string.IsNullOrEmpty(HttpContext.Request.Headers["Range"]))
-                //    {
-                //        long anotherStart = start;
-                //        long anotherEnd = end;
-                //        var rangeParts = HttpContext.Request.Headers["Range"].ToString().Split(new char[] { '=' }, 2);
-                //        var range = rangeParts[1];
-
-                //        // Ensure the client hasn't sent a multi-byte range
-                //        if (range.Contains(","))
-                //        {
-                //            HttpContext.Response.Headers.Append("Content-Range", $"bytes {start}-{end}/{size}");
-                //            return new StatusCodeResult(StatusCodes.Status416RangeNotSatisfiable);
-                //        }
-
-                //        // Parse the range request
-                //        if (range.StartsWith("-"))
-                //        {
-                //            anotherStart = size - long.Parse(range.Substring(1));
-                //        }
-                //        else
-                //        {
-                //            var rangeBounds = range.Split(new char[] { '-' }, 2);
-                //            anotherStart = long.Parse(rangeBounds[0]);
-                //            long temp = 0;
-                //            anotherEnd = (rangeBounds.Length > 1 && long.TryParse(rangeBounds[1], out temp)) ? long.Parse(rangeBounds[1]) : size;
-                //        }
-
-                //        // Validate the requested range
-                //        anotherEnd = (anotherEnd > end) ? end : anotherEnd;
-                //        if (anotherStart > anotherEnd || anotherStart > size - 1 || anotherEnd >= size)
-                //        {
-                //            HttpContext.Response.Headers.Append("Content-Range", $"bytes {start}-{end}/{size}");
-                //            return new StatusCodeResult(StatusCodes.Status416RangeNotSatisfiable);
-                //        }
-
-                //        start = anotherStart;
-                //        end = anotherEnd;
-                //        length = end - start + 1;
-                //        fp = reader.BaseStream.Seek(start, SeekOrigin.Begin);
-                //        HttpContext.Response.StatusCode = StatusCodes.Status206PartialContent;
-                //    }
-                //}
-
-                //HttpContext.Response.ContentType = fileType;
-                //HttpContext.Response.Headers.Append("Cache-Control", "no-cache");
-                //HttpContext.Response.Headers.Append("Content-Disposition", $"inline; filename=\"{VideoId}.{containerName}\"");
-                //HttpContext.Response.Headers.Append("Content-Range", $"bytes {start}-{end}/{size}");
-                //HttpContext.Response.Headers.Append("Content-Length", length.ToString());
-
-
-                ////System.IO.File.Delete(endFileName);
-
-                //Task.Delay(TimeSpan.FromHours(1))
-                //    .ContinueWith(_ => {
-                //        if (System.IO.File.Exists(endFileName))
-                //        {
-                //            System.IO.File.Delete(endFileName);
-                //        }
-                //    });
-
-                //var returnItem = new FileContentResult(fileBytes, fileType);
-
-                bool fileWasFlaggedForDeletion = false;
-                var fileInfo = new FileInfo(endFileName);
-                long fileLength = fileInfo.Length;
-
-                // Handle range requests
-                var rangeHeader = Request.Headers["Range"].ToString();
-                if (string.IsNullOrEmpty(rangeHeader))
-                {
-                    // No range requested, return full file
+                    Response.StatusCode = StatusCodes.Status206PartialContent;
+                    Response.Headers.Append("Content-Range", $"bytes {rangeStart}-{rangeEnd}/{fileLength}");
                     Response.Headers.Append("Accept-Ranges", "bytes");
-                    Response.ContentType = fileType;
+                    Response.Headers.Append("Content-Type", fileType);
                     Response.Headers.Append("Content-Disposition", $"inline; filename=\"{VideoId}.{containerName}\"");
 
-                    FlagFileForDeletion(endFileName);
+                    if (!fileWasFlaggedForDeletion)
+                    {
+                        FlagFileForDeletion(endFileName);
+                    }
 
-                    fileWasFlaggedForDeletion = true;
-
-                    return PhysicalFile(endFileName, fileType, enableRangeProcessing: true);
+                    return new FileStreamResult(new FileStream(endFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite), fileType)
+                    {
+                        EnableRangeProcessing = true
+                    };
                 }
-
-                // Parse range
-                var rangeValue = rangeHeader.Replace("bytes=", string.Empty);
-                var rangeParts = rangeValue.Split('-');
-                var rangeStart = long.Parse(rangeParts[0]);
-                var rangeEnd = rangeParts.Length > 1 && long.TryParse(rangeParts[1], out var temp)
-                    ? Math.Min(temp, fileLength - 1)
-                    : fileLength - 1;
-
-                // Validate range
-                if (rangeStart > rangeEnd || rangeStart > fileLength - 1 || rangeEnd >= fileLength)
-                {
-                    Response.Headers.Append("Content-Range", $"bytes */{fileLength}");
-                    return StatusCode(StatusCodes.Status416RangeNotSatisfiable);
-                }
-
-                Response.StatusCode = StatusCodes.Status206PartialContent;
-                Response.Headers.Append("Content-Range", $"bytes {rangeStart}-{rangeEnd}/{fileLength}");
-                Response.Headers.Append("Accept-Ranges", "bytes");
-                Response.Headers.Append("Content-Type", fileType);
-                Response.Headers.Append("Content-Disposition", $"inline; filename=\"{VideoId}.{containerName}\"");
-
-                if (!fileWasFlaggedForDeletion)
-                {
-                    FlagFileForDeletion(endFileName);
-                }
-
-                return new FileStreamResult(new FileStream(endFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite), fileType)
-                {
-                    EnableRangeProcessing = true
-                };
             }
             catch (Exception ex)
             {
@@ -765,123 +819,126 @@ namespace armaradio.Controllers
         {
             try
             {
-                string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
-                string downloadFolder = (IsLinux ? $"{rootPath}/AudioFiles/" : $"{rootPath}\\AudioFiles\\");
-                string endFileName = "";
-                string fileType = "audio/mp4"; // MimeTypes.GetMimeType($"tmpFileName.mp4");
-                string fileHandle = $"{Guid.NewGuid().ToString().ToLower()}.m4a";
-                string fileHandleTemp = $"{Guid.NewGuid().ToString().ToLower()}";
-                string endTempFile = $"{downloadFolder}{fileHandleTemp}.m4a";
-                string fileName = "";
-                bool fromConvertedFile = false;
-
-                if (!System.IO.File.Exists(endTempFile))
+                using (_operation)
                 {
-                    if (!System.IO.Directory.Exists(downloadFolder))
+                    string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
+                    string downloadFolder = (IsLinux ? $"{rootPath}/AudioFiles/" : $"{rootPath}\\AudioFiles\\");
+                    string endFileName = "";
+                    string fileType = "audio/mp4"; // MimeTypes.GetMimeType($"tmpFileName.mp4");
+                    string fileHandle = $"{Guid.NewGuid().ToString().ToLower()}.m4a";
+                    string fileHandleTemp = $"{Guid.NewGuid().ToString().ToLower()}";
+                    string endTempFile = $"{downloadFolder}{fileHandleTemp}.m4a";
+                    string fileName = "";
+                    bool fromConvertedFile = false;
+
+                    if (!System.IO.File.Exists(endTempFile))
                     {
-                        System.IO.Directory.CreateDirectory(downloadFolder);
+                        if (!System.IO.Directory.Exists(downloadFolder))
+                        {
+                            System.IO.Directory.CreateDirectory(downloadFolder);
+                        }
+
+                        _musicRepo.DownloadMp4File($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}", endTempFile);
+
+                        //List<string> fileNameParts = new List<string>();
+                        //string endFile = $"{downloadFolder}{fileHandle}";
+
+                        //if (!string.IsNullOrWhiteSpace(ArtistName))
+                        //{
+                        //    fileNameParts.Add(ArtistName.Trim());
+                        //}
+                        //if (!string.IsNullOrWhiteSpace(SongName))
+                        //{
+                        //    fileNameParts.Add(SongName.Trim());
+                        //}
+
+                        //fileName = $"{(SanitizeFileName(string.Join(" - ", fileNameParts.ToArray()))).Trim()}";
+
+                        //var youtube = new YoutubeExplode.YoutubeClient();
+                        //var streamManifest = await youtube.Videos.Streams.GetManifestAsync($"https://www.youtube.com/watch?v={VideoId}");
+                        //var allStreams = streamManifest.GetAudioOnlyStreams();
+
+                        //var streamInfo = allStreams.GetWithHighestBitrate();
+                        //var backupStreamInfo = streamInfo;
+
+                        //if (!(streamInfo.Container.Name.ToLower() == "m4a" || streamInfo.Container.Name.ToLower() == "mp4"))
+                        //{
+                        //    streamInfo = streamManifest.GetAudioOnlyStreams()
+                        //        .Where(s => s.Container == Container.Mp4)
+                        //        .OrderByDescending(s => s.Bitrate)
+                        //        .FirstOrDefault();
+
+                        //    if (streamInfo != null)
+                        //    {
+                        //        backupStreamInfo = streamInfo;
+                        //    }
+                        //    else
+                        //    {
+                        //        fromConvertedFile = true;
+                        //        fileName = $"{fileName}.mp4";
+                        //        //endTempFile = $"{endTempFile}.{backupStreamInfo.Container.Name}";
+                        //        fileHandleTemp = $"{fileHandleTemp}.{backupStreamInfo.Container.Name}";
+
+                        //        ConvertToM4A(backupStreamInfo.Url, endTempFile);
+                        //    }
+                        //}
+
+                        //if (!fromConvertedFile)
+                        //{
+                        //    fileName = $"{fileName}.{backupStreamInfo.Container.Name}";
+                        //    //endTempFile = $"{endTempFile}.{backupStreamInfo.Container.Name}";
+                        //    fileHandleTemp = $"{fileHandleTemp}.{backupStreamInfo.Container.Name}";
+
+                        //    if (!System.IO.File.Exists(endTempFile))
+                        //    {
+                        //        await youtube.Videos.Streams.DownloadAsync(streamInfo, endTempFile);
+                        //    }
+                        //}
                     }
 
-                    _musicRepo.DownloadMp4File($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}", endTempFile);
+                    //await DownloadStreamAsync(streamInfo, endTempFile);
+                    //ConvertToMp3(endTempFile, endFile);
 
-                    //List<string> fileNameParts = new List<string>();
-                    //string endFile = $"{downloadFolder}{fileHandle}";
+                    //System.IO.File.Delete(endTempFile);
 
-                    //if (!string.IsNullOrWhiteSpace(ArtistName))
+                    //await youtube.Videos.DownloadAsync($"https://www.youtube.com/watch?v={VideoId}", endFile);
+
+                    MemoryStream memoryStream = new MemoryStream();
+                    using (FileStream fileStream = new FileStream(endTempFile, FileMode.Open, FileAccess.Read))
+                    {
+                        fileStream.CopyTo(memoryStream);
+                    }
+
+                    //System.IO.File.Delete(endTempFile);
+
+                    FlagFileForDeletion(endTempFile);
+
+                    memoryStream.Position = 0;
+                    var returnItem = new FileStreamResult(memoryStream, fileType)
+                    {
+                        FileDownloadName = fileName
+                    };
+
+                    Response.RegisterForDispose(memoryStream);
+
+                    return returnItem;
+
+                    //MemoryStream memoryStream = new MemoryStream();
+
+                    //using (FileStream fileStream = new FileStream(endFile, FileMode.Open, FileAccess.Read))
                     //{
-                    //    fileNameParts.Add(ArtistName.Trim());
-                    //}
-                    //if (!string.IsNullOrWhiteSpace(SongName))
-                    //{
-                    //    fileNameParts.Add(SongName.Trim());
-                    //}
-
-                    //fileName = $"{(SanitizeFileName(string.Join(" - ", fileNameParts.ToArray()))).Trim()}";
-
-                    //var youtube = new YoutubeExplode.YoutubeClient();
-                    //var streamManifest = await youtube.Videos.Streams.GetManifestAsync($"https://www.youtube.com/watch?v={VideoId}");
-                    //var allStreams = streamManifest.GetAudioOnlyStreams();
-
-                    //var streamInfo = allStreams.GetWithHighestBitrate();
-                    //var backupStreamInfo = streamInfo;
-
-                    //if (!(streamInfo.Container.Name.ToLower() == "m4a" || streamInfo.Container.Name.ToLower() == "mp4"))
-                    //{
-                    //    streamInfo = streamManifest.GetAudioOnlyStreams()
-                    //        .Where(s => s.Container == Container.Mp4)
-                    //        .OrderByDescending(s => s.Bitrate)
-                    //        .FirstOrDefault();
-
-                    //    if (streamInfo != null)
-                    //    {
-                    //        backupStreamInfo = streamInfo;
-                    //    }
-                    //    else
-                    //    {
-                    //        fromConvertedFile = true;
-                    //        fileName = $"{fileName}.mp4";
-                    //        //endTempFile = $"{endTempFile}.{backupStreamInfo.Container.Name}";
-                    //        fileHandleTemp = $"{fileHandleTemp}.{backupStreamInfo.Container.Name}";
-
-                    //        ConvertToM4A(backupStreamInfo.Url, endTempFile);
-                    //    }
+                    //    fileStream.CopyTo(memoryStream);
                     //}
 
-                    //if (!fromConvertedFile)
-                    //{
-                    //    fileName = $"{fileName}.{backupStreamInfo.Container.Name}";
-                    //    //endTempFile = $"{endTempFile}.{backupStreamInfo.Container.Name}";
-                    //    fileHandleTemp = $"{fileHandleTemp}.{backupStreamInfo.Container.Name}";
+                    //System.IO.File.Delete(endFile);
 
-                    //    if (!System.IO.File.Exists(endTempFile))
-                    //    {
-                    //        await youtube.Videos.Streams.DownloadAsync(streamInfo, endTempFile);
-                    //    }
-                    //}
+                    //memoryStream.Position = 0;
+
+                    //return new FileStreamResult(memoryStream, "audio/mpeg")
+                    //{
+                    //    FileDownloadName = fileName,
+                    //};
                 }
-                
-                //await DownloadStreamAsync(streamInfo, endTempFile);
-                //ConvertToMp3(endTempFile, endFile);
-
-                //System.IO.File.Delete(endTempFile);
-
-                //await youtube.Videos.DownloadAsync($"https://www.youtube.com/watch?v={VideoId}", endFile);
-
-                MemoryStream memoryStream = new MemoryStream();
-                using (FileStream fileStream = new FileStream(endTempFile, FileMode.Open, FileAccess.Read))
-                {
-                    fileStream.CopyTo(memoryStream);
-                }
-
-                //System.IO.File.Delete(endTempFile);
-
-                FlagFileForDeletion(endTempFile);
-
-                memoryStream.Position = 0;
-                var returnItem = new FileStreamResult(memoryStream, fileType)
-                {
-                    FileDownloadName = fileName
-                };
-
-                Response.RegisterForDispose(memoryStream);
-
-                return returnItem;
-
-                //MemoryStream memoryStream = new MemoryStream();
-
-                //using (FileStream fileStream = new FileStream(endFile, FileMode.Open, FileAccess.Read))
-                //{
-                //    fileStream.CopyTo(memoryStream);
-                //}
-
-                //System.IO.File.Delete(endFile);
-
-                //memoryStream.Position = 0;
-
-                //return new FileStreamResult(memoryStream, "audio/mpeg")
-                //{
-                //    FileDownloadName = fileName,
-                //};
             }
             catch (Exception ex)
             {
@@ -920,16 +977,19 @@ namespace armaradio.Controllers
         {
             try
             {
-                ArmaUser currentUser = _authControl.GetCurrentUser();
-
-                if (currentUser == null)
+                using (_operation)
                 {
-                    throw new Exception("Invalid request");
+                    ArmaUser currentUser = _authControl.GetCurrentUser();
+
+                    if (currentUser == null)
+                    {
+                        throw new Exception("Invalid request");
+                    }
+
+                    List<ArmaUserPlaylistDataItem> returnItem = _musicRepo.GetUserPlaylists(currentUser.UserId);
+
+                    return new JsonResult(returnItem);
                 }
-
-                List<ArmaUserPlaylistDataItem> returnItem = _musicRepo.GetUserPlaylists(currentUser.UserId);
-
-                return new JsonResult(returnItem);
             }
             catch (Exception ex)
             {
@@ -943,19 +1003,22 @@ namespace armaradio.Controllers
         {
             try
             {
-                ArmaUser currentUser = _authControl.GetCurrentUser();
-
-                if (currentUser == null)
+                using (_operation)
                 {
-                    throw new Exception("Invalid request");
+                    ArmaUser currentUser = _authControl.GetCurrentUser();
+
+                    if (currentUser == null)
+                    {
+                        throw new Exception("Invalid request");
+                    }
+
+                    string returnItem = _musicRepo.GetSharedPlaylistToken(PlaylistId, currentUser.UserId);
+
+                    return new JsonResult(new
+                    {
+                        token = returnItem
+                    });
                 }
-
-                string returnItem = _musicRepo.GetSharedPlaylistToken(PlaylistId, currentUser.UserId);
-
-                return new JsonResult(new
-                {
-                    token = returnItem
-                });
             }
             catch (Exception ex)
             {
@@ -968,37 +1031,40 @@ namespace armaradio.Controllers
         {
             try
             {
-                ArmaUser currentUser = _authControl.GetCurrentUser();
-
-                if (string.IsNullOrWhiteSpace(token))
+                using (_operation)
                 {
-                    return new JsonResult(null);
-                }
+                    ArmaUser currentUser = _authControl.GetCurrentUser();
 
-                ArmaSharedPlaylistDataItem returnItem = _musicRepo.GetSharedPlaylist(token);
-
-                if (returnItem == null || returnItem.PlaylistData == null || returnItem.PlaylistData.Count == 0)
-                {
-                    return new JsonResult(null);
-                }
-
-                var finalList = new
-                {
-                    playlistId = -1,
-                    playlistName = returnItem.PlaylistName,
-                    playlistData = returnItem.PlaylistData.Select(sg =>
+                    if (string.IsNullOrWhiteSpace(token))
                     {
-                        return new
-                        {
-                            tid = sg.Id,
-                            artistName = sg.Artist,
-                            songName = sg.Song,
-                            videoId = sg.VideoId
-                        };
-                    })
-                };
+                        return new JsonResult(null);
+                    }
 
-                return new JsonResult(finalList);
+                    ArmaSharedPlaylistDataItem returnItem = _musicRepo.GetSharedPlaylist(token);
+
+                    if (returnItem == null || returnItem.PlaylistData == null || returnItem.PlaylistData.Count == 0)
+                    {
+                        return new JsonResult(null);
+                    }
+
+                    var finalList = new
+                    {
+                        playlistId = -1,
+                        playlistName = returnItem.PlaylistName,
+                        playlistData = returnItem.PlaylistData.Select(sg =>
+                        {
+                            return new
+                            {
+                                tid = sg.Id,
+                                artistName = sg.Artist,
+                                songName = sg.Song,
+                                videoId = sg.VideoId
+                            };
+                        })
+                    };
+
+                    return new JsonResult(finalList);
+                }
             }
             catch (Exception ex)
             {
@@ -1012,26 +1078,29 @@ namespace armaradio.Controllers
         {
             try
             {
-                ArmaUser currentUser = _authControl.GetCurrentUser();
-
-                if (currentUser == null)
+                using (_operation)
                 {
-                    throw new Exception("Invalid request");
-                }
+                    ArmaUser currentUser = _authControl.GetCurrentUser();
 
-                List<ArmaPlaylistDataItem> returnItem = _musicRepo.GetPlaylistById(PlaylistId, currentUser.UserId);
-                var finalList = returnItem.Select(sg =>
-                {
-                    return new
+                    if (currentUser == null)
                     {
-                        tid = sg.Id,
-                        artistName = sg.Artist,
-                        songName = sg.Song,
-                        videoId = sg.VideoId
-                    };
-                });
+                        throw new Exception("Invalid request");
+                    }
 
-                return new JsonResult(finalList);
+                    List<ArmaPlaylistDataItem> returnItem = _musicRepo.GetPlaylistById(PlaylistId, currentUser.UserId);
+                    var finalList = returnItem.Select(sg =>
+                    {
+                        return new
+                        {
+                            tid = sg.Id,
+                            artistName = sg.Artist,
+                            songName = sg.Song,
+                            videoId = sg.VideoId
+                        };
+                    });
+
+                    return new JsonResult(finalList);
+                }
             }
             catch (Exception ex)
             {
@@ -1045,16 +1114,19 @@ namespace armaradio.Controllers
         {
             try
             {
-                ArmaUser currentUser = _authControl.GetCurrentUser();
-
-                if (currentUser == null)
+                using (_operation)
                 {
-                    throw new Exception("Invalid request");
+                    ArmaUser currentUser = _authControl.GetCurrentUser();
+
+                    if (currentUser == null)
+                    {
+                        throw new Exception("Invalid request");
+                    }
+
+                    _musicRepo.DeleteSongFromPlaylist(SongId, currentUser.UserId);
+
+                    return new JsonResult(Ok());
                 }
-
-                _musicRepo.DeleteSongFromPlaylist(SongId, currentUser.UserId);
-
-                return new JsonResult(Ok());
             }
             catch (Exception ex)
             {
@@ -1068,16 +1140,19 @@ namespace armaradio.Controllers
         {
             try
             {
-                ArmaUser currentUser = _authControl.GetCurrentUser();
-
-                if (currentUser == null)
+                using (_operation)
                 {
-                    throw new Exception("Invalid request");
+                    ArmaUser currentUser = _authControl.GetCurrentUser();
+
+                    if (currentUser == null)
+                    {
+                        throw new Exception("Invalid request");
+                    }
+
+                    _musicRepo.DeleteUserPlaylistAndData(PlaylistId, currentUser.UserId);
+
+                    return new JsonResult(Ok());
                 }
-
-                _musicRepo.DeleteUserPlaylistAndData(PlaylistId, currentUser.UserId);
-
-                return new JsonResult(Ok());
             }
             catch (Exception ex)
             {
@@ -1091,25 +1166,28 @@ namespace armaradio.Controllers
         {
             try
             {
-                if (value == null)
+                using (_operation)
                 {
-                    throw new Exception("Invalid request");
+                    if (value == null)
+                    {
+                        throw new Exception("Invalid request");
+                    }
+                    if (!(!string.IsNullOrWhiteSpace(value.Artist) || !string.IsNullOrWhiteSpace(value.Song)))
+                    {
+                        throw new Exception("Invalid request");
+                    }
+
+                    ArmaUser currentUser = _authControl.GetCurrentUser();
+
+                    if (currentUser == null)
+                    {
+                        throw new Exception("Invalid request");
+                    }
+
+                    _musicRepo.AddSongToPlaylist(value.PlaylistId, value.Artist, value.Song, value.VideoId);
+
+                    return new JsonResult(Ok());
                 }
-                if (!(!string.IsNullOrWhiteSpace(value.Artist) || !string.IsNullOrWhiteSpace(value.Song)))
-                {
-                    throw new Exception("Invalid request");
-                }
-
-                ArmaUser currentUser = _authControl.GetCurrentUser();
-
-                if (currentUser == null)
-                {
-                    throw new Exception("Invalid request");
-                }
-
-                _musicRepo.AddSongToPlaylist(value.PlaylistId, value.Artist, value.Song, value.VideoId);
-
-                return new JsonResult(Ok());
             }
             catch (Exception ex)
             {
@@ -1123,43 +1201,46 @@ namespace armaradio.Controllers
         {
             try
             {
-                if (value == null)
+                using (_operation)
                 {
-                    throw new Exception("Invalid request");
+                    if (value == null)
+                    {
+                        throw new Exception("Invalid request");
+                    }
+                    if (string.IsNullOrWhiteSpace(value.PlaylistName))
+                    {
+                        throw new Exception("'Playlist Name' is required");
+                    }
+                    if (!(!string.IsNullOrWhiteSpace(value.Artist) || !string.IsNullOrWhiteSpace(value.Song)))
+                    {
+                        throw new Exception("Invalid request");
+                    }
+
+                    ArmaUser currentUser = _authControl.GetCurrentUser();
+
+                    if (currentUser == null)
+                    {
+                        throw new Exception("Invalid request");
+                    }
+
+                    bool playlistExists = _musicRepo.CheckIfPlaylistExists(value.PlaylistName, currentUser.UserId);
+
+                    if (playlistExists)
+                    {
+                        throw new Exception($"Playlist '{value.PlaylistName.Trim()}' already exists. Please specify a different name");
+                    }
+
+                    int? playlistId = _musicRepo.InsertPlaylistName(value.PlaylistName.Trim(), currentUser.UserId);
+
+                    if (!playlistId.HasValue)
+                    {
+                        throw new Exception("An error occurred creating Playlist");
+                    }
+
+                    _musicRepo.AddSongToPlaylist(playlistId.Value, value.Artist, value.Song, value.VideoId);
+
+                    return new JsonResult(Ok());
                 }
-                if (string.IsNullOrWhiteSpace(value.PlaylistName))
-                {
-                    throw new Exception("'Playlist Name' is required");
-                }
-                if (!(!string.IsNullOrWhiteSpace(value.Artist) || !string.IsNullOrWhiteSpace(value.Song)))
-                {
-                    throw new Exception("Invalid request");
-                }
-
-                ArmaUser currentUser = _authControl.GetCurrentUser();
-
-                if (currentUser == null)
-                {
-                    throw new Exception("Invalid request");
-                }
-
-                bool playlistExists = _musicRepo.CheckIfPlaylistExists(value.PlaylistName, currentUser.UserId);
-
-                if (playlistExists)
-                {
-                    throw new Exception($"Playlist '{value.PlaylistName.Trim()}' already exists. Please specify a different name");
-                }
-
-                int? playlistId = _musicRepo.InsertPlaylistName(value.PlaylistName.Trim(), currentUser.UserId);
-
-                if (!playlistId.HasValue)
-                {
-                    throw new Exception("An error occurred creating Playlist");
-                }
-
-                _musicRepo.AddSongToPlaylist(playlistId.Value, value.Artist, value.Song, value.VideoId);
-
-                return new JsonResult(Ok());
             }
             catch (Exception ex)
             {
@@ -1172,18 +1253,21 @@ namespace armaradio.Controllers
         {
             try
             {
-                List<TrackDataItem> returnItem = _musicRepo.Tracks_GetTop50Songs() ?? new List<TrackDataItem>();
-                var finalList = returnItem.Select(sg =>
+                using (_operation)
                 {
-                    return new
+                    List<TrackDataItem> returnItem = _musicRepo.Tracks_GetTop50Songs() ?? new List<TrackDataItem>();
+                    var finalList = returnItem.Select(sg =>
                     {
-                        tid = sg.tid,
-                        artistName = sg.artist_name,
-                        songName = sg.track_name
-                    };
-                });
+                        return new
+                        {
+                            tid = sg.tid,
+                            artistName = sg.artist_name,
+                            songName = sg.track_name
+                        };
+                    });
 
-                return new JsonResult(finalList);
+                    return new JsonResult(finalList);
+                }
             }
             catch (Exception ex)
             {
@@ -1196,27 +1280,30 @@ namespace armaradio.Controllers
         {
             try
             {
-                YTVideoIdsDataItem videoIds = _musicRepo.Youtube_GetUrlByArtistNameSongName(value.artistName, value.songName);
-
-                if (videoIds != null)
+                using (_operation)
                 {
-                    string currentVideoId = videoIds.VideoId;
+                    YTVideoIdsDataItem videoIds = _musicRepo.Youtube_GetUrlByArtistNameSongName(value.artistName, value.songName);
 
-                    return new JsonResult(new
+                    if (videoIds != null)
                     {
-                        hasVideo = !string.IsNullOrWhiteSpace(currentVideoId),
-                        url = $"https://www.youtube.com/watch?v={currentVideoId}",
-                        embedUrl = $"https://www.youtube.com/embed/{currentVideoId}?enablejsapi=1", //&autoplay=1
-                        videoId = currentVideoId,
-                        alternateIds = videoIds.AlternateIds
-                    });
-                }
-                else
-                {
-                    return new JsonResult(new
+                        string currentVideoId = videoIds.VideoId;
+
+                        return new JsonResult(new
+                        {
+                            hasVideo = !string.IsNullOrWhiteSpace(currentVideoId),
+                            url = $"https://www.youtube.com/watch?v={currentVideoId}",
+                            embedUrl = $"https://www.youtube.com/embed/{currentVideoId}?enablejsapi=1", //&autoplay=1
+                            videoId = currentVideoId,
+                            alternateIds = videoIds.AlternateIds
+                        });
+                    }
+                    else
                     {
-                        hasVideo = false
-                    });
+                        return new JsonResult(new
+                        {
+                            hasVideo = false
+                        });
+                    }
                 }
             }
             catch (Exception ex)
@@ -1230,9 +1317,12 @@ namespace armaradio.Controllers
         {
             try
             {
-                List<YTGeneralSearchDataItem> returnItem = _musicRepo.Youtube_PerformGeneralSearch(SearchText);
+                using (_operation)
+                {
+                    List<YTGeneralSearchDataItem> returnItem = _musicRepo.Youtube_PerformGeneralSearch(SearchText);
 
-                return new JsonResult(returnItem);
+                    return new JsonResult(returnItem);
+                }
             }
             catch (Exception ex)
             {
@@ -1247,101 +1337,104 @@ namespace armaradio.Controllers
         {
             try
             {
-                if (value == null || string.IsNullOrWhiteSpace(value.PlayList))
+                using (_operation)
                 {
-                    throw new Exception("Playlist is required");
-                }
-
-                ArmaUser currentUser = _authControl.GetCurrentUser();
-
-                if (currentUser != null && value.CreateNewPlaylist)
-                {
-                    if (string.IsNullOrWhiteSpace(value.PlaylistName))
+                    if (value == null || string.IsNullOrWhiteSpace(value.PlayList))
                     {
-                        throw new Exception("'Playlist Name' is required");
+                        throw new Exception("Playlist is required");
                     }
 
-                    bool playlistExists = _musicRepo.CheckIfPlaylistExists(value.PlaylistName, currentUser.UserId);
+                    ArmaUser currentUser = _authControl.GetCurrentUser();
 
-                    if (playlistExists)
-                    {
-                        throw new Exception($"Playlist '{value.PlaylistName.Trim()}' already exists. Please specify a different name");
-                    }
-                }
-
-                List<TrackDataItem> returnItem = new List<TrackDataItem>();
-                List<string> allLines = value.PlayList.Split('\n', StringSplitOptions.RemoveEmptyEntries).ToList();
-                int? playlistId = null;
-
-                if (allLines.Count > 0)
-                {
                     if (currentUser != null && value.CreateNewPlaylist)
                     {
-                        playlistId = _musicRepo.InsertPlaylistName(value.PlaylistName.Trim(), currentUser.UserId);
+                        if (string.IsNullOrWhiteSpace(value.PlaylistName))
+                        {
+                            throw new Exception("'Playlist Name' is required");
+                        }
+
+                        bool playlistExists = _musicRepo.CheckIfPlaylistExists(value.PlaylistName, currentUser.UserId);
+
+                        if (playlistExists)
+                        {
+                            throw new Exception($"Playlist '{value.PlaylistName.Trim()}' already exists. Please specify a different name");
+                        }
                     }
 
-                    for (int i = 0; i < allLines.Count; i++)
+                    List<TrackDataItem> returnItem = new List<TrackDataItem>();
+                    List<string> allLines = value.PlayList.Split('\n', StringSplitOptions.RemoveEmptyEntries).ToList();
+                    int? playlistId = null;
+
+                    if (allLines.Count > 0)
                     {
-                        if (allLines[i].Contains("|"))
+                        if (currentUser != null && value.CreateNewPlaylist)
                         {
-                            List<string> parts = allLines[i].Split('|', StringSplitOptions.RemoveEmptyEntries).ToList();
+                            playlistId = _musicRepo.InsertPlaylistName(value.PlaylistName.Trim(), currentUser.UserId);
+                        }
 
-                            if (parts.Count >= 2)
+                        for (int i = 0; i < allLines.Count; i++)
+                        {
+                            if (allLines[i].Contains("|"))
                             {
-                                returnItem.Add(new TrackDataItem()
-                                {
-                                    tid = i,
-                                    artist_name = parts[0].Trim(),
-                                    track_name = parts[1].Trim()
-                                });
+                                List<string> parts = allLines[i].Split('|', StringSplitOptions.RemoveEmptyEntries).ToList();
 
-                                if (currentUser != null && value.CreateNewPlaylist && playlistId.HasValue)
+                                if (parts.Count >= 2)
                                 {
-                                    _musicRepo.InsertSongToPlaylist(playlistId.Value, returnItem.Last().artist_name, returnItem.Last().track_name);
+                                    returnItem.Add(new TrackDataItem()
+                                    {
+                                        tid = i,
+                                        artist_name = parts[0].Trim(),
+                                        track_name = parts[1].Trim()
+                                    });
+
+                                    if (currentUser != null && value.CreateNewPlaylist && playlistId.HasValue)
+                                    {
+                                        _musicRepo.InsertSongToPlaylist(playlistId.Value, returnItem.Last().artist_name, returnItem.Last().track_name);
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                if (currentUser != null && value.CreateNewPlaylist && playlistId.HasValue)
-                {
-                    var finalList = _musicRepo.GetPlaylistById(playlistId.Value, currentUser.UserId).Select(sg =>
+                    if (currentUser != null && value.CreateNewPlaylist && playlistId.HasValue)
                     {
-                        return new
+                        var finalList = _musicRepo.GetPlaylistById(playlistId.Value, currentUser.UserId).Select(sg =>
                         {
-                            tid = sg.Id,
-                            artistName = sg.Artist,
-                            songName = sg.Song,
-                            videoId = sg.VideoId
-                        };
-                    });
+                            return new
+                            {
+                                tid = sg.Id,
+                                artistName = sg.Artist,
+                                songName = sg.Song,
+                                videoId = sg.VideoId
+                            };
+                        });
 
-                    return new JsonResult(new
-                    {
-                        playlistId = playlistId.Value,
-                        playlistName = value.PlaylistName,
-                        songList = finalList
-                    });
-                }
-                else
-                {
-                    var finalList = returnItem.Select(sg =>
-                    {
-                        return new
+                        return new JsonResult(new
                         {
-                            tid = sg.tid,
-                            artistName = sg.artist_name,
-                            songName = sg.track_name
-                        };
-                    });
-
-                    return new JsonResult(new
+                            playlistId = playlistId.Value,
+                            playlistName = value.PlaylistName,
+                            songList = finalList
+                        });
+                    }
+                    else
                     {
-                        playlistId = (int?)null,
-                        playlistName = "",
-                        songList = finalList
-                    });
+                        var finalList = returnItem.Select(sg =>
+                        {
+                            return new
+                            {
+                                tid = sg.tid,
+                                artistName = sg.artist_name,
+                                songName = sg.track_name
+                            };
+                        });
+
+                        return new JsonResult(new
+                        {
+                            playlistId = (int?)null,
+                            playlistName = "",
+                            songList = finalList
+                        });
+                    }
                 }
             }
             catch (Exception ex)

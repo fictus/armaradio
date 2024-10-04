@@ -12,22 +12,28 @@ namespace armaradio.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IArmaAuth _authControl;
         private readonly IMusicRepo _musicRepo;
+        private readonly Operations.ArmaUserOperation _operation;
 
         public HomeController(
             ILogger<HomeController> logger,
             IArmaAuth authControl,
-            IMusicRepo musicRepo
+            IMusicRepo musicRepo,
+            Operations.ArmaUserOperation operation
         )
         {
             _logger = logger;
             _authControl = authControl;
             _musicRepo = musicRepo;
+            _operation = operation;
         }
 
         public IActionResult Index()
         {
-            //_musicRepo.DuckDuckGo_PerformGeneralSearch("depeche mode - somebody");
-            return View();
+            using (_operation)
+            {
+                //_musicRepo.DuckDuckGo_PerformGeneralSearch("depeche mode - somebody");
+                return View();
+            }
         }
 
         [HttpGet]
@@ -54,24 +60,26 @@ namespace armaradio.Controllers
         {
             try
             {
-                if (value == null)
+                using (_operation)
                 {
-                    throw new Exception("Invalid request");
+                    if (value == null)
+                    {
+                        throw new Exception("Invalid request");
+                    }
+                    if (string.IsNullOrEmpty(value.UserName))
+                    {
+                        throw new Exception("'Email' is required");
+                    }
+                    if (string.IsNullOrEmpty(value.Password))
+                    {
+                        throw new Exception("'Password' is required");
+                    }
+
+                    AuthLoginResponse loginResults = _authControl.Login(value.UserName, value.Password);
+
+
+                    return new JsonResult(loginResults);
                 }
-                if (string.IsNullOrEmpty(value.UserName))
-                {
-                    throw new Exception("'Email' is required");
-                }
-                if (string.IsNullOrEmpty(value.Password))
-                {
-                    throw new Exception("'Password' is required");
-                }
-
-                AuthLoginResponse loginResults = _authControl.Login(value.UserName, value.Password);
-
-
-
-                return new JsonResult(loginResults);
             }
             catch (Exception ex)
             {
@@ -85,30 +93,33 @@ namespace armaradio.Controllers
         {
             try
             {
-                if (value == null)
+                using (_operation)
                 {
-                    throw new Exception("Invalid request");
-                }
-                if (string.IsNullOrEmpty(value.UserName))
-                {
-                    throw new Exception("'Email' is required");
-                }
-                if (!_authControl.IsValidEmailAddress(value.UserName))
-                {
-                    throw new Exception("'Email' is incorrect");
-                }
-                if (string.IsNullOrEmpty(value.Password) || string.IsNullOrEmpty(value.ConfirmPassword))
-                {
-                    throw new Exception("'Password' is required");
-                }
-                if (value.Password != value.ConfirmPassword)
-                {
-                    throw new Exception("'Confirm Password' does not match Password");
-                }
+                    if (value == null)
+                    {
+                        throw new Exception("Invalid request");
+                    }
+                    if (string.IsNullOrEmpty(value.UserName))
+                    {
+                        throw new Exception("'Email' is required");
+                    }
+                    if (!_authControl.IsValidEmailAddress(value.UserName))
+                    {
+                        throw new Exception("'Email' is incorrect");
+                    }
+                    if (string.IsNullOrEmpty(value.Password) || string.IsNullOrEmpty(value.ConfirmPassword))
+                    {
+                        throw new Exception("'Password' is required");
+                    }
+                    if (value.Password != value.ConfirmPassword)
+                    {
+                        throw new Exception("'Confirm Password' does not match Password");
+                    }
 
-                AuthRegisterResponse registerResults = _authControl.Register(value.UserName, value.Password);
+                    AuthRegisterResponse registerResults = _authControl.Register(value.UserName, value.Password);
 
-                return new JsonResult(registerResults);
+                    return new JsonResult(registerResults);
+                }
             }
             catch (Exception ex)
             {
