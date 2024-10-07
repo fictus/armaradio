@@ -27,6 +27,7 @@ namespace armaradio.Controllers
             _operation = operation;
         }
 
+        [HttpGet]
         public IActionResult Index()
         {
             using (_operation)
@@ -60,6 +61,7 @@ namespace armaradio.Controllers
         {
             try
             {
+                _operation.SetRequestBody(value);
                 using (_operation)
                 {
                     if (value == null)
@@ -93,6 +95,7 @@ namespace armaradio.Controllers
         {
             try
             {
+                _operation.SetRequestBody(value);
                 using (_operation)
                 {
                     if (value == null)

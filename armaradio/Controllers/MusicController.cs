@@ -9,6 +9,7 @@ using FFMpegCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
@@ -301,6 +302,7 @@ namespace armaradio.Controllers
         {
             try
             {
+                _operation.SetRequestBody(value);
                 using (_operation)
                 {
                     List<ArmaArtistDataItem> returnItem = _musicRepo.Artist_FindArtists(value.SearchPhrase) ?? new List<ArmaArtistDataItem>();
@@ -319,6 +321,7 @@ namespace armaradio.Controllers
         {
             try
             {
+                _operation.SetRequestBody(value);
                 using (_operation)
                 {
                     ArmaArtistAlbumsResponse returnItem = _musicRepo.Albums_GetArtistsAlbums(value.ArtistId);
@@ -337,6 +340,7 @@ namespace armaradio.Controllers
         {
             try
             {
+                _operation.SetRequestBody(value);
                 using (_operation)
                 {
                     List<ArmaAlbumSongDataItem> returnItem = _musicRepo.Albums_GetAlbumSongs(value.ArtistId, value.AlbumId);
@@ -364,6 +368,10 @@ namespace armaradio.Controllers
         {
             try
             {
+                _operation.SetRequestBody(new
+                {
+                    search = seach
+                });
                 using (_operation)
                 {
                     List<ArtistDataItem> returnItem = _musicRepo.Artist_GetArtistList(seach) ?? new List<ArtistDataItem>();
@@ -391,6 +399,7 @@ namespace armaradio.Controllers
         {
             try
             {
+                _operation.SetRequestBody(value);
                 using (_operation)
                 {
                     if (value == null)
@@ -487,6 +496,10 @@ namespace armaradio.Controllers
         {
             try
             {
+                _operation.SetRequestBody(new
+                {
+                    VideoId = VideoId
+                });
                 using (_operation)
                 {
                     var youtube = new YoutubeExplode.YoutubeClient();
@@ -513,6 +526,10 @@ namespace armaradio.Controllers
         {
             try
             {
+                _operation.SetRequestBody(new
+                {
+                    VideoId = VideoId
+                });
                 using (_operation)
                 {
                     //List<AdaptiveFormatDataItem> audioStreams = _musicRepo.GetAudioStreams(VideoId);
@@ -819,6 +836,12 @@ namespace armaradio.Controllers
         {
             try
             {
+                _operation.SetRequestBody(new
+                {
+                    ArtistName = ArtistName,
+                    SongName = SongName,
+                    VideoId = VideoId
+                });
                 using (_operation)
                 {
                     string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
@@ -1003,6 +1026,10 @@ namespace armaradio.Controllers
         {
             try
             {
+                _operation.SetRequestBody(new
+                {
+                    PlaylistId = PlaylistId
+                });
                 using (_operation)
                 {
                     ArmaUser currentUser = _authControl.GetCurrentUser();
@@ -1031,6 +1058,10 @@ namespace armaradio.Controllers
         {
             try
             {
+                _operation.SetRequestBody(new
+                {
+                    token = token
+                });
                 using (_operation)
                 {
                     ArmaUser currentUser = _authControl.GetCurrentUser();
@@ -1078,6 +1109,10 @@ namespace armaradio.Controllers
         {
             try
             {
+                _operation.SetRequestBody(new
+                {
+                    PlaylistId = PlaylistId
+                });
                 using (_operation)
                 {
                     ArmaUser currentUser = _authControl.GetCurrentUser();
@@ -1114,6 +1149,10 @@ namespace armaradio.Controllers
         {
             try
             {
+                _operation.SetRequestBody(new
+                {
+                    SongId = SongId
+                });
                 using (_operation)
                 {
                     ArmaUser currentUser = _authControl.GetCurrentUser();
@@ -1140,6 +1179,10 @@ namespace armaradio.Controllers
         {
             try
             {
+                _operation.SetRequestBody(new
+                {
+                    PlaylistId = PlaylistId
+                });
                 using (_operation)
                 {
                     ArmaUser currentUser = _authControl.GetCurrentUser();
@@ -1166,6 +1209,7 @@ namespace armaradio.Controllers
         {
             try
             {
+                _operation.SetRequestBody(value);
                 using (_operation)
                 {
                     if (value == null)
@@ -1201,6 +1245,7 @@ namespace armaradio.Controllers
         {
             try
             {
+                _operation.SetRequestBody(value);
                 using (_operation)
                 {
                     if (value == null)
@@ -1280,6 +1325,7 @@ namespace armaradio.Controllers
         {
             try
             {
+                _operation.SetRequestBody(value);
                 using (_operation)
                 {
                     YTVideoIdsDataItem videoIds = _musicRepo.Youtube_GetUrlByArtistNameSongName(value.artistName, value.songName);
@@ -1317,6 +1363,10 @@ namespace armaradio.Controllers
         {
             try
             {
+                _operation.SetRequestBody(new
+                {
+                    SearchText = SearchText
+                });
                 using (_operation)
                 {
                     List<YTGeneralSearchDataItem> returnItem = _musicRepo.Youtube_PerformGeneralSearch(SearchText);
@@ -1337,6 +1387,7 @@ namespace armaradio.Controllers
         {
             try
             {
+                _operation.SetRequestBody(value);
                 using (_operation)
                 {
                     if (value == null || string.IsNullOrWhiteSpace(value.PlayList))

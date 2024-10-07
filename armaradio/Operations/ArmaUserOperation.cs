@@ -3,6 +3,7 @@ using Azure.Core;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Claims;
+using System.Text.Json;
 using YoutubeExplode.Channels;
 
 namespace armaradio.Operations
@@ -14,6 +15,7 @@ namespace armaradio.Operations
         private OperationLog _currentLog;
         private bool _disposed = false;
         private static readonly AsyncLocal<bool> _operationInProgress = new AsyncLocal<bool>();
+        private object _requestBody;
 
         public ArmaUserOperation(
             IHttpContextAccessor httpContextAccessor,
@@ -27,6 +29,25 @@ namespace armaradio.Operations
             {
                 _operationInProgress.Value = true;
                 InitializeLog();
+            }
+        }
+
+        public void SetRequestBody(object body)
+        {
+            _requestBody = body;
+            if (_currentLog != null)
+            {
+                try
+                {
+                    _currentLog.RequestBody = JsonSerializer.Serialize(body, new JsonSerializerOptions
+                    {
+                        WriteIndented = true
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _currentLog.RequestBody = $"Error serializing body: {ex.Message}";
+                }
             }
         }
 
@@ -48,7 +69,8 @@ namespace armaradio.Operations
                 UserAgent = context.Request.Headers["User-Agent"].ToString(),
                 Referrer = context.Request.Headers["Referer"].ToString(),
                 RequestHeaders = string.Join(";", context.Request.Headers.Select(h => $"{h.Key}={h.Value}")),
-                QueryString = context.Request.QueryString.ToString()
+                QueryString = context.Request.QueryString.ToString(),
+                RequestBody = null
             };
         }
 
@@ -70,6 +92,7 @@ namespace armaradio.Operations
                     Referrer = _currentLog.Referrer,
                     RequestHeaders = _currentLog.RequestHeaders,
                     QueryString = _currentLog.QueryString,
+                    RequestBody = _currentLog.RequestBody,
                     Duration = _currentLog.Duration
                 });
 
@@ -134,6 +157,7 @@ namespace armaradio.Operations
         public string Referrer { get; set; }
         public string RequestHeaders { get; set; }
         public string QueryString { get; set; }
+        public string RequestBody { get; set; }
         public double Duration { get; set; }
     }
 }
