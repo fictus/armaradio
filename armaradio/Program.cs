@@ -127,18 +127,17 @@ app.UseAuthorization();
 
 //app.MapControllers();
 
-app.MapPost("/logout", async (SignInManager<IdentityUser> signInManager,
-    [FromBody] object empty) =>
-{
-    if (empty != null)
-    {
-        await signInManager.SignOutAsync();
-        return Results.Ok();
-    }
-    return Results.Unauthorized();
-})
-//.WithOpenApi()
-.RequireAuthorization();
+//app.MapPost("/logout", async (SignInManager<IdentityUser> signInManager,
+//    [FromBody] object empty) =>
+//{
+//    if (empty != null)
+//    {
+//        await signInManager.SignOutAsync();
+//        return Results.Ok();
+//    }
+//    return Results.Unauthorized();
+//})
+//.RequireAuthorization();
 
 app.MapControllerRoute(
     name: "default",

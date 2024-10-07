@@ -78,13 +78,29 @@ function attachLoginRegisterEvents() {
         }, 500);
     });
 
+    $("#txtMainLoginEmail").on("keydown", function (e) {
+        if (e.key === "Enter" || e.keyCode === 13) {
+            $("#btnMasterLogin_Login").trigger("click");
+        }
+    });
+
+    $("#txtMainLoginPassword").on("keydown", function (e) {
+        if (e.key === "Enter" || e.keyCode === 13) {
+            $("#btnMasterLogin_Login").trigger("click");
+        }
+    });
+
     $("#btnMasterLogin_Login").on("click", function () {
         armaradio.masterPageWait(true);
 
-        armaradio.masterAJAXPostByEndPoint({
-            email: $.trim($("#txtMainLoginEmail").val()),
-            password: $("#txtMainLoginPassword").val()
-        }, ajaxPointCall + "/login?useCookies=true")
+        //armaradio.masterAJAXPostByEndPoint({
+        //    email: $.trim($("#txtMainLoginEmail").val()),
+        //    password: $("#txtMainLoginPassword").val()
+        //}, ajaxPointCall + "/login?useCookies=true")
+        armaradio.masterAJAXPost({
+            UserName: $.trim($("#txtMainLoginEmail").val()),
+            Password: $("#txtMainLoginPassword").val()
+        }, "Home", "UserLogin")
             .then(function (response) {
                 if (response && response.error) {
                     armaradio.masterPageWait(false);
@@ -98,6 +114,24 @@ function attachLoginRegisterEvents() {
                     location.reload(true);
                 }
             });
+    });
+
+    $("#txtMainRegisterEmail").on("keydown", function (e) {
+        if (e.key === "Enter" || e.keyCode === 13) {
+            $("#btnMasterLogin_Register").trigger("click");
+        }
+    });
+
+    $("#txtMainRegisterPassword").on("keydown", function (e) {
+        if (e.key === "Enter" || e.keyCode === 13) {
+            $("#btnMasterLogin_Register").trigger("click");
+        }
+    });
+
+    $("#txtMainRegisterConfirmPassword").on("keydown", function (e) {
+        if (e.key === "Enter" || e.keyCode === 13) {
+            $("#btnMasterLogin_Register").trigger("click");
+        }
     });
 
     $("#btnMasterLogin_Register").on("click", function () {
@@ -128,61 +162,58 @@ function attachLoginRegisterEvents() {
         
         armaradio.masterPageWait(true);
 
-        armaradio.masterAJAXPostByEndPoint({
-            email: userEmail,
-            password: password1
-        }, ajaxPointCall + "/register")
+        //armaradio.masterAJAXPostByEndPoint({
+        //    email: userEmail,
+        //    password: password1
+        //}, ajaxPointCall + "/register")
+        armaradio.masterAJAXPost({
+            UserName: userEmail,
+            Password: password1,
+            ConfirmPassword: password2
+        }, "Home", "RegisterAccount")
             .then(function (response) {
-                if (response && response.errors) {
-                    let errorsCombined = [];
+                //if (response && response.errors) {
+                //    let errorsCombined = [];
 
-                    $.each(response.errors, function (key, val) {
-                        if (response.errors[key].length) {
-                            errorsCombined.push(response.errors[key].join("<br/>"));
-                        }
-                    });
+                //    $.each(response.errors, function (key, val) {
+                //        if (response.errors[key].length) {
+                //            errorsCombined.push(response.errors[key].join("<br/>"));
+                //        }
+                //    });
 
-                    //if ("PasswordRequiresNonAlphanumeric" in response.errors) {
-                    //    if (response.errors.PasswordRequiresNonAlphanumeric.length) {
-                    //        errorsCombined.push(response.errors.PasswordRequiresNonAlphanumeric.join("<br/>"));
-                    //    }
-                    //}
-                    //if ("PasswordRequiresUpper" in response.errors) {
-                    //    if (response.errors.PasswordRequiresUpper.length) {
-                    //        errorsCombined.push(response.errors.PasswordRequiresUpper.join("<br/>"));
-                    //    }
-                    //}
-                    //if ("PasswordRequiresUpper" in response.errors) {
-                    //    if (response.errors.PasswordRequiresUpper.length) {
-                    //        errorsCombined.push(response.errors.PasswordRequiresUpper.join("<br/>"));
-                    //    }
-                    //}
-                    //if ("PasswordRequiresDigit" in response.errors) {
-                    //    if (response.errors.PasswordRequiresDigit.length) {
-                    //        errorsCombined.push(response.errors.PasswordRequiresDigit.join("<br/>"));
-                    //    }
-                    //}
-                    //if ("PasswordTooShort" in response.errors) {
-                    //    if (response.errors.PasswordTooShort.length) {
-                    //        errorsCombined.push(response.errors.PasswordTooShort.join("<br/>"));
-                    //    }
-                    //}
+                //    let errorMsg = "Unable to create account. Please try again";
 
-                    let errorMsg = "Unable to create account. Please try again";
+                //    if (errorsCombined.length) {
+                //        errorMsg = "Unable to create account:<br/><br/>" + errorsCombined.join("<br/>");
+                //    }
 
-                    if (errorsCombined.length) {
-                        errorMsg = "Unable to create account:<br/><br/>" + errorsCombined.join("<br/>");
-                    }
+                //    armaradio.masterPageWait(false);
 
+                //    armaradio.warningMsg({
+                //        msg: errorMsg,
+                //        captionMsg: "Error",
+                //        typeLayout: "red"
+                //    });
+                if (response && response.error) {
                     armaradio.masterPageWait(false);
 
                     armaradio.warningMsg({
-                        msg: errorMsg,
+                        msg: response.errorMsg,
                         captionMsg: "Error",
                         typeLayout: "red"
                     });
                 } else {
-                    location.reload(true);
+                    armaradio.masterPageWait(false);
+
+                    armaradio.warningMsg({
+                        msg: "Your account was created",
+                        captionMsg: "Account Created",
+                        typeLayout: "green"
+                    });
+
+                    setTimeout(function () {
+                        location.reload(true);
+                    }, 2500);
                 }
             });
     });
@@ -192,7 +223,7 @@ function attachLoginRegisterEvents() {
 
         armaradio.masterPageWait(true);
 
-        armaradio.masterAJAXPostByEndPoint({}, ajaxPointCall + "/logout")
+        armaradio.masterAJAXPost({}, "Home", "Logout")
             .then(function (response) {
                 if (response && response.error) {
                     armaradio.masterPageWait(false);
