@@ -2,6 +2,7 @@ using armaradio.Models.ArmaAuth;
 using armaradio.Models.Home;
 using armaradio.Repositories;
 using Azure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -196,6 +197,7 @@ namespace armaradio.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public IActionResult Logout([FromBody] object empty)
         {
             if (empty != null)
