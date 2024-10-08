@@ -170,11 +170,13 @@ function attachLoginRegisterEvents() {
                 } else {
                     armaradio.masterPageWait(false);
 
+                    $("#dvMasterLogin").modal("hide");
+
                     armaradio.warningMsg({
                         msg: "Email Confirmation has been sent to your email",
                         captionMsg: "Confirmation Required",
                         typeLayout: "green"
-                    });
+                    }, null, null, null, true);
                 }
             });
     });
@@ -329,7 +331,7 @@ function isJSON(str) {
 }
 
 var armaradio = {
-    warningMsg: function(option, fadeoutTime, showCloseButton, onCloseEvent) {
+    warningMsg: function(option, fadeoutTime, showCloseButton, onCloseEvent, dontAutoClose) {
         /*
         valid options:
         -------------
@@ -399,21 +401,23 @@ var armaradio = {
         });
 
         if (!showCloseButton) {
-            let fadeOut = (fadeoutTime && !isNaN(fadeoutTime) ? fadeoutTime : 3500);
-            currentWarning.data("timeOut", setTimeout(function () {
-                //currentWarning.animate({
-                //    "opacity": "0"
-                //}, { duration: "slow", queue: false });
-                currentWarning.animate({
-                    "opacity": "0"
-                }, {
-                    duration: "slow",
-                    queue: false,
-                    complete: function () {
-                        currentWarning.modal("hide");
-                    }
-                });
-            }, fadeOut));
+            if (!dontAutoClose) {
+                let fadeOut = (fadeoutTime && !isNaN(fadeoutTime) ? fadeoutTime : 3500);
+                currentWarning.data("timeOut", setTimeout(function () {
+                    //currentWarning.animate({
+                    //    "opacity": "0"
+                    //}, { duration: "slow", queue: false });
+                    currentWarning.animate({
+                        "opacity": "0"
+                    }, {
+                        duration: "slow",
+                        queue: false,
+                        complete: function () {
+                            currentWarning.modal("hide");
+                        }
+                    });
+                }, fadeOut));
+            }
         }
     },
     /************************************************
