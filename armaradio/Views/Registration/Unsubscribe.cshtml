@@ -1,3 +1,15 @@
-﻿@{
+﻿@model armaradio.Models.Registration.RemoveFromEmailListDataItem
+@{
     ViewData["Title"] = "Arma Radio - Unsubscribe";
 }
+
+<div class="pt-5 pb-5 mb-5">
+    @if (Model.WasRemovedFromEmails)
+    {
+        <span>"@(Model.Email)" has been removed from our mailing list and will no longer receive future emails.</span>
+    }
+    else
+    {
+        <span>Invalid request.</span>
+    }
+</div>

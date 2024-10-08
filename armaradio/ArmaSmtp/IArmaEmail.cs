@@ -6,7 +6,8 @@
             string FromEmail,
             string Subject,
             List<string> To,
-            string Body
+            string Body,
+            string EmailToken
         );
     }
 }

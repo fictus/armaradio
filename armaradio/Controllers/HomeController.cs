@@ -231,7 +231,7 @@ namespace armaradio.Controllers
 
                     toEmails.Add(value.UserName);
 
-                    _email.SendEmail("noreply@armarad.com", "Confirm Your Email", toEmails, emailBody);
+                    _email.SendEmail("noreply@armarad.com", "Confirm Your Email", toEmails, emailBody, emailToken);
 
                     return new JsonResult(Ok());
                 }

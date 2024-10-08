@@ -31,13 +31,41 @@ namespace armaradio.Controllers
                     token = t
                 });
             }
+
             return View(returnItem);
         }
 
         [HttpGet]
         public IActionResult Unsubscribe(string e)
         {
-            return View();
+            RemoveFromEmailListDataItem returnItem = new RemoveFromEmailListDataItem()
+            {
+                WasRemovedFromEmails = false
+            };
+
+            if (!string.IsNullOrEmpty(e))
+            {
+                using (var con = _dapper.GetConnection("radioconn"))
+                {
+                    string email = _dapper.GetFirstOrDefault<string>(con, "ArmaUsers_GetEmailConfirmationToken", new
+                    {
+                        token = e
+                    });
+
+                    if (!string.IsNullOrWhiteSpace(email))
+                    {
+                        int result = _dapper.ExecuteNonQuery(con, "ArmaUsers_RemoveFromEmailList", new
+                        {
+                            email = email
+                        });
+
+                        returnItem.Email = email.Trim();
+                        returnItem.WasRemovedFromEmails = (result > 0);
+                    }
+                }
+            }
+
+            return View(returnItem);
         }
     }
 }
