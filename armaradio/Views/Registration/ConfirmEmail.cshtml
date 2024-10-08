@@ -1,0 +1,18 @@
+﻿@model armaradio.Models.Registration.ConfirmEmailDataItem
+@{
+}
+
+<div class="pt-5 pb-5 mb-5">
+    @if (Model.NotFound)
+    {
+        <span>Activation request is invalid</span>
+    }
+    else if (Model.PreviuslyConfirmed)
+    {
+        <span>Your email was previously confirmed already. No need to confirm it again.</span>
+    }
+    else
+    {
+        <span>Your email has been confirmed and your account is now activated.</span>
+    }
+</div>

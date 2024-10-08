@@ -467,7 +467,7 @@ namespace armaradio.Controllers
 
         [HttpPost]
         [Authorize]
-        public IActionResult GeRandomtSongsFromPlaylists()
+        public IActionResult GeRandomSongsFromPlaylists()
         {
             try
             {

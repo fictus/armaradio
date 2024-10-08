@@ -142,7 +142,7 @@ function loadRadioPlayer(artistName, songName, fromPlaylist, reloadFromCache, fr
         armaradio.masterAJAXPost({
             ArtistName: artistName,
             SongName: songName
-        }, "Music", "GeRandomtSongsFromPlaylists")
+        }, "Music", "GeRandomSongsFromPlaylists")
             .then(function (response) {
                 if (response && !response.error) {
                     if (response.length) {

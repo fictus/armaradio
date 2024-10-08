@@ -111,7 +111,7 @@ function attachLoginRegisterEvents() {
                         typeLayout: "red"
                     });
                 } else {
-                    location.reload(true);
+                    window.location.href = ajaxPointCall;
                 }
             });
     });
@@ -139,15 +139,6 @@ function attachLoginRegisterEvents() {
         let password1 = $("#txtMainRegisterPassword").val();
         let password2 = $("#txtMainRegisterConfirmPassword").val();
 
-        //if (userEmail == "") {
-        //    armaradio.warningMsg({
-        //        msg: "'Email' is required",
-        //        captionMsg: "Email Error",
-        //        typeLayout: "red"
-        //    });
-
-        //    return false;
-        //}
         if ($.trim(password1) != "" && $.trim(password2) != "") {
             if (password1 != password2) {
                 armaradio.warningMsg({
@@ -162,38 +153,12 @@ function attachLoginRegisterEvents() {
         
         armaradio.masterPageWait(true);
 
-        //armaradio.masterAJAXPostByEndPoint({
-        //    email: userEmail,
-        //    password: password1
-        //}, ajaxPointCall + "/register")
         armaradio.masterAJAXPost({
             UserName: userEmail,
             Password: password1,
             ConfirmPassword: password2
         }, "Home", "RegisterAccount")
             .then(function (response) {
-                //if (response && response.errors) {
-                //    let errorsCombined = [];
-
-                //    $.each(response.errors, function (key, val) {
-                //        if (response.errors[key].length) {
-                //            errorsCombined.push(response.errors[key].join("<br/>"));
-                //        }
-                //    });
-
-                //    let errorMsg = "Unable to create account. Please try again";
-
-                //    if (errorsCombined.length) {
-                //        errorMsg = "Unable to create account:<br/><br/>" + errorsCombined.join("<br/>");
-                //    }
-
-                //    armaradio.masterPageWait(false);
-
-                //    armaradio.warningMsg({
-                //        msg: errorMsg,
-                //        captionMsg: "Error",
-                //        typeLayout: "red"
-                //    });
                 if (response && response.error) {
                     armaradio.masterPageWait(false);
 
@@ -206,14 +171,10 @@ function attachLoginRegisterEvents() {
                     armaradio.masterPageWait(false);
 
                     armaradio.warningMsg({
-                        msg: "Your account was created",
-                        captionMsg: "Account Created",
+                        msg: "Email Confirmation has been sent to your email",
+                        captionMsg: "Confirmation Required",
                         typeLayout: "green"
                     });
-
-                    setTimeout(function () {
-                        location.reload(true);
-                    }, 2500);
                 }
             });
     });
@@ -234,7 +195,7 @@ function attachLoginRegisterEvents() {
                         typeLayout: "red"
                     });
                 } else {
-                    location.reload(true);
+                    window.location.href = ajaxPointCall;
                 }
             });
     });

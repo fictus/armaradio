@@ -1,3 +1,4 @@
+using armaradio.Models;
 using armaradio.Models.ArmaAuth;
 using armaradio.Models.Home;
 using armaradio.Repositories;
@@ -19,6 +20,8 @@ namespace armaradio.Controllers
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly IMusicRepo _musicRepo;
         private readonly Operations.ArmaUserOperation _operation;
+        private readonly IDapperHelper _dapper;
+        private readonly ArmaSmtp.IArmaEmail _email;
 
         public HomeController(
             ILogger<HomeController> logger,
@@ -26,7 +29,9 @@ namespace armaradio.Controllers
             UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
             IMusicRepo musicRepo,
-            Operations.ArmaUserOperation operation
+            Operations.ArmaUserOperation operation,
+            IDapperHelper dapper,
+            ArmaSmtp.IArmaEmail email
         )
         {
             _logger = logger;
@@ -35,6 +40,8 @@ namespace armaradio.Controllers
             _musicRepo = musicRepo;
             _operation = operation;
             _signInManager = signInManager;
+            _dapper = dapper;
+            _email = email;
         }
 
         [HttpGet]
@@ -87,7 +94,15 @@ namespace armaradio.Controllers
                         throw new Exception("'Password' is required");
                     }
 
-                    //AuthLoginResponse loginResults = _authControl.Login(value.UserName, value.Password);
+                    bool? emailIsConfirmed = _dapper.GetFirstOrDefault<bool?>("radioconn", "ArmaUsers_GetEmailConfirmedStatus", new
+                    {
+                        email = value.UserName
+                    });
+
+                    if (emailIsConfirmed.HasValue && !emailIsConfirmed.Value)
+                    {
+                        throw new Exception("Email has not been confirmed. Please follow the instructions sent to you via email.");
+                    }
 
                     var result = _signInManager.PasswordSignInAsync(value.UserName, value.Password, false, lockoutOnFailure: false).Result;
 
@@ -128,12 +143,12 @@ namespace armaradio.Controllers
                     }
                     if (string.IsNullOrWhiteSpace(value.Password) || string.IsNullOrWhiteSpace(value.ConfirmPassword))
                     {
-                        throw new Exception("Contraseña es requerida");
+                        throw new Exception("'Password' is required");
                     }
 
                     if (value.Password != value.ConfirmPassword)
                     {
-                        throw new Exception("Contraseñas no coinciden");
+                        throw new Exception("'Confirm Password' does not match Password");
                     }
 
                     var user = new IdentityUser
@@ -141,6 +156,13 @@ namespace armaradio.Controllers
                         UserName = value.UserName,
                         Email = value.UserName
                     };
+
+                    var newUser = _userManager.Users.Where(usr => usr.Email.Equals(value.UserName)).FirstOrDefault();
+
+                    if (newUser != null)
+                    {
+                        throw new Exception("Account already exists for this email");
+                    }
 
                     var validators = _userManager.PasswordValidators;
 
@@ -184,7 +206,32 @@ namespace armaradio.Controllers
                         }
                     }
 
-                    var loginResult = _signInManager.PasswordSignInAsync(value.UserName, value.Password, false, lockoutOnFailure: false).Result;
+                    //var loginResult = _signInManager.PasswordSignInAsync(value.UserName, value.Password, false, lockoutOnFailure: false).Result;
+
+                    string emailToken = _dapper.GetFirstOrDefault<string>("radioconn", "ArmaUsers_CreateEmailConfirmationRequest", new
+                    {
+                        email = value.UserName.Trim()
+                    });
+
+                    if (string.IsNullOrWhiteSpace(emailToken))
+                    {
+                        throw new Exception("Registration failed");
+                    }
+
+                    string confirmUrl = $"https://armarad.com/registration/confirmemail/?t={emailToken}";
+                    string emailBody = @$"
+                        Welcome to ArmaRad!
+                        <br><br>
+                        To complete registration please confirm your email:
+                        <br>
+                        <br>
+                        <a href=""{confirmUrl}"">{confirmUrl}</a>
+                    ";
+                    List<string> toEmails = new List<string>();
+
+                    toEmails.Add(value.UserName);
+
+                    _email.SendEmail("noreply@armarad.com", "Confirm Your Email", toEmails, emailBody);
 
                     return new JsonResult(Ok());
                 }

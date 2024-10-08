@@ -1,3 +1,4 @@
+using armaradio.ArmaSmtp;
 using armaradio.Data;
 using armaradio.Operations;
 using armaradio.Repositories;
@@ -64,6 +65,7 @@ builder.Services.AddTransient<IDapperHelper, DapperHelper>();
 builder.Services.AddTransient<IMusicRepo, MusicRepo>();
 builder.Services.AddTransient<IArmaWebRequest, ArmaWebRequest>();
 builder.Services.AddTransient<IArmaAuth, ArmaAuth>();
+builder.Services.AddTransient<IArmaEmail, ArmaEmail>();
 builder.Services.AddScoped<ArmaUserOperation>();
 
 builder.Services.AddSingleton<YoutubeDL>(sp =>
