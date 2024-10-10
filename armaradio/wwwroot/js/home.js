@@ -1363,6 +1363,13 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
 
     if (startPlaying) {
         $("#tblMainPlayList").find("button.btn-play-inner-btn-play").first().trigger("click");
+
+        if ($("#tblMainPlayList").find("tr.now-playing").length) {
+            $("#tblMainPlayList").find("tr.now-playing")[0].scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }
     }
 
     armaradio.masterPageWait(false);
