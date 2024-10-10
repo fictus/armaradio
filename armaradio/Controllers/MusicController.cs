@@ -36,12 +36,14 @@ namespace armaradio.Controllers
         private readonly IArmaAuth _authControl;
         private readonly IWebHostEnvironment _hostEnvironment;
         private readonly Operations.ArmaUserOperation _operation;
+        private readonly ITeraboxUploader _terabox;
         //private IPage _page;
         public MusicController(
             IMusicRepo musicRepo,
             IArmaAuth authControl,
             IWebHostEnvironment hostEnvironment,
-            Operations.ArmaUserOperation operation
+            Operations.ArmaUserOperation operation,
+            ITeraboxUploader terabox
         //IPage page
         )
         {
@@ -49,6 +51,7 @@ namespace armaradio.Controllers
             _authControl = authControl;
             _hostEnvironment = hostEnvironment;
             _operation = operation;
+            _terabox = terabox;
             //_page = page;
 
             IsLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
@@ -285,6 +288,62 @@ namespace armaradio.Controllers
                             tid = sg.tid,
                             artistName = sg.artist_name,
                             songName = sg.track_name
+                        };
+                    });
+
+                    return new JsonResult(finalList);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetTopRankedArtists5stars()
+        {
+            try
+            {
+                using (_operation)
+                {
+                    List<TrackDataItem> returnItem = _musicRepo.GetTopUserRankedArtists5stars();
+                    var finalList = returnItem.Select(sg =>
+                    {
+                        return new
+                        {
+                            tid = sg.tid,
+                            artistName = sg.artist_name,
+                            songName = sg.track_name,
+                            showAlbumsButton = true
+                        };
+                    });
+
+                    return new JsonResult(finalList);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetTopRankedArtists4stars()
+        {
+            try
+            {
+                using (_operation)
+                {
+                    List<TrackDataItem> returnItem = _musicRepo.GetTopUserRankedArtists4stars();
+                    var finalList = returnItem.Select(sg =>
+                    {
+                        return new
+                        {
+                            tid = sg.tid,
+                            artistName = sg.artist_name,
+                            songName = sg.track_name,
+                            showAlbumsButton = true
                         };
                     });
 
@@ -548,6 +607,22 @@ namespace armaradio.Controllers
                     if (!System.IO.File.Exists(endFileName))
                     {
                         _musicRepo.DownloadMp4File($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}", endFileName);
+
+                        //long fileSize = new FileInfo(endFileName).Length;
+                        //DateTime localMtime = DateTime.Now;
+
+                        //try
+                        //{
+                        //    var preCreateResponse = await _terabox.PreCreateUpload(endFileName, fileSize, localMtime);
+                        //    Console.WriteLine($"Pre-create successful. Upload ID: {preCreateResponse.Uploadid}");
+
+                        //    string uploadResult = await _terabox.UploadFile(endFileName, preCreateResponse);
+                        //    Console.WriteLine($"Upload result: {uploadResult}");
+                        //}
+                        //catch (Exception ex)
+                        //{
+                        //    Console.WriteLine($"Error: {ex.Message}");
+                        //}
 
                         //AdaptiveFormatDataItem maxBitrateStream = audioStreams.OrderByDescending(br => br.bitrate).FirstOrDefault();
                         //var backupStreamInfo = maxBitrateStream;

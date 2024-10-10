@@ -235,6 +235,8 @@ function mainload_attacheEvents() {
     $("#cmbMainOptions").on("change", function () {
         let selectedId = $.trim($(this).find("option:selected").val());
 
+        $("#offcanvasArtistAlbumsRightLabel").attr("data-loadedartistid", "");
+
         if (selectedId == "1") {
             armaradio.masterPageWait(true);
 
@@ -298,6 +300,24 @@ function mainload_attacheEvents() {
                 .then(function (response) {
                     attachListToTable(response);
                 });
+        } else if (selectedId == "10") {
+            armaradio.masterPageWait(true);
+
+            armaradio.masterAJAXGet({}, "Music", "GetTopRankedArtists5stars")
+                .then(function (response) {
+                    attachListToTable(response);
+                });
+
+            $("#cmbMainOptions").find("option[value='1']").prop("selected", true);
+        } else if (selectedId == "11") {
+            armaradio.masterPageWait(true);
+
+            armaradio.masterAJAXGet({}, "Music", "GetTopRankedArtists4stars")
+                .then(function (response) {
+                    attachListToTable(response);
+                });
+
+            $("#cmbMainOptions").find("option[value='1']").prop("selected", true);
         }
         //else if (selectedId == "3") {
         //    if ($("#dvPopupLoadPlaylists").length) {
@@ -888,7 +908,9 @@ function performGeneralSearch(searchPhrase) {
     }
 }
 
-function getAlbumsForArtists(artistId, artistName) {
+function getAlbumsForArtists(artistId, artistName, fromGridButtons) {
+    let d = $.Deferred();
+
     armaradio.masterPageWait(true);
 
     $("#dvArtistAlbumsOpen").css("display", "none");
@@ -1022,7 +1044,7 @@ function getAlbumsForArtists(artistId, artistName) {
                 $("#dvArtistAlbumsOpen").css("display", "");
                 $("#btnMain_StartRadioSession")
                     .attr("data-artistname", artistName)
-                    .css("display", "");
+                        .css("display", "");
 
                 $("#offcanvasArtistAlbums div.offcanvas-body")[0].scrollTop = 0;
 
@@ -1034,8 +1056,12 @@ function getAlbumsForArtists(artistId, artistName) {
                     .css("display", "none");
             }
 
+            d.resolve();
+
             armaradio.masterPageWait(false);
         });
+
+    return d.promise();
 }
 
 function loadAlbumSongs(artistId, albumId, artistName, albumTitle) {
@@ -1076,6 +1102,7 @@ function attachListToTable(response, isPageLoad, loadedPlaylist, isSharedPlaylis
 
     if (response && response.length) {
         let tblPlaylist = $("<table id=\"tblMainPlayList\"></table>");
+        let showAlbumsButton = ("showAlbumsButton" in response[0] ? response[0].showAlbumsButton : false);
 
         for (let i = 0; i < response.length; i++) {
             tblPlaylist.append(
@@ -1102,20 +1129,30 @@ function attachListToTable(response, isPageLoad, loadedPlaylist, isSharedPlaylis
             tblPlaylist.find("tr").last().append(
                 $("<td></td>").append($("<div class=\"row-actions-cotrols\"></div>"))
             );
-            tblPlaylist.find("tr").last().find("td").last().find("div").append(
-                $("<button class=\"btn btn-primary font-sz-0 pt-0 pb-0 btn-play-inner-btn-play mr-3\"><span class=\"font-sz-11pt\">Play</span></button>")
-            );
-            if (loadedPlaylist) {
+            if (showAlbumsButton) {
                 tblPlaylist.find("tr").last().find("td").last().find("div").append(
-                    $("<a class=\"font-sz-11pt btn-inner-more-options\"><i class='fa-solid fa-ellipsis-vertical pl-2 pr-2'></i></a>")
+                    $("<button class=\"btn btn-primary font-sz-0 pt-0 pb-0 btn-albums-inner-btn-albums mr-3\"><i class=\"fa-solid fa-compact-disc mr-2\"></i><span class=\"font-sz-11pt\">View Albums</span></button>")
+                        .attr({
+                            "data-artistid": response[i].tid,
+                            "data-artistname": response[i].artistName
+                        })
                 );
             } else {
-                if ($("#offcanvasNonePlaylistOptions").length) {
+                tblPlaylist.find("tr").last().find("td").last().find("div").append(
+                    $("<button class=\"btn btn-primary font-sz-0 pt-0 pb-0 btn-play-inner-btn-play mr-3\"><span class=\"font-sz-11pt\">Play</span></button>")
+                );
+                if (loadedPlaylist) {
                     tblPlaylist.find("tr").last().find("td").last().find("div").append(
-                        $("<a class=\"font-sz-11pt btn-inner-more-none-list-options\"><i class='fa-solid fa-ellipsis-vertical pl-2 pr-2'></i></a>")
+                        $("<a class=\"font-sz-11pt btn-inner-more-options\"><i class='fa-solid fa-ellipsis-vertical pl-2 pr-2'></i></a>")
                     );
+                } else {
+                    if ($("#offcanvasNonePlaylistOptions").length) {
+                        tblPlaylist.find("tr").last().find("td").last().find("div").append(
+                            $("<a class=\"font-sz-11pt btn-inner-more-none-list-options\"><i class='fa-solid fa-ellipsis-vertical pl-2 pr-2'></i></a>")
+                        );
+                    }
                 }
-            }
+            }            
         }
 
         $("#tblMainPlayList").replaceWith(tblPlaylist);
@@ -1246,6 +1283,23 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                             }
                         }
                     });
+            }
+        });
+    });
+
+    $("#tblMainPlayList").find("button.btn-albums-inner-btn-albums").each(function () {
+        $(this).on("click", function () {
+            let btn = $(this);
+            let loadedArtistId = $.trim($("#offcanvasArtistAlbumsRightLabel").attr("data-loadedartistid"));
+            let artistId = btn.attr("data-artistid");
+            let artistName = btn.attr("data-artistname");
+
+            if (artistId != loadedArtistId) {
+                getAlbumsForArtists(artistId, artistName, true);
+            } else {
+                if (!isVisible) {
+                    bsOffcanvas.show();
+                }
             }
         });
     });

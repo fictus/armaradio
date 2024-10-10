@@ -1078,6 +1078,20 @@ namespace armaradio.Repositories
 
             return returnItem;
         }
+        public List<TrackDataItem> GetTopUserRankedArtists5stars()
+        {
+            List<TrackDataItem> returnItem = _dapper.GetList<TrackDataItem>("radioconn", "Arma_GetTopUserRankedArtists5range");
+
+            return returnItem;
+        }
+
+        public List<TrackDataItem> GetTopUserRankedArtists4stars()
+        {
+            List<TrackDataItem> returnItem = _dapper.GetList<TrackDataItem>("radioconn", "Arma_GetTopUserRankedArtists4range");
+
+            return returnItem;
+        }
+
 
         public List<ProxySocks4DataItem> GetSocks4ProxyList()
         {

@@ -407,3 +407,8 @@ a.playercontrol-button {
     margin-top: 24px;
     margin-left: 16px;
 }
+
+button.btn-albums-inner-btn-albums i {
+    color: white;
+    font-size: 12pt;
+}

@@ -66,6 +66,7 @@ builder.Services.AddTransient<IMusicRepo, MusicRepo>();
 builder.Services.AddTransient<IArmaWebRequest, ArmaWebRequest>();
 builder.Services.AddTransient<IArmaAuth, ArmaAuth>();
 builder.Services.AddTransient<IArmaEmail, ArmaEmail>();
+builder.Services.AddTransient<ITeraboxUploader, TeraboxUploader>();
 builder.Services.AddScoped<ArmaUserOperation>();
 
 builder.Services.AddSingleton<YoutubeDL>(sp =>

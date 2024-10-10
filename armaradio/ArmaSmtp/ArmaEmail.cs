@@ -1,6 +1,8 @@
-﻿using armaradio.Models.Registration;
+﻿using armaradio.Models.Email;
+using armaradio.Models.Registration;
 using Microsoft.Extensions.Hosting;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Mail;
 
 namespace armaradio.ArmaSmtp
@@ -20,48 +22,60 @@ namespace armaradio.ArmaSmtp
             string Subject,
             List<string> To,
             string Body,
-            string EmailToken
+            string EmailToken,
+            List<EmailAttachmentDataItem> FileAttachments = null
         )
         {
-            if (!Debugger.IsAttached && To != null && To.Count > 0)
+            if (!Debugger.IsAttached)
             {
-                List<UnsubscribedEmailDataItem> unsubscribedEmails = _dapper.GetList<UnsubscribedEmailDataItem>("radioconn", "ArmaUsers_GetListOfUnsubscribedEmails");
-                                
-                using (var smtpClient = new SmtpClient("localhost", 25))
+                if (To != null && To.Count > 0)
                 {
-                    var mailMessage = new MailMessage()
-                    {
-                        From = new MailAddress(FromEmail, "Arma Radio"),
-                        Subject = Subject,
-                        Body = (Body + GetEmailFooter(To.First(), EmailToken)),
-                        IsBodyHtml = true
-                    };
+                    List<UnsubscribedEmailDataItem> unsubscribedEmails = _dapper.GetList<UnsubscribedEmailDataItem>("radioconn", "ArmaUsers_GetListOfUnsubscribedEmails");
 
-                    foreach (var emailTo in To)
+                    using (var smtpClient = new SmtpClient("localhost", 25))
                     {
-                        if (!(unsubscribedEmails.Any(em => (em.Email ?? "").Trim().ToLower() == emailTo.Trim().ToLower())))
+                        var mailMessage = new MailMessage()
                         {
-                            mailMessage.To.Add(emailTo);
-                        }
-                        else
-                        {
-                            string warning = $"WARNING - could not send this to {emailTo} because email is in the Unsubscribed Emails list!<br><br>";
+                            From = new MailAddress(FromEmail, "Arma Radio"),
+                            Subject = Subject,
+                            Body = (Body + GetEmailFooter(To.First(), EmailToken)),
+                            IsBodyHtml = true
+                        };
 
-                            var mailMessageUndeliverable = new MailMessage()
+                        if (FileAttachments != null && FileAttachments.Count > 0)
+                        {
+                            foreach (var attachment in FileAttachments)
                             {
-                                From = new MailAddress(FromEmail, "Arma Radio"),
-                                Subject = "UNDELIVERABLE - " + Subject,
-                                Body = warning + (Body + GetEmailFooter(To.First(), EmailToken)),
-                                IsBodyHtml = true
-                            };
-
-                            mailMessageUndeliverable.To.Add("luis.e.valle@gmail.com");
-
-                            smtpClient.Send(mailMessageUndeliverable);
+                                mailMessage.Attachments.Add(new Attachment(attachment.FileStream, attachment.FileName));
+                            }
                         }
-                    }
 
-                    smtpClient.Send(mailMessage);
+                        foreach (var emailTo in To)
+                        {
+                            if (!(unsubscribedEmails.Any(em => (em.Email ?? "").Trim().ToLower() == emailTo.Trim().ToLower())))
+                            {
+                                mailMessage.To.Add(emailTo);
+                            }
+                            else
+                            {
+                                string warning = $"WARNING - could not send this to {emailTo} because email is in the Unsubscribed Emails list!<br><br>";
+
+                                var mailMessageUndeliverable = new MailMessage()
+                                {
+                                    From = new MailAddress(FromEmail, "Arma Radio"),
+                                    Subject = "UNDELIVERABLE - " + Subject,
+                                    Body = warning + (Body + GetEmailFooter(To.First(), "nothing-valid")),
+                                    IsBodyHtml = true
+                                };
+
+                                mailMessageUndeliverable.To.Add("luis.e.valle@gmail.com");
+
+                                smtpClient.Send(mailMessageUndeliverable);
+                            }
+                        }
+
+                        smtpClient.Send(mailMessage);
+                    }
                 }
             }
         }

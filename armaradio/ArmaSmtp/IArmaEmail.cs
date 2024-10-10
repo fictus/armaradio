@@ -1,13 +1,16 @@
-﻿namespace armaradio.ArmaSmtp
+﻿using armaradio.Models.Email;
+
+namespace armaradio.ArmaSmtp
 {
     public interface IArmaEmail
     {
-        public void SendEmail(
+        void SendEmail(
             string FromEmail,
             string Subject,
             List<string> To,
             string Body,
-            string EmailToken
+            string EmailToken,
+            List<EmailAttachmentDataItem> FileAttachments = null
         );
     }
 }

@@ -7,11 +7,14 @@ namespace armaradio.Controllers
     public class RegistrationController : Controller
     {
         private readonly Repositories.IDapperHelper _dapper;
+        private readonly ArmaSmtp.IArmaEmail _email;
         public RegistrationController(
-            Repositories.IDapperHelper dapper
+            Repositories.IDapperHelper dapper,
+            ArmaSmtp.IArmaEmail email
         )
         {
             _dapper = dapper;
+            _email = email;
         }
 
         [HttpGet]
