@@ -37,12 +37,21 @@ div.spacer-bottom {
     height: 190px;
 }
 
-div.iframe-holder {
-    display: inline-block;
+#dvMainPlay_currentlyPlaying div.iframe-holder {
+    position: absolute;
+    bottom: 0;
+    left: 0;
     width: 356px;
     height: 200px;
     background-color: black;
-    padding-top:25px;
+    padding-top: 25px;
+    padding-left: 40px;
+}
+#dvRadioPlayer_currentlyPlaying div.iframe-holder {
+    width: 356px;
+    height: 200px;
+    background-color: black;
+    padding-top: 25px;
     padding-left: 40px;
 }
 span.lbl-not-found {

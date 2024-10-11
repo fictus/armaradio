@@ -144,112 +144,152 @@ namespace arma_miner.Operations
             bool artistExists = false;
             int newArtistsCount = 0;
 
-            using (FileStream fss = new FileStream(artistFileFull, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (StreamReader fs = new StreamReader(fss, System.Text.Encoding.UTF8))
+            using (var reader = new arma_miner.Data.GetFileReverse(artistFileFull))
             {
-                // Start reading from the end of the file
-                fs.BaseStream.Seek(0, SeekOrigin.End);
-
-                // Read the file stream backward
-                long position = fs.BaseStream.Position;
-                byte[] buffer = new byte[1024];
-                StringBuilder sb = new StringBuilder();
-
-                while (!artistExists && position > 0)
+                foreach (string line in reader.ReadLine())
                 {
-                    fs.BaseStream.Seek(-Math.Min(position, buffer.Length), SeekOrigin.Current);
-
-                    int bytesRead = fs.BaseStream.Read(buffer, 0, buffer.Length);
-                    if (bytesRead == 0)
-                        break;
-
-                    for (int i = bytesRead - 1; i >= 0; i--)
+                    while (!artistExists)
                     {
-                        if (buffer[i] == '\n')
+                        try
                         {
-                            // Process the line
-                            string line = sb.ToString();
+                            MBArtistParseDataItem artistItem = Newtonsoft.Json.JsonConvert.DeserializeObject<MBArtistParseDataItem>(line);
 
-                            try
+                            if (artistItem != null)
                             {
-                                MBArtistParseDataItem artistItem = Newtonsoft.Json.JsonConvert.DeserializeObject<MBArtistParseDataItem>(line);
-
-                                if (artistItem != null)
+                                artistExists = _dapper.GetFirstOrDefault<bool>("radioconn", "Operations_CheckIfMBArtistIdExists", new
                                 {
-                                    artistExists = _dapper.GetFirstOrDefault<bool>("radioconn", "Operations_CheckIfMBArtistIdExists", new
-                                    {
-                                        mb_artistid = artistItem.id
-                                    });
+                                    mb_artistid = artistItem.id
+                                });
 
-                                    if (!artistExists)
-                                    {
-                                        SaveMBArtist(artistItem);
-                                        newArtistsCount++;
-                                    }
+                                if (!artistExists)
+                                {
+                                    SaveMBArtist(artistItem);
+                                    newArtistsCount++;
                                 }
                             }
-                            catch (Exception ex)
-                            {
-                                completedWithErrors = true;
-
-                                _dapper.ExecuteNonQuery("radioconn", "Operations_Sync_LogError", new
-                                {
-                                    queue_key = queueKey,
-                                    error_parent = "ArtistOperation",
-                                    error_message = ex.Message.ToString(),
-                                    json_source = (line ?? "")
-                                });
-                            }
-
-                            sb.Clear();
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            sb.Insert(0, (char)buffer[i]);
-                        }
-                    }
+                            completedWithErrors = true;
 
-                    position -= bytesRead;
-                    fs.BaseStream.Seek(-bytesRead, SeekOrigin.Current);
-                }
-
-                // Process the first line if any
-                if (position <= 0 && sb.Length > 0)
-                {
-                    string line = sb.ToString();
-
-                    try
-                    {
-                        MBArtistParseDataItem artistItem = Newtonsoft.Json.JsonConvert.DeserializeObject<MBArtistParseDataItem>(line);
-
-                        if (artistItem != null)
-                        {
-                            artistExists = _dapper.GetFirstOrDefault<bool>("radioconn", "Operations_CheckIfMBArtistIdExists", new
+                            _dapper.ExecuteNonQuery("radioconn", "Operations_Sync_LogError", new
                             {
-                                mb_artistid = artistItem.id
+                                queue_key = queueKey,
+                                error_parent = "ArtistOperation",
+                                error_message = ex.Message.ToString(),
+                                json_source = (line ?? "")
                             });
-
-                            if (!artistExists)
-                            {
-                                SaveMBArtist(artistItem);
-                                newArtistsCount++;
-                            }
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        completedWithErrors = true;
-
-                        _dapper.ExecuteNonQuery("radioconn", "Operations_Sync_LogError", new
-                        {
-                            queue_key = queueKey,
-                            error_parent = "ArtistOperation",
-                            error_message = ex.Message.ToString(),
-                            json_source = (line ?? "")
-                        });
                     }
                 }
             }
+
+            //using (FileStream fss = new FileStream(artistFileFull, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            //using (StreamReader fs = new StreamReader(fss, System.Text.Encoding.UTF8))
+            //{
+            //    // Start reading from the end of the file
+            //    fs.BaseStream.Seek(0, SeekOrigin.End);
+
+            //    // Read the file stream backward
+            //    long position = fs.BaseStream.Position;
+            //    byte[] buffer = new byte[1024];
+            //    StringBuilder sb = new StringBuilder();
+
+            //    while (!artistExists && position > 0)
+            //    {
+            //        fs.BaseStream.Seek(-Math.Min(position, buffer.Length), SeekOrigin.Current);
+
+            //        int bytesRead = fs.BaseStream.Read(buffer, 0, buffer.Length);
+            //        if (bytesRead == 0)
+            //            break;
+
+            //        for (int i = bytesRead - 1; i >= 0; i--)
+            //        {
+            //            if (buffer[i] == '\n')
+            //            {
+            //                // Process the line
+            //                string line = sb.ToString();
+
+            //                try
+            //                {
+            //                    MBArtistParseDataItem artistItem = Newtonsoft.Json.JsonConvert.DeserializeObject<MBArtistParseDataItem>(line);
+
+            //                    if (artistItem != null)
+            //                    {
+            //                        artistExists = _dapper.GetFirstOrDefault<bool>("radioconn", "Operations_CheckIfMBArtistIdExists", new
+            //                        {
+            //                            mb_artistid = artistItem.id
+            //                        });
+
+            //                        if (!artistExists)
+            //                        {
+            //                            SaveMBArtist(artistItem);
+            //                            newArtistsCount++;
+            //                        }
+            //                    }
+            //                }
+            //                catch (Exception ex)
+            //                {
+            //                    completedWithErrors = true;
+
+            //                    _dapper.ExecuteNonQuery("radioconn", "Operations_Sync_LogError", new
+            //                    {
+            //                        queue_key = queueKey,
+            //                        error_parent = "ArtistOperation",
+            //                        error_message = ex.Message.ToString(),
+            //                        json_source = (line ?? "")
+            //                    });
+            //                }
+
+            //                sb.Clear();
+            //            }
+            //            else
+            //            {
+            //                sb.Insert(0, (char)buffer[i]);
+            //            }
+            //        }
+
+            //        position -= bytesRead;
+            //        fs.BaseStream.Seek(-bytesRead, SeekOrigin.Current);
+            //    }
+
+            //    // Process the first line if any
+            //    if (position <= 0 && sb.Length > 0)
+            //    {
+            //        string line = sb.ToString();
+
+            //        try
+            //        {
+            //            MBArtistParseDataItem artistItem = Newtonsoft.Json.JsonConvert.DeserializeObject<MBArtistParseDataItem>(line);
+
+            //            if (artistItem != null)
+            //            {
+            //                artistExists = _dapper.GetFirstOrDefault<bool>("radioconn", "Operations_CheckIfMBArtistIdExists", new
+            //                {
+            //                    mb_artistid = artistItem.id
+            //                });
+
+            //                if (!artistExists)
+            //                {
+            //                    SaveMBArtist(artistItem);
+            //                    newArtistsCount++;
+            //                }
+            //            }
+            //        }
+            //        catch (Exception ex)
+            //        {
+            //            completedWithErrors = true;
+
+            //            _dapper.ExecuteNonQuery("radioconn", "Operations_Sync_LogError", new
+            //            {
+            //                queue_key = queueKey,
+            //                error_parent = "ArtistOperation",
+            //                error_message = ex.Message.ToString(),
+            //                json_source = (line ?? "")
+            //            });
+            //        }
+            //    }
+            //}
 
             int finalCount = newArtistsCount;
 

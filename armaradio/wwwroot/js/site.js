@@ -1045,5 +1045,98 @@ var armaradio = {
         } else {
             return {};
         }
+    },
+    /************************************************
+        generateAbstractArt
+    ************************************************/
+    generateAbstractArt: function () {
+        const width = 400;
+        const height = 400;
+
+        function getPastelColor() {
+            const hue = Math.floor(Math.random() * 360);
+            return `hsl(${hue}, 70%, 80%)`;
+        }
+
+        // Generate contrasting colors for shapes
+        function getShapeColor(pastelHue) {
+            const hue = (pastelHue + 180) % 360; // Opposite hue
+            return `hsl(${hue}, 70%, 40%)`; // More saturated, darker
+        }
+
+        const backgroundColor = getPastelColor();
+        const bgHue = parseInt(backgroundColor.match(/\d+/)[0]);
+
+        const colors = [
+            getShapeColor(bgHue),
+            `hsl(${(bgHue + 120) % 360}, 70%, 40%)`,
+            `hsl(${(bgHue + 240) % 360}, 70%, 40%)`
+        ];
+
+        let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}">`;
+
+        // Background
+        svg += `<rect width="100%" height="100%" fill="${backgroundColor}"/>`;
+
+        // Add subtle texture to background
+        for (let i = 0; i < 30; i++) {
+            const x = Math.random() * width;
+            const y = Math.random() * height;
+            const size = Math.random() * 3 + 1;
+            svg += `<circle cx="${x}" cy="${y}" r="${size}" fill="#000000" opacity="0.05"/>`;
+        }
+
+        // Generate abstract shapes
+        function generateAbstractShape() {
+            const points = [];
+            const numPoints = Math.floor(Math.random() * 5) + 3; // 3-7 points
+            const centerX = Math.random() * width;
+            const centerY = Math.random() * height;
+            const radius = Math.random() * 50 + 30;
+
+            for (let i = 0; i < numPoints; i++) {
+                const angle = (i / numPoints) * Math.PI * 2;
+                const variance = Math.random() * 30 - 15;
+                const x = centerX + Math.cos(angle) * (radius + variance);
+                const y = centerY + Math.sin(angle) * (radius + variance);
+                points.push([x, y]);
+            }
+
+            let pathData = `M ${points[0][0]},${points[0][1]} `;
+
+            for (let i = 0; i < points.length; i++) {
+                const curr = points[i];
+                const next = points[(i + 1) % points.length];
+                const midX = (curr[0] + next[0]) / 2;
+                const midY = (curr[1] + next[1]) / 2;
+
+                const cp1x = curr[0] + (Math.random() * 40 - 20);
+                const cp1y = curr[1] + (Math.random() * 40 - 20);
+                const cp2x = next[0] + (Math.random() * 40 - 20);
+                const cp2y = next[1] + (Math.random() * 40 - 20);
+
+                pathData += `C ${cp1x},${cp1y} ${cp2x},${cp2y} ${midX},${midY} `;
+            }
+
+            pathData += 'Z';
+            return pathData;
+        }
+
+        // Generate multiple abstract shapes
+        const numShapes = Math.floor(Math.random() * 3) + 2; // 2-4 shapes
+        for (let i = 0; i < numShapes; i++) {
+            const color = colors[i % colors.length];
+            const opacity = (Math.random() * 0.3 + 0.6).toFixed(2);
+            const shape = generateAbstractShape();
+
+            // Add shape with animation
+            svg += `<path d="${shape}" fill="${color}" opacity="${opacity}">
+            <animate attributeName="d" dur="${Math.random() * 10 + 5}s" repeatCount="indefinite"
+                values="${shape};${generateAbstractShape()};${shape}"/>
+        </path>`;
+        }
+
+        svg += '</svg>';
+        return svg;
     }
 };
