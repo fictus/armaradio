@@ -74,7 +74,7 @@ builder.Services.AddSingleton<YoutubeDL>(sp =>
     bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
     return new YoutubeDL
     {
-        YoutubeDLPath = (isLinux ? "/usr/bin/yt-dlp" : "C:\\YTDL\\yt-dlp.exe"),
+        YoutubeDLPath = (isLinux ? "/usr/local/bin/yt-dlp" : "C:\\YTDL\\yt-dlp.exe"),
         FFmpegPath = (isLinux ? "/usr/bin/ffmpeg" : "C:\\ffmpeg\\ffmpeg.exe")
     };
 });
