@@ -1433,6 +1433,8 @@ function initializeHomeRadio(videoId, disponse) {
                             $("a.lnk-attribution-notice").css("display", "");
 
                             localHomePlayer.muted(false);
+
+                            prebufferNextSong();
                         }, 100);
                     });
             //} else {
@@ -1492,6 +1494,8 @@ function initializeHomeRadio(videoId, disponse) {
                             $("a.lnk-attribution-notice").css("display", "");
 
                             localHomePlayer.muted(false);
+
+                            prebufferNextSong();
                         }, 100);
                     });
             });
@@ -1584,6 +1588,28 @@ function playerPlayNext(fromError) {
 
         if ($("button.btn-play-inner-btn-play").length) {
             nextPlay.find("button.btn-play-inner-btn-play").trigger("click");
+        }
+    }
+}
+
+function prebufferNextSong() {
+    let lastPlayedRow = $("#tblMainPlayList").find("tr.now-playing");
+
+    if (lastPlayedRow.length) {
+        let indexRow = lastPlayedRow.index() + 1;
+        nextPlay = $("#tblMainPlayList").find("tr").eq(indexRow);
+
+        if (nextPlay.length) {
+            let videoId = $.trim(nextPlay.attr("data-videoid"));
+
+            if (videoId != "") {
+                fetch(ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId, {
+                    method: "GET",
+                    headers: {
+                        "Range": "bytes=0-1"
+                    }
+                });
+            }
         }
     }
 }

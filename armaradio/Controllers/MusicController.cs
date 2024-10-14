@@ -839,7 +839,7 @@ namespace armaradio.Controllers
 
         private void FlagFileForDeletion(string FullDirFIleName)
         {
-            Task.Delay(TimeSpan.FromHours(1))
+            Task.Delay(TimeSpan.FromHours(1.5))
                     .ContinueWith(_ =>
                     {
                         if (System.IO.File.Exists(FullDirFIleName))
