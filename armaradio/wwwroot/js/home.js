@@ -18,6 +18,7 @@ function mainload_attacheEvents() {
     $("#dvPopupLoadPlaylists").modal();
     $("#dvPopupSharePlaylist").modal();
     $("#dvPopupRefineRadioParameters").modal();
+    $("#dvPopupAISuggestions").modal();
 
     let sharedPlaylistToken = $.trim($("#dvMasterAttribures").attr("data-sharedplaylisttoken"));
 
@@ -345,6 +346,65 @@ function mainload_attacheEvents() {
         //$("#chkPastePlaylist_CreateNewPlaylist").trigger("change");
 
         //$("#dvPopupPastePlaylist").modal("show");
+    });
+
+    $("#btnMain_AISuggestions").on("click", function () {
+        if ($("#lnkMainLogin").length) {
+            armaradio.warningMsg({
+                msg: "Please login to use AI suggestions",
+                captionMsg: "Login Required",
+                typeLayout: "red"
+            });
+        } else {
+            if ($("#dvPopupAISuggestions").length) {
+                $("#dvPopupAISuggestions").modal("show");
+            }
+        }
+    });
+
+    $("#btnLoadAISuggestions").on("click", function () {
+        let artistName = $.trim($("#txtAISuggestions_ArtistName").val());
+        let songName = $.trim($("#txtAISuggestions_SongName").val());
+
+        if (artistName != "" && songName != "") {
+            armaradio.masterPageWait(true);
+
+            armaradio.masterAJAXPost({
+                ArtistName: artistName,
+                SongName: songName
+            }, "Music", "GetAISongSuggestions")
+                .then(function (response) {
+                    if (response && response.error) {
+                        armaradio.masterPageWait(false);
+
+                        armaradio.warningMsg({
+                            msg: response.errorMsg,
+                            captionMsg: "Error",
+                            typeLayout: "red"
+                        });
+                    } else {
+                        if (response.rerun || !response.songs || response.songs.length == 0) {
+                            armaradio.masterPageWait(false);
+
+                            armaradio.warningMsg({
+                                msg: "An error occurred, please try again",
+                                captionMsg: "Error",
+                                typeLayout: "red"
+                            });
+                        } else {
+                            $("#dvPopupAISuggestions").modal("hide");
+
+                            attachListToTable(response.songs);
+                        }
+                    }
+                });
+        } else {
+            armaradio.warningMsg({
+                msg: "AI Assistant requires an Artist and Song name",
+                captionMsg: "Error",
+                typeLayout: "red"
+            });
+        }
     });
 
     $("#offcanvasNonePlaylistOptionsRightLabel").on("click", function () {

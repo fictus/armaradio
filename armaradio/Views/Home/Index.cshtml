@@ -88,10 +88,9 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-12">
         <button id="btnMain_LoadPlaylist" type="button" class="btn btn-primary mr-3">Load Playlist</button>
-    </div>
-    <div class="col-md-6">        
+        <button id="btnMain_AISuggestions" type="button" class="btn btn-primary"><i class="fas fa-brain font-sz-11pt mr-2"></i> AI Picks</button>
     </div>
 </div>
 
@@ -354,6 +353,42 @@
                 </div>
                 <div class="modal-footer">
                     <button id="btnRefineParametersStartRadio" type="button" class="btn btn-primary mr-5">Start Radio</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="dvPopupAISuggestions" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">AI Song Suggestions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <span>Enter 'Artist' & 'Song' so AI can provide similar suggestions.</span>
+                    </div>
+                    <div class="mt-3">
+                        <div class="col">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">Artist:</span>
+                                <input id="txtAISuggestions_ArtistName" type="text" class="form-control" aria-label="" aria-describedby="inputGroup-sizing-default" atocomplete="off_hack3463453453">
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="col">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">Song:</span>
+                                <input id="txtAISuggestions_SongName" type="text" class="form-control" aria-label="" aria-describedby="inputGroup-sizing-default" atocomplete="off_hack3463453453">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnLoadAISuggestions" type="button" class="btn btn-primary mr-5">Get AI Songs</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>

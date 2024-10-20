@@ -45,10 +45,11 @@ namespace armaradio.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             using (_operation)
             {
+                //await _musicRepo.GetAIRecommendedSongs("Rank1", "Airwaves");
                 //_musicRepo.DuckDuckGo_PerformGeneralSearch("depeche mode - somebody");
                 return View();
             }

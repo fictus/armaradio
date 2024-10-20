@@ -15,6 +15,7 @@ namespace armaradio.Repositories
         string GetApiToken();
         RadioSessionSongsResponse GetRadioPlalistSongsFromArtist(string artistName);
         RadioSessionRecommendedResponse GetRadioSessionRecommendedSongsFromArtist(string artistName, string songName);
+        Task<ArmaAISongsResponse> GetAIRecommendedSongs(string artistName, string songName, int limit = 10);
         ArtistPlaylistsResponse GetArtistPlaylists(string artistName, string songName);
         List<ArtistDataItem> Artist_GetArtistList(string search);
         List<TrackDataItem> Tracks_GetTop50Songs();

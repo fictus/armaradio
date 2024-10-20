@@ -24,6 +24,11 @@ using System.Diagnostics;
 using FFMpegCore.Enums;
 using System.Runtime.InteropServices;
 using static System.Net.Mime.MediaTypeNames;
+using Microsoft.Identity.Client;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading;
+using System.Net.Http.Json;
 
 namespace armaradio.Repositories
 {
@@ -432,6 +437,95 @@ namespace armaradio.Repositories
             //            //d.resolve({ error: true, errorMsg: error.message });
             //        });
             //";
+        }
+
+        public async Task<ArmaAISongsResponse> GetAIRecommendedSongs(string artistName, string songName, int limit = 10)
+        {
+            ArmaAISongsResponse returnItem = new ArmaAISongsResponse()
+            {
+                Rerun = true,
+                Songs = new List<ArmaAISongDataItem>()
+            };
+            ArmaAIRecommendationResponse responseItem = null;
+
+            string artistSong = $"{((artistName ?? "").Trim())}{(!string.IsNullOrWhiteSpace(artistName) && !string.IsNullOrWhiteSpace(songName) ? " " : "")}{((songName ?? "").Trim())}";
+            string promptText = $"pretend you are a dataserver. recommend {limit} songs, from various artists, similar to '{artistSong}'. return data in this format 'artist | song\\n'. no other wording or explanations";
+            string url = "http://163.172.72.32:5000/api/v1/generate";
+
+            using (var client = new HttpClient()
+            {
+                Timeout = TimeSpan.FromMinutes(5)
+            })
+            {
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer 17791853-d396-496c-bd3f-0c5bc51ae27d");
+
+                var payload = new
+                {
+                    prompt = promptText
+                    //temperature = "1"
+                };
+
+                var content = new StringContent(
+                    Newtonsoft.Json.JsonConvert.SerializeObject(payload),
+                    Encoding.UTF8,
+                    "application/json");
+
+                using (var response = await client.PostAsync(url, content))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        responseItem = Newtonsoft.Json.JsonConvert.DeserializeObject<ArmaAIRecommendationResponse>(responseBody);
+                    }
+
+                    if (responseItem != null && responseItem.results != null && responseItem.results.Count > 0)
+                    {
+                        List<string> tempSongs = new List<string>();
+
+                        foreach (var item in responseItem.results)
+                        {
+                            List<string> responseParts = (item.text ?? "").Trim().Split('\n', StringSplitOptions.RemoveEmptyEntries).ToList();
+
+                            foreach (var part in responseParts)
+                            {
+                                string currentPart = part.Trim();
+
+                                if (currentPart.Contains("|"))
+                                {
+                                    string songToAdd = currentPart.Replace("\\n", "").Trim('\\').Trim('.').Trim();
+
+                                    if (!(tempSongs.Any(sg => sg.ToLower() == songToAdd.ToLower())))
+                                    {
+                                        List<string> songParts = songToAdd.Split('|').ToList();
+
+                                        if (!(string.IsNullOrWhiteSpace(songParts.First()) && string.IsNullOrWhiteSpace(songParts.Last())))
+                                        {
+                                            returnItem.Songs.Add(new ArmaAISongDataItem()
+                                            {
+                                                artistName = (songParts.First()).Trim(),
+                                                songName = (songParts.Count > 1 ? songParts.Last().Trim() : "")
+                                            });
+
+                                            tempSongs.Add(songToAdd);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (returnItem.Songs.Count >= 6)
+                        {
+                            returnItem.Rerun = false;
+                        }
+                        else
+                        {
+                            returnItem.Songs = new List<ArmaAISongDataItem>();
+                        }
+                    }
+                }
+            }
+
+            return returnItem;
         }
 
         public List<TrackDataItem> Tracks_GetTop50Songs()

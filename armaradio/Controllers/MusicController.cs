@@ -524,6 +524,40 @@ namespace armaradio.Controllers
             }
         }
 
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> GetAISongSuggestions([FromBody] SongAlikeRequest value)
+        {
+            try
+            {
+                _operation.SetRequestBody(value);
+                using (_operation)
+                {
+                    if (value == null)
+                    {
+                        throw new Exception("Invalid Request");
+                    }
+                    if (string.IsNullOrWhiteSpace(value.ArtistName) && string.IsNullOrWhiteSpace(value.SongName))
+                    {
+                        throw new Exception("Artist or a Song Name is required");
+                    }
+
+                    ArmaAISongsResponse returnItem = await _musicRepo.GetAIRecommendedSongs(value.ArtistName, value.SongName);
+
+                    if (returnItem == null || returnItem.Rerun)
+                    {
+                        throw new Exception("An error occurred. Please try again");
+                    }
+
+                    return new JsonResult(returnItem);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost]
         [Authorize]
         public IActionResult GeRandomSongsFromPlaylists()
@@ -840,13 +874,13 @@ namespace armaradio.Controllers
         private void FlagFileForDeletion(string FullDirFIleName)
         {
             Task.Delay(TimeSpan.FromHours(1.5))
-                    .ContinueWith(_ =>
+                .ContinueWith(_ =>
+                {
+                    if (System.IO.File.Exists(FullDirFIleName))
                     {
-                        if (System.IO.File.Exists(FullDirFIleName))
-                        {
-                            System.IO.File.Delete(FullDirFIleName);
-                        }
-                    });
+                        System.IO.File.Delete(FullDirFIleName);
+                    }
+                });
         }
 
         //[HttpGet]
