@@ -37,6 +37,10 @@ div.spacer-bottom {
     height: 190px;
 }
 
+ul.other-suggestions li {
+    font-size: 9pt;
+}
+
 #dvMainPlay_currentlyPlaying div.iframe-holder {
     position: absolute;
     bottom: 0;

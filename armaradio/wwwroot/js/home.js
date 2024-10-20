@@ -2,6 +2,7 @@ var arma_mainSearchSelectedType = "1";
 var isIOSDevice = false;
 var localHomePlayer;
 var soundWaveColor = "#E14B4B";
+var otherSuggestionsTemplate;
 
 $(document).ready(function () {
     isIOSDevice = (navigator.platform == "iPad" || navigator.platform == "iPhone" || navigator.platform == "iPod");
@@ -19,6 +20,10 @@ function mainload_attacheEvents() {
     $("#dvPopupSharePlaylist").modal();
     $("#dvPopupRefineRadioParameters").modal();
     $("#dvPopupAISuggestions").modal();
+
+    otherSuggestionsTemplate = $("<div class=\"dropdown inline-block\"></div>");
+    otherSuggestionsTemplate.append("<a class=\"font-sz-11pt btn-view-other-suggestions dropdown-toggle mr-3\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\" style=\"display:none;\"><i class=\"far fa-caret-squeare-down\"></i></a>");
+    otherSuggestionsTemplate.append("<ul class=\"dropdown-menu other-suggestions\"></ul>");
 
     let sharedPlaylistToken = $.trim($("#dvMasterAttribures").attr("data-sharedplaylisttoken"));
 
@@ -1198,16 +1203,19 @@ function attachListToTable(response, isPageLoad, loadedPlaylist, isSharedPlaylis
                         })
                 );
             } else {
+                let tempSuggestionsTemplate = $(otherSuggestionsTemplate).clone();
+
                 tblPlaylist.find("tr").last().find("td").last().find("div").append(
                     $("<button class=\"btn btn-primary font-sz-0 pt-0 pb-0 btn-play-inner-btn-play mr-3\"><span class=\"font-sz-11pt\">Play</span></button>")
                 );
+                tblPlaylist.find("tr").last().find("td").last().find("div").first().append(tempSuggestionsTemplate);
                 if (loadedPlaylist) {
                     tblPlaylist.find("tr").last().find("td").last().find("div").append(
                         $("<a class=\"font-sz-11pt btn-inner-more-options\"><i class='fa-solid fa-ellipsis-vertical pl-2 pr-2'></i></a>")
                     );
                 } else {
                     if ($("#offcanvasNonePlaylistOptions").length) {
-                        tblPlaylist.find("tr").last().find("td").last().find("div").append(
+                        tblPlaylist.find("tr").last().find("td").last().find("div").first().append(
                             $("<a class=\"font-sz-11pt btn-inner-more-none-list-options\"><i class='fa-solid fa-ellipsis-vertical pl-2 pr-2'></i></a>")
                         );
                     }
@@ -1231,6 +1239,8 @@ function attachListToTableFromGeneralSearch(response, headerTitle) {
         let tblPlaylist = $("<table id=\"tblMainPlayList\"></table>");
 
         for (let i = 0; i < response.length; i++) {
+            let tempSuggestionsTemplate = $(otherSuggestionsTemplate).clone();
+
             tblPlaylist.append(
                 $("<tr></tr>").attr({
                     "data-tid": "-1",
@@ -1259,8 +1269,9 @@ function attachListToTableFromGeneralSearch(response, headerTitle) {
             tblPlaylist.find("tr").last().find("td").last().find("div").append(
                 $("<button class=\"btn btn-primary font-sz-0 pt-0 pb-0 btn-play-inner-btn-play mr-3\"><span class=\"font-sz-11pt\">Play</span></button>")
             );
+            tblPlaylist.find("tr").last().find("td").last().find("div").first().append(tempSuggestionsTemplate);
             if ($("#offcanvasNonePlaylistOptions").length) {
-                tblPlaylist.find("tr").last().find("td").last().find("div").append(
+                tblPlaylist.find("tr").last().find("td").last().find("div").first().append(
                     $("<a class=\"font-sz-11pt btn-inner-more-none-list-options\"><i class='fa-solid fa-ellipsis-vertical pl-2 pr-2'></i></a>")
                 );
             }
@@ -1275,7 +1286,7 @@ function attachListToTableFromGeneralSearch(response, headerTitle) {
 
 function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
     $("#tblMainPlayList").find("button.btn-play-inner-btn-play").each(function () {
-        $(this).on("click", function () {
+        $(this).on("click", function () {            
             armaradio.masterPageWait(true);
 
             let currentRow = $(this).closest("tr");
@@ -1310,6 +1321,40 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
                                 $("a.lnk-attribution-notice").attr("data-artistname", artistName);
                                 $("a.lnk-attribution-notice").attr("data-songname", songName);
                                 $("a.lnk-attribution-notice").attr("data-url", "https://www.youtube.com/watch?v=" + response.videoId);
+
+                                //btn-view-other-suggestions
+                                let ulHolder = currentRow.find("div.dropdown").find("ul");
+
+                                if (!ulHolder.find("li").length) {
+                                    if ((response.alternateIds || []).length > 0) {
+
+                                        for (let i = 0; i < response.alternateIds.length; i++) {
+                                            ulHolder.append(
+                                                $("<li></li>").append(
+                                                    $("<a class=\"dropdown-item other-play-this-videoid" + (i == 0 ? " active" : "") + "\" href=\"#\"></a>").attr("data-videoid", response.alternateIds[i]).html(response.alternateIds[i])
+                                                )
+                                            );
+                                        }
+                                    }
+
+                                    currentRow.find("a.other-play-this-videoid").each(function () {
+                                        $(this).on("click", function (e) {
+                                            e.preventDefault();
+                                            let currBtn = $(this);
+                                            let currVideoId = $.trim(currBtn.attr("data-videoid"));
+
+                                            if (currVideoId != "") {
+                                                currBtn.closest("ul").find("a").removeClass("active");
+                                                currBtn.addClass("active");
+                                                currBtn.closest("tr").attr("data-videoid", currVideoId);
+
+                                                currBtn.closest("tr").find("button.btn-play-inner-btn-play").trigger("click");
+                                            }
+                                        });
+                                    });
+
+                                    currentRow.find("a.btn-view-other-suggestions").css("display", "");
+                                }
 
                                 initializeHomeRadio(response.videoId);
 
