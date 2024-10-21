@@ -37,6 +37,18 @@ div.spacer-bottom {
     height: 190px;
 }
 
+i.ai-icon {
+    display: inline-block;
+    background: url(../images/ai-icon.png) center no-repeat;
+    background-size: 24px 24px;
+    width: 22px;
+    height: 16px;
+}
+
+html body table tr td div ul.other-suggestions {
+    inset: 0px auto auto -17px !important;
+}
+
 ul.other-suggestions li {
     font-size: 9pt;
 }

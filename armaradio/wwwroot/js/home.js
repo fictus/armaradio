@@ -1327,11 +1327,14 @@ function rowSongsAttachClickEvents(startPlaying, fromPlaylist) {
 
                                 if (!ulHolder.find("li").length) {
                                     if ((response.alternateIds || []).length > 0) {
+                                        let optionNumber = 0;
 
                                         for (let i = 0; i < response.alternateIds.length; i++) {
+                                            optionNumber++;
+
                                             ulHolder.append(
                                                 $("<li></li>").append(
-                                                    $("<a class=\"dropdown-item other-play-this-videoid" + (i == 0 ? " active" : "") + "\" href=\"#\"></a>").attr("data-videoid", response.alternateIds[i]).html(response.alternateIds[i])
+                                                    $("<a class=\"dropdown-item other-play-this-videoid" + (i == 0 ? " active" : "") + "\" href=\"#\"></a>").attr("data-videoid", response.alternateIds[i]).html("option " + optionNumber)
                                                 )
                                             );
                                         }
