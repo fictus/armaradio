@@ -496,9 +496,9 @@ namespace armaradio.Repositories
 
                                     if (!(tempSongs.Any(sg => sg.ToLower() == songToAdd.ToLower())))
                                     {
-                                        List<string> songParts = songToAdd.Split('|').ToList();
+                                        List<string> songParts = songToAdd.Split('|', StringSplitOptions.RemoveEmptyEntries).ToList();
 
-                                        if (!(string.IsNullOrWhiteSpace(songParts.First()) && string.IsNullOrWhiteSpace(songParts.Last())))
+                                        if (songParts.Count > 1 && !(string.IsNullOrWhiteSpace(songParts.First()) && string.IsNullOrWhiteSpace(songParts.Last())))
                                         {
                                             returnItem.Songs.Add(new ArmaAISongDataItem()
                                             {
