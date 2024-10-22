@@ -449,7 +449,7 @@ namespace armaradio.Repositories
             ArmaAIRecommendationResponse responseItem = null;
 
             string artistSong = $"{((artistName ?? "").Trim())}{(!string.IsNullOrWhiteSpace(artistName) && !string.IsNullOrWhiteSpace(songName) ? " " : "")}{((songName ?? "").Trim())}";
-            string promptText = $"pretend you are a dataserver. recommend {limit} songs, from various artists, similar to '{artistSong}'. return data in this format 'artist | song\\n'. no other wording or explanations";
+            string promptText = $"pretend you are a dataserver. recommend {limit} songs, from various artists, similar to '{artistSong}'. return data in this format 'artist | song\\n'. don't add other wording or explanations";
             string url = "http://163.172.72.32:5000/api/v1/generate";
 
             using (var client = new HttpClient()
@@ -500,10 +500,17 @@ namespace armaradio.Repositories
 
                                         if (songParts.Count > 1 && !(string.IsNullOrWhiteSpace(songParts.First()) && string.IsNullOrWhiteSpace(songParts.Last())))
                                         {
+                                            string lastPart = songParts.Last().Trim();
+
+                                            if (lastPart.Contains("  "))
+                                            {
+                                                lastPart = (lastPart.Replace("  ", "|").Split('|')).First().Trim();
+                                            }
+
                                             returnItem.Songs.Add(new ArmaAISongDataItem()
                                             {
                                                 artistName = (songParts.First()).Trim(),
-                                                songName = (songParts.Count > 1 ? songParts.Last().Trim() : "")
+                                                songName = lastPart
                                             });
 
                                             tempSongs.Add(songToAdd);
