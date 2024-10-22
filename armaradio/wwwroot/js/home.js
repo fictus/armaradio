@@ -1210,7 +1210,7 @@ function attachListToTable(response, isPageLoad, loadedPlaylist, isSharedPlaylis
                 );
                 tblPlaylist.find("tr").last().find("td").last().find("div").first().append(tempSuggestionsTemplate);
                 if (loadedPlaylist) {
-                    tblPlaylist.find("tr").last().find("td").last().find("div").append(
+                    tblPlaylist.find("tr").last().find("td").last().find("div").first().append(
                         $("<a class=\"font-sz-11pt btn-inner-more-options\"><i class='fa-solid fa-ellipsis-vertical pl-2 pr-2'></i></a>")
                     );
                 } else {

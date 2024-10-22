@@ -75,11 +75,6 @@ span.lbl-not-found {
     color: white;
 }
 
-#tblMainPlayList {
-    border-collapse: collapse;
-    width: 100%;
-}
-
 div.div-thumbnail {
     display: block;
     width: 65px;
@@ -95,6 +90,11 @@ div.div-thumbnail {
 
 #lblRadioPlayer_SongTitle {
     color: #b54d00;
+}
+
+#tblMainPlayList {
+    border-collapse: collapse;
+    width: 100%;
 }
 
 #tblMainPlayList td {
