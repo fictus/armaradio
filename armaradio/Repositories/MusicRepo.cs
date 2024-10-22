@@ -500,6 +500,7 @@ namespace armaradio.Repositories
 
                                         if (songParts.Count > 1 && !(string.IsNullOrWhiteSpace(songParts.First()) && string.IsNullOrWhiteSpace(songParts.Last())))
                                         {
+                                            string firstPart = (songParts.First()).Trim();
                                             string lastPart = songParts.Last().Trim();
 
                                             if (lastPart.Contains("  "))
@@ -507,13 +508,16 @@ namespace armaradio.Repositories
                                                 lastPart = (lastPart.Replace("  ", "|").Split('|')).First().Trim();
                                             }
 
-                                            returnItem.Songs.Add(new ArmaAISongDataItem()
+                                            if (firstPart.ToLower() != "artist" && lastPart.ToLower() != "song")
                                             {
-                                                artistName = (songParts.First()).Trim(),
-                                                songName = lastPart
-                                            });
+                                                returnItem.Songs.Add(new ArmaAISongDataItem()
+                                                {
+                                                    artistName = firstPart,
+                                                    songName = lastPart
+                                                });
 
-                                            tempSongs.Add(songToAdd);
+                                                tempSongs.Add(songToAdd);
+                                            }
                                         }
                                     }
                                 }
