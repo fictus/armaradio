@@ -62,6 +62,7 @@ ul.other-suggestions li {
     background-color: black;
     padding-top: 25px;
     padding-left: 40px;
+    box-shadow: 4px 2px 10px rgb(0 0 0 / 52%);
 }
 #dvRadioPlayer_currentlyPlaying div.iframe-holder {
     width: 356px;
@@ -83,6 +84,7 @@ div.div-thumbnail {
     /*filter: blur(3px);*/
     margin: 5px;
     border-radius: 50%;
+    box-shadow: 4px 2px 8px rgb(0 0 0 / 52%);
 }
 
 div.div-thumbnail::before {
@@ -96,7 +98,7 @@ div.div-thumbnail::before {
     margin-top: -10px;
     left: 50%;
     margin-left: -10px;
-    background-color: #ffefef;
+    background-color: #def1ff;
 }
 
 #armaMainPlayer {
@@ -117,9 +119,10 @@ div.div-thumbnail::before {
     padding-left: 8px;
     padding-right: 8px;
     vertical-align: middle;
-    border-top: 5px solid white;
-    border-bottom: 5px solid white;
+    border-top: 8px solid white;
+    border-bottom: 8px solid white;
     background-color: #def1ff;
+    box-shadow: inset 0 -15px 25px -8px rgb(157 157 157 / 20%);
 }
 
 #tblMainPlayList td:first-child {
@@ -143,9 +146,11 @@ div.div-thumbnail::before {
 }
 
 #tblMainPlayList tr:hover div.div-thumbnail {
-    animation: rotation 2.0s infinite linear;
+    animation: rotation 3.0s infinite linear;
 }
-
+#tblMainPlayList tr:hover div.div-thumbnail::before {
+    background-color: #f4f8fb;
+}
 
 #btnMainPlayerToggleRepeat[data-status='0'] i {
     color: #e5dcdc;
@@ -189,6 +194,12 @@ div.div-thumbnail::before {
 
 #tblMainPlayList tr.now-playing td {
     background-color: #fbd3d3 /*#ffefef*/;
+}
+#tblMainPlayList tr.now-playing div.div-thumbnail::before {
+    background-color: #fbd3d3;
+}
+#tblMainPlayList tr.now-playing:hover div.div-thumbnail::before {
+    background-color: #fbd3d3;
 }
 
 #tblMainPlayList tr.now-playing td:last-child {
