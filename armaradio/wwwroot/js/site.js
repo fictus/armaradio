@@ -317,6 +317,13 @@ function generateGUID() {
     });
 }
 
+function randNumber(max) {
+    let array = new Uint32Array(1);
+    crypto.getRandomValues(array);
+
+    return (array[0] % max) + 1;
+}
+
 function isJSON(str) {
     if (typeof (str) !== 'string') {
         return true;

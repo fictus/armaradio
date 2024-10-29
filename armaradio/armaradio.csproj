@@ -31,8 +31,8 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\AudioFiles\" />
-    <Folder Include="wwwroot\images\" />
     <Folder Include="wwwroot\files\" />
+    <Folder Include="wwwroot\images\records-art\" />
     <Folder Include="wwwroot\tempMp3\" />
   </ItemGroup>
 

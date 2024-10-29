@@ -508,7 +508,7 @@ namespace armaradio.Repositories
                                                 lastPart = (lastPart.Replace("  ", "|").Split('|')).First().Trim();
                                             }
 
-                                            if (firstPart.ToLower() != "artist" && lastPart.ToLower() != "song")
+                                            if ((firstPart.ToLower() != "" && lastPart.ToLower() != "") && (firstPart.ToLower() != "artist" && lastPart.ToLower() != "song"))
                                             {
                                                 returnItem.Songs.Add(new ArmaAISongDataItem()
                                                 {
