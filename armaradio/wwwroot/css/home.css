@@ -145,9 +145,6 @@ div.div-thumbnail::before {
     border-bottom-right-radius: 25px;
 }
 
-#tblMainPlayList tr:hover div.div-thumbnail {
-    animation: rotation 3.0s infinite linear;
-}
 #tblMainPlayList tr:hover div.div-thumbnail::before {
     background-color: #f4f8fb;
 }
@@ -200,6 +197,9 @@ div.div-thumbnail::before {
 }
 #tblMainPlayList tr.now-playing:hover div.div-thumbnail::before {
     background-color: #fbd3d3;
+}
+#tblMainPlayList tr.now-playing div.div-thumbnail {
+    animation: rotation 3.0s infinite linear;
 }
 
 #tblMainPlayList tr.now-playing td:last-child {
