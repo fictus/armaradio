@@ -105,7 +105,7 @@ namespace armaradio.Controllers
                         throw new Exception("Email has not been confirmed. Please follow the instructions sent to you via email.");
                     }
 
-                    var result = _signInManager.PasswordSignInAsync(value.UserName, value.Password, false, lockoutOnFailure: false).Result;
+                    var result = _signInManager.PasswordSignInAsync(value.UserName, value.Password, true, lockoutOnFailure: false).Result;
 
                     if (!result.Succeeded)
                     {
