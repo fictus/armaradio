@@ -27,6 +27,7 @@ namespace armaradio.Repositories
         List<TrackDataItem> GetCurrentTopRockAlternative();
         List<TrackDataItem> GetTopEmergingArtists();
         List<TrackDataItem> GetCurrentTopCountrySongs();
+        List<TrackDataItem> GetCurrentTopRegionalMexicanoSongs();
         List<TrackDataItem> GetTopUserRankedArtists5stars();
         List<TrackDataItem> GetTopUserRankedArtists4stars();
         List<ProxySocks4DataItem> GetSocks4ProxyList();

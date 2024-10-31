@@ -301,6 +301,33 @@ namespace armaradio.Controllers
         }
 
         [HttpGet]
+        public IActionResult GetCurrentTopRegionalMexicanoSongs()
+        {
+            try
+            {
+                using (_operation)
+                {
+                    List<TrackDataItem> returnItem = _musicRepo.GetCurrentTopRegionalMexicanoSongs();
+                    var finalList = returnItem.Select(sg =>
+                    {
+                        return new
+                        {
+                            tid = sg.tid,
+                            artistName = sg.artist_name,
+                            songName = sg.track_name
+                        };
+                    });
+
+                    return new JsonResult(finalList);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
+        [HttpGet]
         public IActionResult GetTopRankedArtists5stars()
         {
             try

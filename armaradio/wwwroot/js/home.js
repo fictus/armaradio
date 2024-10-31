@@ -324,6 +324,13 @@ function mainload_attacheEvents() {
                 });
 
             $("#cmbMainOptions").find("option[value='1']").prop("selected", true);
+        } else if (selectedId == "12") {
+            armaradio.masterPageWait(true);
+
+            armaradio.masterAJAXGet({}, "Music", "GetCurrentTopRegionalMexicanoSongs")
+                .then(function (response) {
+                    attachListToTable(response);
+                });
         }
         //else if (selectedId == "3") {
         //    if ($("#dvPopupLoadPlaylists").length) {
