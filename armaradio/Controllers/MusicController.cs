@@ -959,9 +959,23 @@ namespace armaradio.Controllers
                     string fileType = "audio/mp4"; // MimeTypes.GetMimeType($"tmpFileName.mp4");
                     string fileHandle = $"{Guid.NewGuid().ToString().ToLower()}.m4a";
                     string fileHandleTemp = $"{Guid.NewGuid().ToString().ToLower()}";
-                    string endTempFile = $"{downloadFolder}{fileHandleTemp}.m4a";
+                    string endTempExistingFile = (!string.IsNullOrWhiteSpace(VideoId) ? $"{downloadFolder}{VideoId}.m4a" : "");
+                    string endTempFile = (!string.IsNullOrWhiteSpace(endTempExistingFile) ? endTempExistingFile : $"{downloadFolder}{fileHandleTemp}.m4a");
                     string fileName = "";
                     bool fromConvertedFile = false;
+
+                    List<string> fileNameParts = new List<string>();
+
+                    if (!string.IsNullOrWhiteSpace(ArtistName))
+                    {
+                        fileNameParts.Add(ArtistName.Trim());
+                    }
+                    if (!string.IsNullOrWhiteSpace(SongName))
+                    {
+                        fileNameParts.Add(SongName.Trim());
+                    }
+
+                    string downloadFileName = $"{(Latinize(SanitizeFileName(string.Join(" - ", fileNameParts.ToArray())))).Trim()}";
 
                     if (!System.IO.File.Exists(endTempFile))
                     {
@@ -1035,41 +1049,29 @@ namespace armaradio.Controllers
 
                     //await youtube.Videos.DownloadAsync($"https://www.youtube.com/watch?v={VideoId}", endFile);
 
-                    MemoryStream memoryStream = new MemoryStream();
-                    using (FileStream fileStream = new FileStream(endTempFile, FileMode.Open, FileAccess.Read))
-                    {
-                        fileStream.CopyTo(memoryStream);
-                    }
-
-                    //System.IO.File.Delete(endTempFile);
+                    Response.Headers.Append("Content-Disposition", $"inline; filename=\"{downloadFileName}.m4a\"");
 
                     FlagFileForDeletion(endTempFile);
 
-                    memoryStream.Position = 0;
-                    var returnItem = new FileStreamResult(memoryStream, fileType)
-                    {
-                        FileDownloadName = fileName
-                    };
-
-                    Response.RegisterForDispose(memoryStream);
-
-                    return returnItem;
+                    return PhysicalFile(endTempFile, fileType, enableRangeProcessing: false);
 
                     //MemoryStream memoryStream = new MemoryStream();
-
-                    //using (FileStream fileStream = new FileStream(endFile, FileMode.Open, FileAccess.Read))
+                    //using (FileStream fileStream = new FileStream(endTempFile, FileMode.Open, FileAccess.Read))
                     //{
                     //    fileStream.CopyTo(memoryStream);
                     //}
 
-                    //System.IO.File.Delete(endFile);
+                    //FlagFileForDeletion(endTempFile);
 
                     //memoryStream.Position = 0;
-
-                    //return new FileStreamResult(memoryStream, "audio/mpeg")
+                    //var returnItem = new FileStreamResult(memoryStream, fileType)
                     //{
-                    //    FileDownloadName = fileName,
+                    //    FileDownloadName = fileName
                     //};
+
+                    //Response.RegisterForDispose(memoryStream);
+
+                    //return returnItem;
                 }
             }
             catch (Exception ex)

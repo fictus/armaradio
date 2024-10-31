@@ -1018,7 +1018,7 @@ var armaradio = {
             });
     },
     /************************************************
-        getFileAsBlob
+        sanitizeFileName
     ************************************************/
     sanitizeFileName: function (fileName) {
         const sanitizeRegex = /[/\\?%*:|"<>]/g;
@@ -1026,7 +1026,7 @@ var armaradio = {
         return fileName.replace(sanitizeRegex, "");
     },
     /************************************************
-        sanitizeFileName
+        queryStringToJSON
     ************************************************/
     queryStringToJSON: function (queryString) {
         if (queryString && ($.trim(queryString) != "")) {
@@ -1145,5 +1145,73 @@ var armaradio = {
 
         svg += '</svg>';
         return svg;
+    },
+    /************************************************
+        downloadFile
+    ************************************************/
+    downloadFile: function (downloadUrl, data, fileExtension) {
+        let params = [];
+
+        $.each((data || {}), function (key, val) {
+            params.push(key + "=" + encodeURIComponent(val));
+        });
+
+        let finUrl = downloadUrl + (params.length ? "?" : "") + params.join("&");
+
+        let iframe = $("<iframe></iframe>");
+        iframe
+            .css("display", "none")
+            .attr({
+                "id": "tmpIframeDownload",
+                "src": finUrl
+            });
+
+        let nameParts = [];
+        let saniArtist = this.sanitizeFileName(data.ArtistName || "");
+        let saniSong = this.sanitizeFileName(data.SongName || "");
+
+        if ($.trim(saniArtist) != "") {
+            nameParts.push(saniArtist)
+        }
+        if ($.trim(saniSong) != "") {
+            nameParts.push(saniSong)
+        }
+
+        iframe[0].setAttribute("download", `${nameParts.join(" - ")}.${fileExtension}`);
+
+        iframe.on("onload", function () {
+            setTimeout(() => {
+                $("#tmpIframeDownload").remove();
+            }, 5000);
+        });
+        //iframe.onload = () => {
+        //    setTimeout(() => {
+        //        document.body.removeChild(iframe);
+        //    }, 5000);
+        //};
+
+        $("body").append(iframe);
     }
+    /************************************************
+        sanitizeFileName
+    ************************************************/
+    //sanitizeFileName: function(fileName, options = {}) {
+    //    let defaults = {
+    //        replacement: '_',   // Character to replace illegal chars
+    //        allowedChars: /[a-z0-9_\-\.]/gi, // Specify allowed characters
+    //        maxLength: 255,     // Max filename length
+    //        forceASCII: true    // Force only ASCII characters
+    //    };
+
+    //    let config = { ...defaults, ...options };
+
+    //    return fileName
+    //        .normalize('NFD')   // Normalize unicode characters
+    //        .replace(/[\u0300-\u036f]/g, '') // Remove diacritical marks
+    //        .replace(/[^a-z0-9_\-\.]/gi, config.replacement) // Replace disallowed chars
+    //        .replace(new RegExp(`${config.replacement}{2,}`, 'g'), config.replacement) // Remove multiple consecutive replacement chars
+    //        .replace(new RegExp(`^${config.replacement}|${config.replacement}$`, 'g'), '') // Remove leading/trailing replacement char
+    //        .trim()
+    //        .substring(0, config.maxLength);
+    //}
 };

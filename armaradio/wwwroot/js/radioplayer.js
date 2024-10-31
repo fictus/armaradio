@@ -39,13 +39,22 @@ function radioplayer_attachEvents() {
                 VideoId: videoId
             }, mimeType)
                 .then(function (blobResponse) {
-                    const url = window.URL.createObjectURL(blobResponse);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = fileName + "." + fileExtension;
-                    document.body.appendChild(a);
-                    a.click();
+                    let url = window.URL.createObjectURL(blobResponse);
+                    let a = $("<a></a>");
+                    a.attr({
+                        "id": "lnkTempDownloadFile",
+                        "href": url,
+                        "download": (fileName + "." + fileExtension)
+                    });
+
+                    $("body").append(a);
+
+                    a[0].click();
                     window.URL.revokeObjectURL(url);
+
+                    setTimeout(function () {
+                        $("#lnkTempDownloadFile").remove();
+                    }, 1000);
 
                     armaradio.masterPageWait(false);
                 });

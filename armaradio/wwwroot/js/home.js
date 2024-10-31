@@ -1179,6 +1179,11 @@ function attachListToTable(response, isPageLoad, loadedPlaylist, isSharedPlaylis
                 })
             );
 
+            /***************
+            Images downloaded from:
+            https://pixabay.com/images/search/dark%20background/?pagi=14
+            **************/
+
             tblPlaylist.find("tr").last().append(
                 $("<td></td>").append(
                     $("<div class=\"div-thumbnail\"></div>")
@@ -1251,6 +1256,11 @@ function attachListToTableFromGeneralSearch(response, headerTitle) {
                     "data-thumbnailurl": JSON.stringify(response[i].thumbNail || "")
                 })
             );
+
+            /***************
+            Images downloaded from:
+            https://pixabay.com/images/search/dark%20background/?pagi=14
+            **************/
 
             tblPlaylist.find("tr").last().append(
                 $("<td></td>").append(
