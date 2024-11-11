@@ -32,8 +32,8 @@ namespace armaradio.Repositories
                 FragmentRetries = 10, // Retry failed fragments
                 ForceIPv4 = true, // Force IPv4 to potentially avoid slow IPv6 connections
                 SocketTimeout = 10,
-                DownloaderArgs = "-4",
-                Verbose = true
+                DownloaderArgs = "-4"
+                //Verbose = true
             };
             //var options = new OptionSet
             //{
@@ -49,7 +49,7 @@ namespace armaradio.Repositories
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                options.NoCacheDir = true; // Disable cache directory on Linux
+                //options.NoCacheDir = true; // Disable cache directory on Linux
                 options.DownloaderArgs = "-4 native:buffer_size=16k"; // Set native downloader buffer size
             }
 
