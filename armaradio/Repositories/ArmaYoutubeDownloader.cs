@@ -32,7 +32,8 @@ namespace armaradio.Repositories
                 FragmentRetries = 10, // Retry failed fragments
                 ForceIPv4 = true, // Force IPv4 to potentially avoid slow IPv6 connections
                 SocketTimeout = 10,
-                DownloaderArgs = "-4"
+                DownloaderArgs = "-4",
+                Verbose = true
             };
             //var options = new OptionSet
             //{
