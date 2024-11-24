@@ -1193,9 +1193,11 @@ function attachListToTable(response, isPageLoad, loadedPlaylist, isSharedPlaylis
 
             tblPlaylist.find("tr").last().append(
                 $("<td></td>").append(
-                    $("<div class=\"div-thumbnail\"></div>")
-                        //.attr("style", "background: url(https://picsum.photos/id/" + Math.floor(Math.random() * 900) + "/65/50) no-repeat center center / cover;")
-                        .attr("style", "background: url(../images/records-art/" + randNumber(113) + ".jpg) no-repeat center center / cover;")
+                    $("<div class=\"div-thumbnail-holder\"></div>").append(
+                        $("<div class=\"div-thumbnail\"></div>")
+                            //.attr("style", "background: url(https://picsum.photos/id/" + Math.floor(Math.random() * 900) + "/65/50) no-repeat center center / cover;")
+                            .attr("style", "background: url(../images/records-art/" + randNumber(113) + ".jpg) no-repeat center center / cover;")
+                    )
                 )
             );
             tblPlaylist.find("tr").last().append(
@@ -1271,9 +1273,11 @@ function attachListToTableFromGeneralSearch(response, headerTitle) {
 
             tblPlaylist.find("tr").last().append(
                 $("<td></td>").append(
-                    $("<div class=\"div-thumbnail\"></div>")
-                        //.attr("style", "background: url(https://picsum.photos/id/" + Math.floor(Math.random() * 900) + "/65/50) no-repeat center center / cover;")
-                        .attr("style", "background: url(../images/records-art/" + randNumber(113) + ".jpg) no-repeat center center / cover;")
+                    $("<div class=\"div-thumbnail-holder\"></div>").append(
+                        $("<div class=\"div-thumbnail\"></div>")
+                            //.attr("style", "background: url(https://picsum.photos/id/" + Math.floor(Math.random() * 900) + "/65/50) no-repeat center center / cover;")
+                            .attr("style", "background: url(../images/records-art/" + randNumber(113) + ".jpg) no-repeat center center / cover;")
+                    )
                 )
             );
             tblPlaylist.find("tr").last().append(

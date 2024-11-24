@@ -76,15 +76,24 @@ span.lbl-not-found {
     color: white;
 }
 
+div.div-thumbnail-holder {
+    display: block;
+    width: 65px;
+    height: 65px;
+    margin: 5px;
+    border-radius: 50%;
+    box-shadow: 4px 2px 8px rgb(0 0 0 / 52%);
+}
+
 div.div-thumbnail {
     position: relative;
     display: block;
     width: 65px;
     height: 65px;
     /*filter: blur(3px);*/
-    margin: 5px;
+    /*margin: 5px;*/
     border-radius: 50%;
-    box-shadow: 4px 2px 8px rgb(0 0 0 / 52%);
+    /*box-shadow: 4px 2px 8px rgb(0 0 0 / 52%);*/
 }
 
 div.div-thumbnail::before {
