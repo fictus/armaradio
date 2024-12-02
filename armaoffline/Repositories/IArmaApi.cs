@@ -9,7 +9,7 @@ namespace armaoffline.Repositories
 {
     public interface IArmaApi
     {
-        bool Singin(string Email, string Password);
+        bool Signin(string Email, string Password);
         List<ArmaUserPlaylistDataItem> GetUserPlaylists();
         List<ArmaPlaylistDataItem> GetPlaylistById(int playlistId);
         void GetAudioFile(string VideoId);

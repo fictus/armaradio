@@ -29,7 +29,7 @@ namespace armaoffline.Repositories
             _dapper = dapper;
         }
 
-        public bool Singin(string Email, string Password)
+        public bool Signin(string Email, string Password)
         {
             bool nowSignedIn = false;
 
@@ -273,7 +273,7 @@ namespace armaoffline.Repositories
             if (!string.IsNullOrWhiteSpace(VideoId) && string.IsNullOrWhiteSpace(fileName))
             {
                 byte[] fileBytes = null;
-                ApiAudioDetailsDataItem audioDetails = GetAudioFileDetails(VideoId);
+                //ApiAudioDetailsDataItem audioDetails = GetAudioFileDetails(VideoId);
 
                 using (HttpClient client = new HttpClient())
                 {
@@ -291,7 +291,7 @@ namespace armaoffline.Repositories
                 if (fileBytes != null)
                 {
                     string audioFolderPath = Path.Combine(FileSystem.AppDataDirectory, "audio");
-                    string fileNameFinal = $"{VideoId.Trim()}.{(audioDetails != null ? audioDetails.FileExtension : "m4a")}";
+                    string fileNameFinal = $"{VideoId.Trim()}.m4a";
                     string filePath = Path.Combine(audioFolderPath, fileNameFinal);
 
                     if (!CheckIfAudioFileExists(fileNameFinal))

@@ -163,7 +163,7 @@ namespace armaradio.Controllers
 
         [ApiTokenAttribute]
         [HttpGet]
-        public async Task<IActionResult> GetAudioFile(string VideoId)
+        public IActionResult GetAudioFile(string VideoId)
         {
             try
             {

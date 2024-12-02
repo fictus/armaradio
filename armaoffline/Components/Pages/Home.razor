@@ -54,7 +54,7 @@
         {
             try
             {
-                if (!string.IsNullOrWhiteSpace(_globalState.appToken) || _armaApi.Singin(userName, password))
+                if (!string.IsNullOrWhiteSpace(_globalState.appToken) || _armaApi.Signin(userName, password))
                 {
                     Navigation.NavigateTo("/armaloader");
                 }
