@@ -1536,7 +1536,7 @@ namespace armaradio.Repositories
             //}
         }
 
-        private void FlagFileForDeletion(string FullDirFIleName)
+        public void FlagFileForDeletion(string FullDirFIleName)
         {
             Task.Delay(TimeSpan.FromHours(1.5))
                 .ContinueWith(_ =>
