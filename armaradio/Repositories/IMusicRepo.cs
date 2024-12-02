@@ -33,6 +33,7 @@ namespace armaradio.Repositories
         List<ProxySocks4DataItem> GetSocks4ProxyList();
         List<AdaptiveFormatDataItem> GetAudioStreams(string VideoId);
         void DownloadMp4File(string url, string endFileName);
+        void FlagFileForDeletion(string FullDirFIleName);
         YTVideoIdsDataItem Youtube_GetUrlByArtistNameSongName(string artistName, string songName);
         List<YTGeneralSearchDataItem> Youtube_PerformGeneralSearch(string searchText);
         List<YTGeneralSearchDataItem> DuckDuckGo_PerformGeneralSearch(string searchText);

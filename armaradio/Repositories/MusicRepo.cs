@@ -1536,6 +1536,18 @@ namespace armaradio.Repositories
             //}
         }
 
+        private void FlagFileForDeletion(string FullDirFIleName)
+        {
+            Task.Delay(TimeSpan.FromHours(1.5))
+                .ContinueWith(_ =>
+                {
+                    if (System.IO.File.Exists(FullDirFIleName))
+                    {
+                        System.IO.File.Delete(FullDirFIleName);
+                    }
+                });
+        }
+
         public YTVideoIdsDataItem Youtube_GetUrlByArtistNameSongName(string artistName, string songName)
         {
             YTVideoIdsDataItem returnItem = null;

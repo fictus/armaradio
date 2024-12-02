@@ -26,12 +26,14 @@ namespace armaradio.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IMusicRepo _musicRepo;
         private readonly IWebHostEnvironment _hostEnvironment;
+        private readonly ArmaYoutubeDownloader _armaYTDownloader;
         public ApiController(
             IArmaAuth authControl,
             SignInManager<IdentityUser> signInManager,
             UserManager<IdentityUser> userManager,
             IMusicRepo musicRepo,
-            IWebHostEnvironment hostEnvironment
+            IWebHostEnvironment hostEnvironment,
+            ArmaYoutubeDownloader armaYTDownloader
         )
         {
             _authControl = authControl;
@@ -39,6 +41,7 @@ namespace armaradio.Controllers
             _userManager = userManager;
             _musicRepo = musicRepo;
             _hostEnvironment = hostEnvironment;
+            _armaYTDownloader = armaYTDownloader;
 
             IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         }
@@ -167,51 +170,26 @@ namespace armaradio.Controllers
                 if (!string.IsNullOrWhiteSpace(VideoId))
                 {
                     string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
-                    string downloadFolder = (!IsWindows ? $"{rootPath}/tempMp3/" : $"{rootPath}\\tempMp3\\");
-                    string fileHandle = $"{SanitizeFileName(VideoId).ToLower()}.mp3";
-                    string fileHandleTemp = $"{Guid.NewGuid().ToString().ToLower()}";
-                    string endFile = $"{downloadFolder}{fileHandle}";
-                    string endTempFile = $"{downloadFolder}{fileHandleTemp}";
-
-                    string fileName = SanitizeFileName(VideoId).ToLower();
+                    string downloadFolder = (!IsWindows ? $"{rootPath}/AudioFiles/" : $"{rootPath}\\AudioFiles\\");
+                    string endFileName = endFileName = $"{downloadFolder}{VideoId.Trim()}.m4a";
+                    string fileType = "audio/mp4";
 
                     if (!System.IO.Directory.Exists(downloadFolder))
                     {
                         System.IO.Directory.CreateDirectory(downloadFolder);
                     }
 
-                    var youtube = new YoutubeExplode.YoutubeClient();
-                    var streamManifest = await youtube.Videos.Streams.GetManifestAsync($"https://www.youtube.com/watch?v={VideoId}");
-                    var allStreams = streamManifest.GetAudioOnlyStreams();
-                    var streamInfo = allStreams.GetWithHighestBitrate();
-                    fileName = $"{fileName}.{streamInfo.Container.Name}";
-                    endTempFile = $"{endTempFile}.{streamInfo.Container.Name}";
-                    fileHandleTemp = $"{fileHandleTemp}.{streamInfo.Container.Name}";
-
-                    await youtube.Videos.Streams.DownloadAsync(streamInfo, endTempFile);
-
-                    //ConvertToMp3(endTempFile, endFile);
-
-                    //System.IO.File.Delete(endTempFile);
-
-                    MemoryStream memoryStream = new MemoryStream();
-                    using (FileStream fileStream = new FileStream(endTempFile, FileMode.Open, FileAccess.Read))
+                    if (!System.IO.File.Exists(endFileName))
                     {
-                        fileStream.CopyTo(memoryStream);
+                        _musicRepo.DownloadMp4File($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}", endFileName);
                     }
 
-                    System.IO.File.Delete(endTempFile);
+                    _musicRepo.FlagFileForDeletion(endFileName);
 
-                    memoryStream.Position = 0;
-
-                    var returnItem = new FileStreamResult(memoryStream, MimeTypes.GetMimeType(fileHandleTemp)) //"audio/mpeg"
+                    return new FileStreamResult(new FileStream(endFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite), fileType)
                     {
-                        FileDownloadName = fileName
+                        EnableRangeProcessing = true
                     };
-
-                    Response.RegisterForDispose(memoryStream);
-
-                    return returnItem;
                 }
                 else
                 {

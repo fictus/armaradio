@@ -853,7 +853,7 @@ namespace armaradio.Controllers
                         Response.ContentType = fileType;
                         Response.Headers.Append("Content-Disposition", $"inline; filename=\"{VideoId}.{containerName}\"");
 
-                        FlagFileForDeletion(endFileName);
+                        _musicRepo.FlagFileForDeletion(endFileName);
 
                         fileWasFlaggedForDeletion = true;
 
@@ -883,7 +883,7 @@ namespace armaradio.Controllers
 
                     if (!fileWasFlaggedForDeletion)
                     {
-                        FlagFileForDeletion(endFileName);
+                        _musicRepo.FlagFileForDeletion(endFileName);
                     }
 
                     return new FileStreamResult(new FileStream(endFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite), fileType)
@@ -898,17 +898,7 @@ namespace armaradio.Controllers
             }
         }
 
-        private void FlagFileForDeletion(string FullDirFIleName)
-        {
-            Task.Delay(TimeSpan.FromHours(1.5))
-                .ContinueWith(_ =>
-                {
-                    if (System.IO.File.Exists(FullDirFIleName))
-                    {
-                        System.IO.File.Delete(FullDirFIleName);
-                    }
-                });
-        }
+        
 
         //[HttpGet]
         //public async Task<IActionResult> FetchAudioFile(string VideoId)
@@ -1078,7 +1068,7 @@ namespace armaradio.Controllers
 
                     Response.Headers.Append("Content-Disposition", $"inline; filename=\"{downloadFileName}.m4a\"");
 
-                    FlagFileForDeletion(endTempFile);
+                    _musicRepo.FlagFileForDeletion(endTempFile);
 
                     return PhysicalFile(endTempFile, fileType, enableRangeProcessing: false);
 

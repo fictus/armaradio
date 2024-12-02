@@ -291,7 +291,7 @@ namespace armaoffline.Repositories
                 if (fileBytes != null)
                 {
                     string audioFolderPath = Path.Combine(FileSystem.AppDataDirectory, "audio");
-                    string fileNameFinal = $"{VideoId.Trim()}.{(audioDetails != null ? audioDetails.FileExtension : "mp3")}";
+                    string fileNameFinal = $"{VideoId.Trim()}.{(audioDetails != null ? audioDetails.FileExtension : "m4a")}";
                     string filePath = Path.Combine(audioFolderPath, fileNameFinal);
 
                     if (!CheckIfAudioFileExists(fileNameFinal))
