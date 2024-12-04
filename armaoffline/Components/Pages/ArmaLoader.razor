@@ -94,8 +94,15 @@
 
     private async void DownloadSelectedPlaylistSongs()
     {
-        await JS.InvokeVoidAsync("showPageWait", true);
-        await JS.InvokeVoidAsync("downloadSelectedPlaylistSongs", selectedPlaylstId);
-        await JS.InvokeVoidAsync("showPageWait", false);
+        await InvokeAsync(async () =>
+        {
+            await JS.InvokeVoidAsync("showPageWait", true);
+            StateHasChanged();
+
+            await JS.InvokeVoidAsync("downloadSelectedPlaylistSongs", selectedPlaylstId);
+            await JS.InvokeVoidAsync("showPageWait", false);
+
+            StateHasChanged();
+        });
     }
 }

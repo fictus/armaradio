@@ -6,8 +6,16 @@
 @inject IJSRuntime JS
 @page "/"
 @{
-    _dapper.CreateDatabase();
-    List<ArmaUserPlaylistDataItem> offlinePlaylists = _armaApi.Offline_GetAvailablePlaylists() ?? new List<ArmaUserPlaylistDataItem>();
+    List<ArmaUserPlaylistDataItem> offlinePlaylists = new List<ArmaUserPlaylistDataItem>();
+
+    try
+    {
+        offlinePlaylists = _armaApi.Offline_GetAvailablePlaylists() ?? new List<ArmaUserPlaylistDataItem>();
+    }
+    catch (Exception ex)
+    {
+        
+    }
 }
 
 <div class="row">
@@ -76,7 +84,7 @@
     {
         if (firstRender)
         {
-            
+            _dapper.CreateDatabase();
         }
     }
 
@@ -88,7 +96,11 @@
         {
             try
             {
-                await JS.InvokeVoidAsync("showPageWait", true);
+                await InvokeAsync(async () =>
+                {
+                    await JS.InvokeVoidAsync("showPageWait", true);
+                    StateHasChanged();
+                });
 
                 if (_armaApi.Signin(userName, password))
                 {
@@ -99,7 +111,11 @@
                     await JS.InvokeVoidAsync("loginError", "Incorrect 'UserName' or 'Password'");
                 }
 
-                await JS.InvokeVoidAsync("showPageWait", false);
+                await InvokeAsync(async () =>
+                {
+                    await JS.InvokeVoidAsync("showPageWait", false);
+                    StateHasChanged();
+                });
             }
             catch (Exception ex)
             {

@@ -1,15 +1,19 @@
 ﻿using Android;
 using Android.App;
+using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using AndroidX.Core.App;
 using AndroidX.Core.Content;
+using armaoffline.Platforms.Android;
+using static Android.OS.PowerManager;
 
 namespace armaoffline
 {
     [Activity(Theme = "@style/Maui.SplashTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.Density)]
     public class MainActivity : MauiAppCompatActivity
     {
+        private WakeLock wakeLock;
         const int RequestStoragePermissionCode = 123;
         const int REQUEST_RECORD_AUDIO_PERMISSION = 200;
 
@@ -36,6 +40,14 @@ namespace armaoffline
                     },
                     RequestStoragePermissionCode);
             }
+
+            // Acquire wake lock
+            PowerManager powerManager = (PowerManager)GetSystemService(Context.PowerService);
+            wakeLock = powerManager.NewWakeLock(WakeLockFlags.Partial, "armaoffline:AudioPlaybackLock");
+            wakeLock.Acquire();
+
+            // Start foreground service for audio playback
+            StartForegroundService(new Intent(this, typeof(AudioService)));
         }
 
         private void RequestRequiredPermissions()
