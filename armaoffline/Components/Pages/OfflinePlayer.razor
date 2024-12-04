@@ -1,6 +1,8 @@
 ﻿@using armaoffline.Models
+@using Plugin.Maui.Audio
 @inject armaoffline.Repositories.IArmaApi _armaApi
 @inject armaoffline.Services.GlobalState _globalState
+@inject NavigationManager NavigationManager
 @inject IJSRuntime JS
 @page "/offlineplayer"
 @{
@@ -11,10 +13,275 @@
 
 <div class="row">
     <div class="col-md-12">
+        <h3 id="lblTblHeaderPlaylistName"></h3>
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-md-12">
+        <table id="tblMainPlayList">
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+<div class="bottom-gap"></div>
 
+<!-- Player Controls -->
+<div class="player-float-bottom">
+    <div class="block-item">
+        <div>
+            <button @onclick="PlayPause" class="player-btn player-@(IsPlaying ? "pause" : "play")">
+                <div class="player-inner"></div>
+            </button>
+            <input type="range" id="sldPlayerLocation" min="0" max="100" value="0" class="ms-3 me-3">
+            <button @onclick="NextSong" class="player-btn player-next">
+                <div class="player-inner"></div>
+            </button>
+        </div>
+        <div class="align-center">
+            <label>@ElapsedTime / @TotalTime</label>
+        </div>
     </div>
 </div>
 
 @code {
-    
+    [Parameter]
+    public int? PlaylistId { get; set; }
+    public string PlaylistTitle { get; set; }
+
+    private static armaoffline.Repositories.IArmaApi _armaStaticApi =
+        armaoffline.Providers.ServiceLocator.ServiceProvider.GetRequiredService<armaoffline.Repositories.IArmaApi>();
+    private IAudioPlayer _audioPlayer;
+    private static Action<string> _playAction;
+    private static Action<double> _playerPositionAction;
+
+    private System.Timers.Timer _elapsedTimer;
+    public bool IsPlaying { get; private set; } = false;
+    public string ElapsedTime { get; private set; } = "00:00";
+    public string TotalTime { get; private set; } = "00:00";
+
+    protected override void OnInitialized()
+    {
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        PlaylistId = (int.TryParse(query["playlistid"], out int _playlistId) ? _playlistId : null);
+        PlaylistTitle = query["playlisttitle"] ?? "";
+
+        _elapsedTimer = new System.Timers.Timer(1000);
+        _elapsedTimer.Elapsed += UpdateElapsedTime;
+
+        _playAction = PlaySong;
+        _playerPositionAction = PlayerAudioPosition;
+
+        NavigationManager.LocationChanged += HandleLocationChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            List<ArmaPlaylistDataItem> firstPlaylist = new List<ArmaPlaylistDataItem>();
+
+            if (PlaylistId.HasValue)
+            {
+                firstPlaylist = _armaApi.Offline_GetPlaylistById(PlaylistId.Value);
+            }
+
+            await JS.InvokeVoidAsync("onOfflinePlayerOnload");
+            await JS.InvokeVoidAsync("populateSongsToPlayerTable", firstPlaylist, PlaylistTitle);
+        }
+    }
+
+    private void HandleLocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        // Clean up audio resources before navigating
+        CleanupAudioResources();
+    }
+
+    private void CleanupAudioResources()
+    {
+        if (_audioPlayer != null)
+        {
+            _audioPlayer.Stop();
+            _audioPlayer.Dispose();
+            _audioPlayer = null;
+        }
+
+        _elapsedTimer?.Stop();
+        _elapsedTimer?.Dispose();
+    }
+
+    public void Dispose()
+    {
+        // Remove event handler to prevent memory leaks
+        NavigationManager.LocationChanged -= HandleLocationChanged;
+
+        CleanupAudioResources();
+    }
+
+    private void PlaySong(string songId)
+    {
+        if (!string.IsNullOrWhiteSpace(songId))
+        {
+            string songWithPath = _armaApi.GetFileWithPath($"{songId}.m4a");
+            if (!string.IsNullOrWhiteSpace(songWithPath))
+            {
+                InvokeAsync(() =>
+                //MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    byte[] audioBytes = File.ReadAllBytesAsync(songWithPath).Result;
+
+                    if (_audioPlayer != null)
+                    {
+                        _audioPlayer.PlaybackEnded -= OnPlaybackEnded;
+                        _audioPlayer.Stop();
+                        _audioPlayer.Dispose();
+                        _audioPlayer = null;
+
+                        _elapsedTimer.Stop();
+                    }
+
+                    _audioPlayer = AudioManager.Current.CreatePlayer(new MemoryStream(audioBytes));
+
+                    _audioPlayer.PlaybackEnded += OnPlaybackEnded;
+                    _audioPlayer.Play();
+
+                    _elapsedTimer.Start();
+                    IsPlaying = true;
+
+                    StateHasChanged();
+                });
+            }
+        }
+        else
+        {
+            if (_audioPlayer != null)
+            {
+                InvokeAsync(() =>
+                {
+                    _audioPlayer.PlaybackEnded -= OnPlaybackEnded;
+                    _audioPlayer.Stop();
+                    _audioPlayer.Dispose();
+                    _audioPlayer = null;
+                });
+            }
+
+            InvokeAsync(async () =>
+            {
+                _elapsedTimer.Stop();
+                IsPlaying = false;
+
+                ElapsedTime = "00:00";
+                TotalTime = "00:00";
+
+                await JS.InvokeVoidAsync("updatePlayerSliderPosition", 0);
+
+                StateHasChanged();
+            });
+        }
+    }
+
+    [JSInvokable]
+    public static void Play(string songId)
+    {
+        _playAction?.Invoke(songId);
+    }
+
+    [JSInvokable]
+    public static void SetAudioToPosition(double position)
+    {
+        _playerPositionAction?.Invoke(position);
+    }
+
+    private void PlayerAudioPosition(double position)
+    {
+        if (_audioPlayer != null)
+        {
+            InvokeAsync(() =>
+            {
+                double newSeconds = (_audioPlayer.Duration * (position / 100));
+
+                _audioPlayer.Seek(newSeconds);
+                ElapsedTime = FormatTime(_audioPlayer.CurrentPosition);
+
+                StateHasChanged();
+            });
+        }
+    }
+
+    private void PlayPause()
+    {
+        if (_audioPlayer == null) return;
+        
+        InvokeAsync(() =>
+        {
+            if (IsPlaying)
+            {
+                _audioPlayer.Pause();
+                _elapsedTimer.Stop();
+                IsPlaying = false;
+            }
+            else
+            {
+                _audioPlayer.Play();
+                _elapsedTimer.Start();
+                IsPlaying = true;
+            }
+
+            StateHasChanged();
+        });
+    }
+
+    private async Task NextSong()
+    {
+        if (_audioPlayer == null) return;
+        
+        await InvokeAsync(() =>
+        {
+            _audioPlayer.PlaybackEnded -= OnPlaybackEnded;
+            _audioPlayer.Stop();
+            _elapsedTimer.Stop();
+            _audioPlayer.Dispose();
+            _audioPlayer = null;
+
+            StateHasChanged();
+        });
+
+        await JS.InvokeVoidAsync("playNextAvailableSong");
+
+    }
+
+    private string FormatTime(double seconds)
+    {
+        TimeSpan time = TimeSpan.FromSeconds(seconds);
+        return time.ToString(@"mm\:ss");
+    }
+
+    private void UpdateElapsedTime(object sender, System.Timers.ElapsedEventArgs e)
+    {
+        if (_audioPlayer != null)
+        {
+            // Update UI on main thread
+            InvokeAsync(async () =>
+            {
+                ElapsedTime = FormatTime(_audioPlayer.CurrentPosition);
+                TotalTime = FormatTime(_audioPlayer.Duration);
+
+                double sliderPosition = (_audioPlayer.CurrentPosition / _audioPlayer.Duration) * 100;
+
+                await JS.InvokeVoidAsync("updatePlayerSliderPosition", sliderPosition);
+
+                StateHasChanged();
+            });
+        }
+    }
+
+    private async void OnPlaybackEnded(object sender, EventArgs e)
+    {
+        // Ensure this runs on the UI thread
+        await InvokeAsync(async () =>
+        {
+            // Automatically move to the next song
+            await NextSong();
+        });
+    }
 }

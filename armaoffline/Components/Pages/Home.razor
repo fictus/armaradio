@@ -5,11 +5,15 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 @page "/"
+@{
+    _dapper.CreateDatabase();
+    List<ArmaUserPlaylistDataItem> offlinePlaylists = _armaApi.Offline_GetAvailablePlaylists() ?? new List<ArmaUserPlaylistDataItem>();
+}
 
 <div class="row">
     <div class="col-md-12">
         <div class="input-group mb-3">
-            <span class="input-group-text" id="basic-addon1">User Name</span>
+            <span class="input-group-text col-4" id="basic-addon1">User Name</span>
             <input id="txtMainUserName" type="text" class="form-control" placeholder="Username" aria-label="Username" @bind="userName" />
         </div>
     </div>
@@ -17,7 +21,7 @@
 <div class="row">
     <div class="col-md-12">
         <div class="input-group mb-3">
-            <span class="input-group-text" id="basic-addon1">Password</span>
+            <span class="input-group-text col-4" id="basic-addon1">Password</span>
             <input id="txtMainPassword" type="password" class="form-control" placeholder="Password" aria-label="Password" @bind="password" />
         </div>
     </div>
@@ -32,17 +36,47 @@
         <span id="lblLoginError"></span>
     </div>
 </div>
+<div class="row mt-3 mb-3">
+    <div class="col-md-12">
+        <div class="line-division-gray"></div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="input-group mb-3">
+            <span class="input-group-text col-4" id="basic-addon1">Offline Player:</span>
+            <select id="cmbOfflinePlaylists" class="form-select" @onchange="OnChangeOfflinePlaylistsHandler">
+                <option value=""></option>
+                @{
+                    foreach (var item in offlinePlaylists)
+                    {
+                        <option value="@item.Id">@item.PlaylistName</option>
+                    }
+                }
+            </select>
+            <button id="btnLoadOfflinePlaylist" class="btn btn-primary" @onclick="InitializeOfflinePlayer">Load</button>
+        </div>
+    </div>
+</div>
 
 @code {
     private string userName = string.Empty;
     private string password = string.Empty;
     private string token = string.Empty;
+    private int? offlinePlaylistId = null;
+    private string offlinePlaylistName = "";
+    private static Action<int?, string> _selectedPlaylistValues;
+
+    protected override void OnInitialized()
+    {
+        _selectedPlaylistValues = SelectedPlaylistValues;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            _dapper.CreateDatabase();
+            
         }
     }
 
@@ -54,7 +88,9 @@
         {
             try
             {
-                if (!string.IsNullOrWhiteSpace(_globalState.appToken) || _armaApi.Signin(userName, password))
+                await JS.InvokeVoidAsync("showPageWait", true);
+
+                if (_armaApi.Signin(userName, password))
                 {
                     Navigation.NavigateTo("/armaloader");
                 }
@@ -62,6 +98,8 @@
                 {
                     await JS.InvokeVoidAsync("loginError", "Incorrect 'UserName' or 'Password'");
                 }
+
+                await JS.InvokeVoidAsync("showPageWait", false);
             }
             catch (Exception ex)
             {
@@ -72,5 +110,32 @@
         {
             await JS.InvokeVoidAsync("loginError", "'UserName'/'Password' are required");
         }
+    }
+
+    private async void InitializeOfflinePlayer()
+    {
+        if (offlinePlaylistId.HasValue)
+        {
+            Navigation.NavigateTo($"/offlineplayer?playlistid={offlinePlaylistId.Value}&playlisttitle={Uri.EscapeDataString(offlinePlaylistName)}");
+        }
+    }
+
+    private async void OnChangeOfflinePlaylistsHandler(ChangeEventArgs e)
+    {
+        int? playlistId = (Int32.TryParse(e.Value.ToString(), out int _idValue) ? _idValue : (int?)null);        
+
+        await JS.InvokeVoidAsync("presetOfflineBtnValues", playlistId);
+    }
+
+    [JSInvokable]
+    public static void SetSelectedOfflinePlaylistValues(int? PlaylistId, string PlaylistName)
+    {
+        _selectedPlaylistValues?.Invoke(PlaylistId, PlaylistName);
+    }
+
+    private void SelectedPlaylistValues(int? PlaylistId, string PlaylistName)
+    {
+        offlinePlaylistId = PlaylistId;
+        offlinePlaylistName = PlaylistName;
     }
 }

@@ -22,7 +22,7 @@
                     }
                 }
             </select>
-            <button id="btnDownloadPlaylistSongs" class="btn btn-primary form-control-sm" disabled="disabled">Download Songs</button>
+            <button id="btnDownloadPlaylistSongs" @onclick="DownloadSelectedPlaylistSongs" class="btn btn-primary form-control-sm" disabled="disabled">Download Songs</button>
         </div>
     </div>
 </div>
@@ -37,12 +37,16 @@
 @code {
     private static armaoffline.Repositories.IArmaApi _armaStaticApi =
         armaoffline.Providers.ServiceLocator.ServiceProvider.GetRequiredService<armaoffline.Repositories.IArmaApi>();
+    private static Action _updateUI;
+    private int? selectedPlaylstId;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            JS.InvokeVoidAsync("onArmaLoaderOnload");
+            await JS.InvokeVoidAsync("onArmaLoaderOnload");
+
+            _updateUI = RefreshPageUI;
         }
     }
 
@@ -56,12 +60,42 @@
             firstPlaylist = _armaApi.GetPlaylistById(playlistId.Value);
         }
 
-        await JS.InvokeVoidAsync("populateSongsToDownloadTable", firstPlaylist);
+        selectedPlaylstId = playlistId;
+        await JS.InvokeVoidAsync("populateSongsToDownloadTable", firstPlaylist, playlistId);
+
+        StateHasChanged();
     }
 
     [JSInvokable]
     public static void DownloadFile(string videoId)
     {
         _armaStaticApi.GetAudioFile(videoId);
+    }
+
+    [JSInvokable]
+    public static void MarkPlaylistSongsAsDownloaded(int playlistId)
+    {
+        _armaStaticApi.MarkPlaylistSongsAsDownloaded(playlistId);
+    }
+
+    [JSInvokable]
+    public static void RefreshUI()
+    {
+        _updateUI?.Invoke();
+    }
+
+    private void RefreshPageUI()
+    {
+        InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+    }
+
+    private async void DownloadSelectedPlaylistSongs()
+    {
+        await JS.InvokeVoidAsync("showPageWait", true);
+        await JS.InvokeVoidAsync("downloadSelectedPlaylistSongs", selectedPlaylstId);
+        await JS.InvokeVoidAsync("showPageWait", false);
     }
 }

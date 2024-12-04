@@ -14,24 +14,47 @@ namespace armaoffline.Data
         {
         }
 
+        private string GetDatabasePath(string filename)
+        {
+            return Path.Combine(
+                DeviceInfo.Platform == DevicePlatform.Android
+                    ? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
+                    : FileSystem.AppDataDirectory,
+                filename
+            );
+        }
+
         public SqliteConnection GetConnection(bool OpenConnection = true)
         {
-            SqliteConnection returnItem = new SqliteConnection("Data Source=arma.db");
-
-            if (OpenConnection)
+            try
             {
-                returnItem.Open();
-            }
+                //SqliteConnection returnItem = new SqliteConnection("Data Source=arma.db");
+                SqliteConnection returnItem = new SqliteConnection($"Data Source={GetDatabasePath("arma.db")}");
 
-            return returnItem;
+                if (OpenConnection)
+                {
+                    returnItem.Open();
+                }
+
+                return returnItem;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Service Registration Error: {ex}");
+                throw;
+            }
         }
 
         public void CreateDatabase()
         {
             using (var db = GetConnection())
             {
+                bool dropAllTables = false;
+
                 db.ExecuteAsync(
-                    @"
+                    @$"
+                    {(dropAllTables ? "drop table if exists armausers; drop table if exists playlists; drop table if exists usersongs; drop table if exists localsongs;" : "")}
+
                     create table if not exists
                     armausers
                     (
@@ -45,7 +68,8 @@ namespace armaoffline.Data
                         id integer not null primary key autoincrement,
                         playlistid integer not null,
                         userid integer not null,
-                        playlistname text
+                        playlistname text,
+                        songsavailableoffline integer
                     );
 
                     create table if not exists

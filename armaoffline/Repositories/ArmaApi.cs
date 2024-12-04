@@ -139,6 +139,8 @@ namespace armaoffline.Repositories
                             playlistname = (playlist.PlaylistName ?? "")
                         });
 
+                    bool allSongsAvailableOffLine = true;
+
                     foreach (var song in songs.Where(sg => !string.IsNullOrWhiteSpace(sg.VideoId)).ToList())
                     {
                         _dapper.ExecuteNonQuery(conn, @"
@@ -169,6 +171,16 @@ namespace armaoffline.Repositories
                                 songname = song.Song,
                                 artist = song.Artist
                             });
+
+                        if (!CheckIfAudioFileExists($"{song.VideoId}.m4a"))
+                        {
+                            allSongsAvailableOffLine = false;
+                        }
+                    }
+
+                    if (allSongsAvailableOffLine)
+                    {
+                        MarkPlaylistSongsAsDownloaded(playlist.Id);
                     }
                 }
             }
@@ -229,6 +241,45 @@ namespace armaoffline.Repositories
             return returnItem;
         }
 
+        public List<ArmaPlaylistDataItem> Offline_GetPlaylistById(int playlistId)
+        {
+            List<ArmaPlaylistDataItem> returnItem = _dapper.GetList<ArmaPlaylistDataItem>(@"
+                select
+                    us.id as Id,
+                    us.artist as Artist,
+                    us.songname as Song,
+                    us.videoid as VideoId
+                from playlists pl
+                inner join usersongs us
+                    on us.playlistid = pl.id
+                where
+                    pl.playlistid = @playlistid
+                    and pl.songsavailableoffline = 1;
+                ",
+                new
+                {
+                    playlistid = playlistId
+                });
+
+            return returnItem;
+        }
+
+        public List<ArmaUserPlaylistDataItem> Offline_GetAvailablePlaylists()
+        {
+            List<ArmaUserPlaylistDataItem> returnItem = _dapper.GetList<ArmaUserPlaylistDataItem>(@"
+                select distinct
+                    pl.playlistid as Id,
+                    pl.playlistname as PlaylistName
+                from playlists pl
+                join usersongs us
+                    on us.playlistid = pl.id
+                where
+                    pl.songsavailableoffline = 1;
+                ");
+
+            return returnItem;
+        }
+
         public ApiAudioDetailsDataItem GetAudioFileDetails(string VideoId)
         {
             ApiAudioDetailsDataItem returnItem = null;
@@ -270,7 +321,35 @@ namespace armaoffline.Repositories
                 videoid = VideoId
             });
 
-            if (!string.IsNullOrWhiteSpace(VideoId) && string.IsNullOrWhiteSpace(fileName))
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                string newFileName = $"{VideoId}.m4a";
+
+                if (CheckIfAudioFileExists(newFileName))
+                {
+                    _dapper.ExecuteNonQuery(@"
+                        insert into localsongs
+                        (
+                            videoid,
+                            filename
+                        )
+                        values
+                        (
+                            @videoid,
+                            @filename
+                        );
+                    ",
+                    new
+                    {
+                        videoid = VideoId.Trim(),
+                        filename = newFileName
+                    });
+
+                    fileName = newFileName;
+                }
+            }
+
+            if ((!string.IsNullOrWhiteSpace(VideoId) && string.IsNullOrWhiteSpace(fileName)) || (!string.IsNullOrWhiteSpace(VideoId) && !CheckIfAudioFileExists($"{VideoId}.m4a")))
             {
                 byte[] fileBytes = null;
                 //ApiAudioDetailsDataItem audioDetails = GetAudioFileDetails(VideoId);
@@ -320,6 +399,21 @@ namespace armaoffline.Repositories
             }
         }
 
+        public void MarkPlaylistSongsAsDownloaded(int PlaylistId)
+        {
+            _dapper.ExecuteNonQuery(@"
+                update playlists
+                set
+                    songsavailableoffline = 1
+                where
+                    playlistid=@playlistid
+            ",
+            new
+            {
+                playlistid = PlaylistId
+            });
+        }
+
         public bool CheckIfAudioFileExists(string FileName)
         {
             if (!string.IsNullOrWhiteSpace(FileName))
@@ -337,6 +431,25 @@ namespace armaoffline.Repositories
             }
 
             return false;
+        }
+
+        public string GetFileWithPath(string FileName)
+        {
+            string returnItem = "";
+
+            if (!string.IsNullOrWhiteSpace(FileName))
+            {
+                string audioFolderPath = Path.Combine(FileSystem.AppDataDirectory, "audio");
+
+                if (!Directory.Exists(audioFolderPath))
+                {
+                    Directory.CreateDirectory(audioFolderPath);
+                }
+
+                returnItem = Path.Combine(audioFolderPath, FileName.Trim());
+            }
+
+            return returnItem;
         }
 
         public bool CheckIfAudioFileExistsByVideoId(string VideoId)

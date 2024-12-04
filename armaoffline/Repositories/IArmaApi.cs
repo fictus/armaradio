@@ -12,6 +12,11 @@ namespace armaoffline.Repositories
         bool Signin(string Email, string Password);
         List<ArmaUserPlaylistDataItem> GetUserPlaylists();
         List<ArmaPlaylistDataItem> GetPlaylistById(int playlistId);
+        List<ArmaPlaylistDataItem> Offline_GetPlaylistById(int playlistId);
+        List<ArmaUserPlaylistDataItem> Offline_GetAvailablePlaylists();
         void GetAudioFile(string VideoId);
+        void MarkPlaylistSongsAsDownloaded(int PlaylistId);
+        public bool CheckIfAudioFileExists(string FileName);
+        string GetFileWithPath(string FileName);
     }
 }
