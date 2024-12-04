@@ -1,5 +1,20 @@
 ﻿function onArmaLoaderOnload() {
-    
+    $(document).ready(function () {
+        disableBackButton();
+    });
+}
+
+function disableBackButton() {
+    // Prevent default back navigation
+    history.pushState(null, null, location.href);
+    window.onpopstate = function () {
+        history.pushState(null, null, location.href);
+    };
+
+    // Additional Android-specific back button prevention
+    document.addEventListener("backbutton", function (e) {
+        e.preventDefault();
+    }, false);
 }
 
 function downloadSelectedPlaylistSongs(playListId) {
