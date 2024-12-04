@@ -14,6 +14,7 @@ namespace armaoffline.Repositories
         List<ArmaPlaylistDataItem> GetPlaylistById(int playlistId);
         List<ArmaPlaylistDataItem> Offline_GetPlaylistById(int playlistId);
         List<ArmaUserPlaylistDataItem> Offline_GetAvailablePlaylists();
+        void DownloadPlaylistSongsForOffline(int? PlaylistId);
         void GetAudioFile(string VideoId);
         void MarkPlaylistSongsAsDownloaded(int PlaylistId);
         public bool CheckIfAudioFileExists(string FileName);

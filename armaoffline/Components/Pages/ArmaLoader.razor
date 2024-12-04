@@ -98,10 +98,17 @@
         {
             await JS.InvokeVoidAsync("showPageWait", true);
             StateHasChanged();
+        });
 
-            await JS.InvokeVoidAsync("downloadSelectedPlaylistSongs", selectedPlaylstId);
+        await Task.Run(() =>
+        {
+            _armaApi.DownloadPlaylistSongsForOffline(selectedPlaylstId);
+            //await JS.InvokeVoidAsync("downloadSelectedPlaylistSongs", selectedPlaylstId);
+        });
+
+        await InvokeAsync(async () =>
+        {
             await JS.InvokeVoidAsync("showPageWait", false);
-
             StateHasChanged();
         });
     }

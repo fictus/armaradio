@@ -307,6 +307,24 @@ namespace armaoffline.Repositories
             return returnItem;
         }
 
+        public void DownloadPlaylistSongsForOffline(int? PlaylistId)
+        {
+            if (PlaylistId.HasValue)
+            {
+                List<ArmaPlaylistDataItem> songs = GetPlaylistById(PlaylistId.Value);
+
+                if (songs != null && songs.Count > 0)
+                {
+                    foreach (var song in songs)
+                    {
+                        GetAudioFile(song.VideoId);
+                    }
+
+                    MarkPlaylistSongsAsDownloaded(PlaylistId.Value);
+                }
+            }
+        }
+
         public void GetAudioFile(string VideoId)
         {
             string fileName = _dapper.GetFirstOrDefault<string>(@"

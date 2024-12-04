@@ -102,14 +102,17 @@
                     StateHasChanged();
                 });
 
-                if (_armaApi.Signin(userName, password))
+                await Task.Run(async () =>
                 {
-                    Navigation.NavigateTo("/armaloader");
-                }
-                else
-                {
-                    await JS.InvokeVoidAsync("loginError", "Incorrect 'UserName' or 'Password'");
-                }
+                    if (_armaApi.Signin(userName, password))
+                    {
+                        Navigation.NavigateTo("/armaloader");
+                    }
+                    else
+                    {
+                        await JS.InvokeVoidAsync("loginError", "Incorrect 'UserName' or 'Password'");
+                    }
+                });
 
                 await InvokeAsync(async () =>
                 {
