@@ -55,6 +55,7 @@
     private static Action<double> _playerPositionAction;
 
     private System.Timers.Timer _elapsedTimer;
+    private System.Timers.Timer _heartbeatTimer;
     public bool IsPlaying { get; private set; } = false;
     public string ElapsedTime { get; private set; } = "00:00";
     public string TotalTime { get; private set; } = "00:00";
@@ -69,10 +70,24 @@
         _elapsedTimer = new System.Timers.Timer(1000);
         _elapsedTimer.Elapsed += UpdateElapsedTime;
 
+        _heartbeatTimer = new System.Timers.Timer(10000); // Send a heartbeat every 10 seconds
+        _heartbeatTimer.Elapsed += SendHeartbeat;
+
         _playAction = PlaySong;
         _playerPositionAction = PlayerAudioPosition;
 
         NavigationManager.LocationChanged += HandleLocationChanged;
+
+        _heartbeatTimer.Start();
+    }
+
+    private void SendHeartbeat(object sender, System.Timers.ElapsedEventArgs e)
+    {
+#if ANDROID
+        var intent = new Android.Content.Intent(Android.App.Application.Context, typeof(ScreenOffService));
+        intent.SetAction("ACTION_HEARTBEAT");
+        Android.App.Application.Context.StartService(intent);
+#endif
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -108,14 +123,8 @@
 
         _elapsedTimer?.Stop();
         _elapsedTimer?.Dispose();
-    }
-
-    public void Dispose()
-    {
-        // Remove event handler to prevent memory leaks
-        NavigationManager.LocationChanged -= HandleLocationChanged;
-
-        CleanupAudioResources();
+        _heartbeatTimer?.Stop();
+        _heartbeatTimer?.Dispose();
     }
 
     private void PlaySong(string songId)
@@ -283,5 +292,14 @@
             // Automatically move to the next song
             await NextSong();
         });
+    }
+
+
+    public void Dispose()
+    {
+        // Remove event handler to prevent memory leaks
+        NavigationManager.LocationChanged -= HandleLocationChanged;
+
+        CleanupAudioResources();
     }
 }
