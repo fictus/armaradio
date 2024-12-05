@@ -46,8 +46,8 @@ namespace armaoffline
             wakeLock = powerManager.NewWakeLock(WakeLockFlags.Partial, "armaoffline:AudioPlaybackLock");
             wakeLock.Acquire();
 
-            // Start foreground service for audio playback
-            StartForegroundService(new Intent(this, typeof(AudioService)));
+            //// Start foreground service for audio playback
+            //StartForegroundService(new Intent(this, typeof(AudioService)));
         }
 
         private void RequestRequiredPermissions()
@@ -93,6 +93,25 @@ namespace armaoffline
                     Console.WriteLine("Storage permissions were denied!");
                 }
             }
+        }
+
+        protected override void OnDestroy()
+        {
+            // Release the wake lock if it exists and is held
+            if (wakeLock != null)
+            {
+                if (wakeLock.IsHeld)
+                {
+                    wakeLock.Release();
+                }
+                wakeLock.Dispose();
+                wakeLock = null;
+            }
+
+            // Stop the foreground service
+            StopService(new Intent(this, typeof(AudioService)));
+
+            base.OnDestroy();
         }
     }
 }
