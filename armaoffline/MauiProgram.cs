@@ -3,7 +3,8 @@ using armaoffline.Repositories;
 using armaoffline.Services;
 using armaoffline.Providers;
 using armaoffline.Data;
-using Plugin.Maui.Audio;
+using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Views;
 
 namespace armaoffline
 {
@@ -18,22 +19,7 @@ namespace armaoffline
                 var builder = MauiApp.CreateBuilder();
                 builder
                     .UseMauiApp<App>()
-                    //.UseMauiCommunityToolkitMediaElement()
-                    .AddAudio(
-                    playbackOptions =>
-                    {
-    #if IOS || MACCATALYST
-					    playbackOptions.Category = AVFoundation.AVAudioSessionCategory.Playback;
-    #endif
-                    },
-                    recordingOptions =>
-                    {
-    #if IOS || MACCATALYST
-					    recordingOptions.Category = AVFoundation.AVAudioSessionCategory.Record;
-					    recordingOptions.Mode = AVFoundation.AVAudioSessionMode.Default;
-					    recordingOptions.CategoryOptions = AVFoundation.AVAudioSessionCategoryOptions.MixWithOthers;
-    #endif
-                    })
+                    .UseMauiCommunityToolkitMediaElement()                   
                     .ConfigureFonts(fonts =>
                     {
                         fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -55,7 +41,20 @@ namespace armaoffline
     #if DEBUG
                     builder.Services.AddBlazorWebViewDeveloperTools();
                     builder.Logging.AddDebug();
-    #endif
+
+                    builder.Services.AddSingleton<IMediaElementService>(sp =>
+                    {
+                        var mainPage = Application.Current?.MainPage as MainPage;
+                        var mediaElement = mainPage?.FindByName<MediaElement>("myMediaElement");
+
+                        if (mediaElement == null)
+                        {
+                            throw new InvalidOperationException("MediaElement not found");
+                        }
+
+                        return new MediaElementService(mediaElement);
+                    });
+#endif
                 }
                 catch (Exception serviceEx)
                 {
