@@ -41,6 +41,7 @@ namespace armaoffline
     #if DEBUG
                     builder.Services.AddBlazorWebViewDeveloperTools();
                     builder.Logging.AddDebug();
+    #endif
 
                     builder.Services.AddSingleton<IMediaElementService>(sp =>
                     {
@@ -54,7 +55,6 @@ namespace armaoffline
 
                         return new MediaElementService(mediaElement);
                     });
-#endif
                 }
                 catch (Exception serviceEx)
                 {

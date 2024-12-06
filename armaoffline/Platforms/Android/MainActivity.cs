@@ -82,15 +82,15 @@ namespace armaoffline
                 }
             }
 
-            ////// Acquire a wake lock with the correct flags
-            //wakeLock = powerManager.NewWakeLock(WakeLockFlags.Partial, "armaoffline:AudioPlaybackLock");
-            //////wakeLock = powerManager.NewWakeLock(
-            //////    WakeLockFlags.Partial |
-            //////    WakeLockFlags.AcquireCausesWakeup |
-            //////    WakeLockFlags.OnAfterRelease,
-            //////    "armaoffline:AudioPlaybackLock"
-            //////);
-            //wakeLock.Acquire();
+            //// Acquire a wake lock with the correct flags
+            wakeLock = powerManager.NewWakeLock(WakeLockFlags.Partial, "armaoffline:AudioPlaybackLock");
+            ////wakeLock = powerManager.NewWakeLock(
+            ////    WakeLockFlags.Partial |
+            ////    WakeLockFlags.AcquireCausesWakeup |
+            ////    WakeLockFlags.OnAfterRelease,
+            ////    "armaoffline:AudioPlaybackLock"
+            ////);
+            wakeLock.Acquire();
 
             //// Start foreground service for audio playback
             //StartForegroundService(new Intent(this, typeof(AudioService)));
@@ -141,24 +141,24 @@ namespace armaoffline
             }
         }
 
-        //protected override void OnDestroy()
-        //{
-        //    // Release the wake lock if it exists and is held
-        //    if (wakeLock != null)
-        //    {
-        //        if (wakeLock.IsHeld)
-        //        {
-        //            wakeLock.Release();
-        //        }
-        //        wakeLock.Dispose();
-        //        wakeLock = null;
-        //    }
+        protected override void OnDestroy()
+        {
+            // Release the wake lock if it exists and is held
+            if (wakeLock != null)
+            {
+                if (wakeLock.IsHeld)
+                {
+                    wakeLock.Release();
+                }
+                wakeLock.Dispose();
+                wakeLock = null;
+            }
 
-        //    //// Stop the foreground service
-        //    //StopService(new Intent(this, typeof(AudioService)));
+            //// Stop the foreground service
+            //StopService(new Intent(this, typeof(AudioService)));
 
-        //    base.OnDestroy();
-        //}
+            base.OnDestroy();
+        }
     }
 
     //[Service(Label = nameof(ScreenOffService))]

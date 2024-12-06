@@ -102,6 +102,7 @@
 
     private async void CleanupAudioResources()
     {
+        _audioPlayer.MediaEndedEvent -= OnPlaybackEnded;
         await _audioPlayer.Stop();
         // if (_audioPlayer != null)
         // {
@@ -136,9 +137,11 @@
         {
             await InvokeAsync(async () =>
             {
+                _audioPlayer.MediaEndedEvent -= OnPlaybackEnded;
                 await _audioPlayer.Stop();
                 _elapsedTimer.Stop();
                 IsPlaying = false;
+                _audioPlayer.MediaEndedEvent += OnPlaybackEnded;
 
                 ElapsedTime = "00:00";
                 TotalTime = "00:00";
@@ -207,8 +210,10 @@
     {
         await InvokeAsync(async () =>
         {
+            _audioPlayer.MediaEndedEvent -= OnPlaybackEnded;
             await _audioPlayer.Stop();
             _elapsedTimer.Stop();
+            _audioPlayer.MediaEndedEvent += OnPlaybackEnded;
 
             StateHasChanged();
         });
