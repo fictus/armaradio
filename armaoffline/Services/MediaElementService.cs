@@ -32,7 +32,18 @@ namespace armaoffline.Services
                 Task.Delay(100);
 
                 _mediaElement.Source = new Uri(source);
-                _mediaElement.IsVisible = false;
+                //_mediaElement.IsVisible = false;
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public Task SetMetaData(string artistName, string songName)
+        {
+            if (_mediaElement != null)
+            {
+                _mediaElement.MetadataArtist = artistName;
+                _mediaElement.MetadataTitle = songName;
             }
 
             return Task.CompletedTask;

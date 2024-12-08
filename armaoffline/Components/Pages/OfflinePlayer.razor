@@ -51,8 +51,8 @@
 
     private static armaoffline.Repositories.IArmaApi _armaStaticApi =
         armaoffline.Providers.ServiceLocator.ServiceProvider.GetRequiredService<armaoffline.Repositories.IArmaApi>();
-    private static Action<string> _playAction;
-    private static Action<double> _playerPositionAction;
+    private static Action<string, string, string> _playAction;
+    private static Action<double?> _playerPositionAction;
 
     private System.Timers.Timer _elapsedTimer;
     private System.Timers.Timer _heartbeatTimer;
@@ -104,18 +104,12 @@
     {
         _audioPlayer.MediaEndedEvent -= OnPlaybackEnded;
         await _audioPlayer.Stop();
-        // if (_audioPlayer != null)
-        // {
-        //     _audioPlayer.Stop();
-        //     _audioPlayer.Dispose();
-        //     _audioPlayer = null;
-        // }
 
         _elapsedTimer?.Stop();
         _elapsedTimer?.Dispose();
     }
 
-    private async void PlaySong(string songId)
+    private async void PlaySong(string songId, string artistName, string songName)
     {
         if (!string.IsNullOrWhiteSpace(songId))
         {
@@ -125,6 +119,7 @@
             //MainThread.BeginInvokeOnMainThread(() =>
             {
                 await _audioPlayer.SetMediaSource(songWithPath);
+                await _audioPlayer.SetMetaData(artistName, songName);
                 await _audioPlayer.Play();
 
                 _elapsedTimer.Start();
@@ -154,33 +149,36 @@
     }
 
     [JSInvokable]
-    public static void Play(string songId)
+    public static void Play(string songId, string artistName, string songName)
     {
-        _playAction?.Invoke(songId);
+        _playAction?.Invoke(songId, artistName, songName);
     }
 
     [JSInvokable]
-    public static void SetAudioToPosition(double position)
+    public static void SetAudioToPosition(double? position)
     {
         _playerPositionAction?.Invoke(position);
     }
 
-    private async void PlayerAudioPosition(double position)
+    private async void PlayerAudioPosition(double? position)
     {
-        await InvokeAsync(async () =>
+        if (position.HasValue)
         {
-            if (position > 0)
+            await InvokeAsync(async () =>
             {
-                TimeSpan songDuration = await _audioPlayer.GetDuration();
+                if (position > 0)
+                {
+                    TimeSpan songDuration = await _audioPlayer.GetDuration();
 
-                double newSeconds = ((position / 100) * songDuration.TotalSeconds);
-                TimeSpan duration = TimeSpan.FromSeconds(newSeconds);
+                    double newSeconds = ((position.Value / 100) * songDuration.TotalSeconds);
+                    TimeSpan duration = TimeSpan.FromSeconds(newSeconds);
 
-                await _audioPlayer.Seek(duration);
+                    await _audioPlayer.Seek(duration);
 
-                StateHasChanged();
-            }
-        });
+                    StateHasChanged();
+                }
+            });
+        }
     }
 
     private async void PlayPause()
@@ -219,7 +217,6 @@
         });
 
         await JS.InvokeVoidAsync("playNextAvailableSong");
-
     }
 
     private string FormatTime(TimeSpan seconds)
@@ -239,7 +236,7 @@
 
             double sliderPosition = 0;
 
-            if (currentPosition.Seconds > 0 && currentDuration.Seconds > 0)
+            if (currentPosition.TotalSeconds > 0 && currentDuration.TotalSeconds > 0)
             {
                 sliderPosition = (currentPosition.TotalSeconds / currentDuration.TotalSeconds) * 100;
             }

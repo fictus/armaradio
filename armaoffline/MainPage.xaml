@@ -8,10 +8,12 @@
     <Grid>
         <toolkit:MediaElement x:Name="myMediaElement"
             Source=""
-            IsVisible="False"
+            IsVisible="True"
             MetadataArtist=""
             MetadataTitle=""
-            ShouldShowPlaybackControls="False" />
+            WidthRequest="0"
+            HeightRequest="0"
+            ShouldShowPlaybackControls="True" />
 
         <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html">
             <BlazorWebView.RootComponents>

@@ -11,6 +11,7 @@ namespace armaoffline.Services
         event EventHandler<bool> MediaLoadedChanged;
         event EventHandler MediaEndedEvent;
         Task SetMediaSource(string source);
+        Task SetMetaData(string artistName, string songName);
         Task Play();
         Task Pause();
         Task Stop();

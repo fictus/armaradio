@@ -161,7 +161,7 @@ function preparePlayNowRow(btn) {
         $("a.lnk-attribution-notice").attr("data-songname", songName);
         //$("a.lnk-attribution-notice").attr("data-url", "https://www.youtube.com/watch?v=" + videoId);
 
-        playSong(videoId);
+        playSong(videoId, artistName, songName);
 
         //armaradio.masterPageWait(false);
     }
@@ -182,12 +182,12 @@ function playNextAvailableSong() {
     }
 }
 
-async function playSong(videoId) {
-    await DotNet.invokeMethodAsync("armaoffline", "Play", videoId);
+async function playSong(videoId, artistName, songName) {
+    await DotNet.invokeMethodAsync("armaoffline", "Play", videoId, artistName, songName);
 }
 
 async function clearPlayer() {
-    await DotNet.invokeMethodAsync("armaoffline", "Play", "");
+    await DotNet.invokeMethodAsync("armaoffline", "Play", "", "", "");
 }
 
 async function setAudioToPosition(position) {
