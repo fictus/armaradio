@@ -14,3 +14,4 @@ arma_miner/obj/
 /armaoffline/obj
 /armaradio/wwwroot/AudioFiles
 /armaoffline/bin/Release/net8.0-android
+/armaoffline/armaoffline.csproj.user
