@@ -114,5 +114,12 @@ namespace armaoffline.Services
                    && !string.IsNullOrEmpty(_mediaElement.Source?.ToString())
                    && _mediaElement.Duration > TimeSpan.Zero;
         }
+
+        public void CleanupMediaSession()
+        {
+            _mediaElement?.Pause();
+            _mediaElement?.Handler?.DisconnectHandler();
+            _mediaElement?.Dispose();
+        }
     }
 }

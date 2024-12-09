@@ -19,5 +19,6 @@ namespace armaoffline.Services
         Task<TimeSpan> GetDuration();
         Task<TimeSpan> GetCurrentPosition();
         bool IsMediaLoaded();
+        void CleanupMediaSession();
     }
 }
