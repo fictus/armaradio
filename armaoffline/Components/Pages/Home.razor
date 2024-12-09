@@ -6,16 +6,7 @@
 @inject IJSRuntime JS
 @page "/"
 @{
-    List<ArmaUserPlaylistDataItem> offlinePlaylists = new List<ArmaUserPlaylistDataItem>();
-
-    try
-    {
-        offlinePlaylists = _armaApi.Offline_GetAvailablePlaylists() ?? new List<ArmaUserPlaylistDataItem>();
-    }
-    catch (Exception ex)
-    {
-        
-    }
+    
 }
 
 <div class="row">
@@ -53,31 +44,42 @@
     <div class="col-md-12">
         <div class="input-group mb-3">
             <span class="input-group-text col-4" id="basic-addon1">Offline Player:</span>
-            <select id="cmbOfflinePlaylists" class="form-select" @onchange="OnChangeOfflinePlaylistsHandler">
-                <option value=""></option>
+            <select id="cmbOfflinePlaylists" class="form-select" @onchange="OnChangeOfflineUserslistsHandler">
+                @* <option value=""></option> *@
                 @{
-                    foreach (var item in offlinePlaylists)
+                    foreach (var item in offlineUsers)
                     {
-                        <option value="@item.Id">@item.PlaylistName</option>
+                        <option value="@item.id">@item.username</option>
                     }
                 }
             </select>
-            <button id="btnLoadOfflinePlaylist" class="btn btn-primary" @onclick="InitializeOfflinePlayer">Load</button>
+            <button id="btnLoadOfflinePlayerForUser" class="btn btn-primary" @onclick="InitializeOfflinePlayerForUser">Load</button>
         </div>
     </div>
 </div>
 
 @code {
+    List<ArmaUserDataItem> offlineUsers { get; set; }
     private string userName = string.Empty;
     private string password = string.Empty;
     private string token = string.Empty;
-    private int? offlinePlaylistId = null;
-    private string offlinePlaylistName = "";
-    private static Action<int?, string> _selectedPlaylistValues;
+    private int? offlineUserId = null;
 
     protected override void OnInitialized()
     {
-        _selectedPlaylistValues = SelectedPlaylistValues;
+        try
+        {
+            offlineUsers = _armaApi.Offline_GetListOfOfflineUsers() ?? new List<ArmaUserDataItem>();
+
+            if (offlineUsers.Count > 0)
+            {
+                offlineUserId = offlineUsers.FirstOrDefault().id;
+            }
+        }
+        catch (Exception ex)
+        {
+
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -131,30 +133,16 @@
         }
     }
 
-    private async void InitializeOfflinePlayer()
+    private async void InitializeOfflinePlayerForUser()
     {
-        if (offlinePlaylistId.HasValue)
+        if (offlineUserId.HasValue)
         {
-            Navigation.NavigateTo($"/offlineplayer?playlistid={offlinePlaylistId.Value}&playlisttitle={Uri.EscapeDataString(offlinePlaylistName)}");
+            Navigation.NavigateTo($"/offlineplayer?userid={offlineUserId.Value}");
         }
     }
 
-    private async void OnChangeOfflinePlaylistsHandler(ChangeEventArgs e)
+    private async void OnChangeOfflineUserslistsHandler(ChangeEventArgs e)
     {
-        int? playlistId = (Int32.TryParse(e.Value.ToString(), out int _idValue) ? _idValue : (int?)null);        
-
-        await JS.InvokeVoidAsync("presetOfflineBtnValues", playlistId);
-    }
-
-    [JSInvokable]
-    public static void SetSelectedOfflinePlaylistValues(int? PlaylistId, string PlaylistName)
-    {
-        _selectedPlaylistValues?.Invoke(PlaylistId, PlaylistName);
-    }
-
-    private void SelectedPlaylistValues(int? PlaylistId, string PlaylistName)
-    {
-        offlinePlaylistId = PlaylistId;
-        offlinePlaylistName = PlaylistName;
+        offlineUserId = (Int32.TryParse(e.Value.ToString(), out int _idValue) ? _idValue : (int?)null);
     }
 }

@@ -10,11 +10,25 @@
     
 }
 
-<h1>Armaradio</h1>
-
 <div class="row">
     <div class="col-md-12">
-        <h3 id="lblTblHeaderPlaylistName"></h3>
+        <button id="btnLoadOfflinePlayerForUser" class="btn btn-primary" @onclick="GetRandomSongsFromAllUserPlaylsts">Random Songs</button>
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-md-12">
+        <div class="input-group mb-3">
+            <span class="input-group-text col-4" id="basic-addon1">Playlist:</span>
+            <select id="cmbOfflinePlaylists" class="form-select" @onchange="OnChangeOfflinePlaylistsHandler">
+                <option value=""></option>
+                @{
+                    foreach (var item in offlinePlaylists)
+                    {
+                        <option value="@item.Id">@item.PlaylistName</option>
+                    }
+                }
+            </select>
+        </div>
     </div>
 </div>
 <div class="row mt-3">
@@ -28,7 +42,7 @@
 
 <!-- Player Controls -->
 <div class="player-float-bottom">
-    <div class="block-item">
+    <div class="player-body ps-5 pe-5">
         <div>
             <button @onclick="PlayPause" class="player-btn player-@(IsPlaying ? "pause" : "play")">
                 <div class="player-inner"></div>
@@ -46,12 +60,12 @@
 
 @code {
     [Parameter]
-    public int? PlaylistId { get; set; }
-    public string PlaylistTitle { get; set; }
+    public int? UserId { get; set; }
+    List<ArmaUserPlaylistDataItem> offlinePlaylists { get; set; }
 
     private static armaoffline.Repositories.IArmaApi _armaStaticApi =
         armaoffline.Providers.ServiceLocator.ServiceProvider.GetRequiredService<armaoffline.Repositories.IArmaApi>();
-    private static Action<string, string, string> _playAction;
+    private static Action<string, string, string, bool> _playAction;
     private static Action<double?> _playerPositionAction;
 
     private System.Timers.Timer _elapsedTimer;
@@ -64,8 +78,8 @@
     {
         var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
         var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
-        PlaylistId = (int.TryParse(query["playlistid"], out int _playlistId) ? _playlistId : null);
-        PlaylistTitle = query["playlisttitle"] ?? "";
+        UserId = (int.TryParse(query["userid"], out int _userId) ? _userId : null);
+        offlinePlaylists = (UserId.HasValue ? _armaApi.Offline_GetAvailablePlaylists(UserId.Value) : new List<ArmaUserPlaylistDataItem>());
 
         _elapsedTimer = new System.Timers.Timer(1000);
         _elapsedTimer.Elapsed += UpdateElapsedTime;
@@ -82,15 +96,7 @@
     {
         if (firstRender)
         {
-            List<ArmaPlaylistDataItem> firstPlaylist = new List<ArmaPlaylistDataItem>();
-
-            if (PlaylistId.HasValue)
-            {
-                firstPlaylist = _armaApi.Offline_GetPlaylistById(PlaylistId.Value);
-            }
-
             await JS.InvokeVoidAsync("onOfflinePlayerOnload");
-            await JS.InvokeVoidAsync("populateSongsToPlayerTable", firstPlaylist, PlaylistTitle);
         }
     }
 
@@ -109,49 +115,88 @@
         _elapsedTimer?.Dispose();
     }
 
-    private async void PlaySong(string songId, string artistName, string songName)
+    private async void GetRandomSongsFromAllUserPlaylsts()
     {
-        if (!string.IsNullOrWhiteSpace(songId))
+        List<ArmaPlaylistDataItem> randomSongs = (UserId.HasValue ? _armaApi.Offline_GetRandomSongs(UserId.Value) : new List<ArmaPlaylistDataItem>());
+
+        await JS.InvokeVoidAsync("populateSongsToPlayerTable", randomSongs);
+    }
+
+    private async void OnChangeOfflinePlaylistsHandler(ChangeEventArgs e)
+    {
+        int? playlistId = (Int32.TryParse(e.Value.ToString(), out int _idValue) ? _idValue : (int?)null);
+
+        List<ArmaPlaylistDataItem> playlist = (playlistId.HasValue ? _armaApi.Offline_GetPlaylistById(playlistId.Value) : new List<ArmaPlaylistDataItem>());
+
+        await JS.InvokeVoidAsync("populateSongsToPlayerTable", playlist);
+    }
+
+    private async void PlaySong(string songId, string artistName, string songName, bool fromPlayFirstSong)
+    {
+        if (!fromPlayFirstSong)
         {
-            string songWithPath = _armaApi.GetFileWithPath($"{songId}.m4a");
-
-            await InvokeAsync(async () =>
-            //MainThread.BeginInvokeOnMainThread(() =>
+            if (!string.IsNullOrWhiteSpace(songId))
             {
-                await _audioPlayer.SetMediaSource(songWithPath);
-                await _audioPlayer.SetMetaData(artistName, songName);
-                await _audioPlayer.Play();
+                string songWithPath = _armaApi.GetFileWithPath($"{songId}.m4a");
 
-                _elapsedTimer.Start();
-                IsPlaying = true;
+                await InvokeAsync(async () =>
+                //MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    await _audioPlayer.SetMediaSource(songWithPath);
+                    await _audioPlayer.SetMetaData(artistName, songName);
+                    await _audioPlayer.Play();
 
-                StateHasChanged();
-            });
+                    _elapsedTimer.Start();
+                    IsPlaying = true;
+
+                    StateHasChanged();
+                });
+            }
+            else
+            {
+                await InvokeAsync(async () =>
+                {
+                    _audioPlayer.MediaEndedEvent -= OnPlaybackEnded;
+                    await _audioPlayer.Stop();
+                    _elapsedTimer.Stop();
+                    IsPlaying = false;
+                    _audioPlayer.MediaEndedEvent += OnPlaybackEnded;
+
+                    ElapsedTime = "00:00";
+                    TotalTime = "00:00";
+
+                    await JS.InvokeVoidAsync("updatePlayerSliderPosition", 0);
+
+                    StateHasChanged();
+                });
+            }
         }
         else
         {
-            await InvokeAsync(async () =>
+            if (!string.IsNullOrWhiteSpace(songId))
             {
-                _audioPlayer.MediaEndedEvent -= OnPlaybackEnded;
-                await _audioPlayer.Stop();
-                _elapsedTimer.Stop();
-                IsPlaying = false;
-                _audioPlayer.MediaEndedEvent += OnPlaybackEnded;
+                string songWithPath = _armaApi.GetFileWithPath($"{songId}.m4a");
 
-                ElapsedTime = "00:00";
-                TotalTime = "00:00";
+                await InvokeAsync(async () =>
+                //MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    await _audioPlayer.SetMediaSource(songWithPath);
+                    await _audioPlayer.SetMetaData(artistName, songName);
+                    await _audioPlayer.Play();
 
-                await JS.InvokeVoidAsync("updatePlayerSliderPosition", 0);
+                    _elapsedTimer.Start();
+                    IsPlaying = true;
 
-                StateHasChanged();
-            });
+                    StateHasChanged();
+                });
+            }
         }
     }
 
     [JSInvokable]
-    public static void Play(string songId, string artistName, string songName)
+    public static void Play(string songId, string artistName, string songName, bool fromPlayFirstSong)
     {
-        _playAction?.Invoke(songId, artistName, songName);
+        _playAction?.Invoke(songId, artistName, songName, fromPlayFirstSong);
     }
 
     [JSInvokable]
@@ -183,25 +228,33 @@
 
     private async void PlayPause()
     {
-        if (!_audioPlayer.IsMediaLoaded()) return;
-
-        await InvokeAsync(async () =>
+        if (_audioPlayer.IsMediaLoaded())
         {
-            if (IsPlaying)
+            await InvokeAsync(async () =>
             {
-                await _audioPlayer.Pause();
-                _elapsedTimer.Stop();
-                IsPlaying = false;
-            }
-            else
-            {
-                await _audioPlayer.Play();
-                _elapsedTimer.Start();
-                IsPlaying = true;
-            }
+                if (IsPlaying)
+                {
+                    await _audioPlayer.Pause();
+                    _elapsedTimer.Stop();
+                    IsPlaying = false;
+                }
+                else
+                {
+                    await _audioPlayer.Play();
+                    _elapsedTimer.Start();
+                    IsPlaying = true;
+                }
 
-            StateHasChanged();
-        });
+                StateHasChanged();
+            });
+        }
+        else
+        {
+            if (!IsPlaying)
+            {
+                await JS.InvokeVoidAsync("playFirstAvailableSong");
+            }
+        }
     }
 
     private async Task NextSong()

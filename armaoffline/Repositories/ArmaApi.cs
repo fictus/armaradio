@@ -90,6 +90,18 @@ namespace armaoffline.Repositories
             return nowSignedIn;
         }
 
+        public List<ArmaUserDataItem> Offline_GetListOfOfflineUsers()
+        {
+            return _dapper.GetList<ArmaUserDataItem>(@"
+                select
+                    id,
+                    username
+                from armausers
+                order by
+                    username;
+                ");
+        }
+
         public void RepopulateUserPlaylistAndSongs()
         {
             using (var conn = _dapper.GetConnection())
@@ -264,7 +276,7 @@ namespace armaoffline.Repositories
             return returnItem;
         }
 
-        public List<ArmaUserPlaylistDataItem> Offline_GetAvailablePlaylists()
+        public List<ArmaUserPlaylistDataItem> Offline_GetAvailablePlaylists(int UserId)
         {
             List<ArmaUserPlaylistDataItem> returnItem = _dapper.GetList<ArmaUserPlaylistDataItem>(@"
                 select distinct
@@ -274,8 +286,39 @@ namespace armaoffline.Repositories
                 join usersongs us
                     on us.playlistid = pl.id
                 where
-                    pl.songsavailableoffline = 1;
-                ");
+                    pl.userid=@userid
+                    and pl.songsavailableoffline = 1;
+                ",
+            new
+            {
+                userid = UserId
+            });
+
+            return returnItem;
+        }
+
+        public List<ArmaPlaylistDataItem> Offline_GetRandomSongs(int UserId)
+        {
+            List<ArmaPlaylistDataItem> returnItem = _dapper.GetList<ArmaPlaylistDataItem>(@"
+                select
+                    us.id as Id,
+                    us.artist as Artist,
+                    us.songname as Song,
+                    us.videoid as VideoId
+                from playlists pl
+                inner join usersongs us
+                    on us.playlistid = pl.id
+                where
+                    pl.userid=@userid
+                    and pl.songsavailableoffline = 1
+                order by
+                    random()
+                limit 100;
+                ",
+                new
+                {
+                    userid = UserId
+                });
 
             return returnItem;
         }

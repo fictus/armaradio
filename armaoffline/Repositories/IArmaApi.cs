@@ -10,10 +10,12 @@ namespace armaoffline.Repositories
     public interface IArmaApi
     {
         bool Signin(string Email, string Password);
+        List<ArmaUserDataItem> Offline_GetListOfOfflineUsers();
         List<ArmaUserPlaylistDataItem> GetUserPlaylists();
         List<ArmaPlaylistDataItem> GetPlaylistById(int playlistId);
         List<ArmaPlaylistDataItem> Offline_GetPlaylistById(int playlistId);
-        List<ArmaUserPlaylistDataItem> Offline_GetAvailablePlaylists();
+        List<ArmaPlaylistDataItem> Offline_GetRandomSongs(int UserId);
+        List<ArmaUserPlaylistDataItem> Offline_GetAvailablePlaylists(int UserId);
         void DownloadPlaylistSongsForOffline(int? PlaylistId);
         void GetAudioFile(string VideoId);
         void MarkPlaylistSongsAsDownloaded(int PlaylistId);

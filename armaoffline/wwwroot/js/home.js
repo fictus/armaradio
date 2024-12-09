@@ -98,9 +98,7 @@ function populateSongsToDownloadTable(data, playListId) {
     }
 }
 
-function populateSongsToPlayerTable(data, playlistTitle) {
-    $("#lblTblHeaderPlaylistName").html(playlistTitle);
-
+function populateSongsToPlayerTable(data) {
     let tblPlaylist = $("#tblMainPlayList");
     tblPlaylist.find("tbody").find("tr").remove();
 
@@ -139,13 +137,13 @@ function populateSongsToPlayerTable(data, playlistTitle) {
 
         $("#tblMainPlayList").find("button.btn-play-inner-btn-play").each(function () {
             $(this).on("click", function () {
-                preparePlayNowRow(this);
+                preparePlayNowRow(this, false);
             });
         });
     }
 }
 
-function preparePlayNowRow(btn) {
+function preparePlayNowRow(btn, fromPlayFirstSong) {
     //armaradio.masterPageWait(true);
 
     let currentRow = $(btn).closest("tr");
@@ -161,9 +159,21 @@ function preparePlayNowRow(btn) {
         $("a.lnk-attribution-notice").attr("data-songname", songName);
         //$("a.lnk-attribution-notice").attr("data-url", "https://www.youtube.com/watch?v=" + videoId);
 
-        playSong(videoId, artistName, songName);
+        playSong(videoId, artistName, songName, fromPlayFirstSong);
 
         //armaradio.masterPageWait(false);
+    }
+}
+
+function playFirstAvailableSong() {
+    if ($("#tblMainPlayList").find("tr").length) {
+        let nextSongTr = $("#tblMainPlayList").find("tr").eq(0);
+
+        if (nextSongTr.length) {
+            let playButton = nextSongTr.find("button.btn-play-inner-btn-play");
+
+            preparePlayNowRow(playButton, true);
+        }
     }
 }
 
@@ -174,7 +184,7 @@ function playNextAvailableSong() {
     if (nextSongTr.length) {
         let playButton = nextSongTr.find("button.btn-play-inner-btn-play");
 
-        preparePlayNowRow(playButton);
+        preparePlayNowRow(playButton, false);
     } else {
         $("#tblMainPlayList").find("tr.now-playing").removeClass("now-playing");
 
@@ -182,12 +192,12 @@ function playNextAvailableSong() {
     }
 }
 
-async function playSong(videoId, artistName, songName) {
-    await DotNet.invokeMethodAsync("armaoffline", "Play", videoId, artistName, songName);
+async function playSong(videoId, artistName, songName, fromPlayFirstSong) {
+    await DotNet.invokeMethodAsync("armaoffline", "Play", videoId, artistName, songName, fromPlayFirstSong);
 }
 
 async function clearPlayer() {
-    await DotNet.invokeMethodAsync("armaoffline", "Play", "", "", "");
+    await DotNet.invokeMethodAsync("armaoffline", "Play", "", "", "", false);
 }
 
 async function setAudioToPosition(position) {
