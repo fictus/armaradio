@@ -19,12 +19,6 @@ namespace armaoffline
     public class MainActivity : MauiAppCompatActivity
     {
         //private WakeLock wakeLock;
-        //private readonly IMediaElementService _mediaElementService;
-
-        //public MainActivity(IMediaElementService mediaElementService)
-        //{
-        //    _mediaElementService = mediaElementService;
-        //}
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -37,10 +31,19 @@ namespace armaoffline
 
         protected override void OnDestroy()
         {
+            //wakeLock.Release();
+
             // Properly release media session and stop service
 
             var _mediaPlayer = IPlatformApplication.Current.Services.GetService(typeof(IMediaElementService)) as IMediaElementService;
             _mediaPlayer?.CleanupMediaSession();
+
+            // Cancel the media notification
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.From(this);
+            notificationManager.CancelAll();
+
+            // for some reason the app does not fully close when Audio is playing, the only way to fully terminate it is to kill it this way 
+            Process.KillProcess(Process.MyPid());
 
             base.OnDestroy();
         }

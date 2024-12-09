@@ -117,9 +117,13 @@ namespace armaoffline.Services
 
         public void CleanupMediaSession()
         {
-            _mediaElement?.Pause();
-            _mediaElement?.Handler?.DisconnectHandler();
-            _mediaElement?.Dispose();
+            if (_mediaElement != null)
+            {
+                _mediaElement.MediaEnded -= OnMediaEnded;
+                _mediaElement.Stop();
+                _mediaElement.Source = null;
+                _mediaElement.Dispose();
+            }
         }
     }
 }
