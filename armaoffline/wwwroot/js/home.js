@@ -161,7 +161,12 @@ function preparePlayNowRow(btn, fromPlayFirstSong) {
 
         playSong(videoId, artistName, songName, fromPlayFirstSong);
 
-        //armaradio.masterPageWait(false);
+        if ($("#tblMainPlayList").find("tr.now-playing").length) {
+            $("#tblMainPlayList").find("tr.now-playing")[0].scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+        }
     }
 }
 

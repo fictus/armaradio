@@ -18,20 +18,21 @@ namespace armaoffline
     [Activity(Theme = "@style/Maui.SplashTheme", ResizeableActivity = true, MainLauncher = true, LaunchMode = LaunchMode.SingleTask, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.Density)]
     public class MainActivity : MauiAppCompatActivity
     {
-        //private WakeLock wakeLock;
+        private WakeLock wakeLock;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
 
-            ////// Acquire a wake lock with the correct flags
-            //wakeLock = powerManager.NewWakeLock(WakeLockFlags.Partial, "armaoffline:AudioPlaybackLock");
-            //wakeLock.Acquire();
+            // Acquire a wake lock with the correct flags
+            PowerManager powerManager = (PowerManager)GetSystemService(Context.PowerService);
+            wakeLock = powerManager.NewWakeLock(WakeLockFlags.Partial, "armaoffline:AudioPlaybackLock");
+            wakeLock.Acquire();
         }
 
         protected override void OnDestroy()
         {
-            //wakeLock.Release();
+            wakeLock?.Release();
 
             // Properly release media session and stop service
 
