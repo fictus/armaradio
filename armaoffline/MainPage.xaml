@@ -13,7 +13,6 @@
             MetadataTitle=""
             WidthRequest="0"
             HeightRequest="0"
-            ShouldKeepScreenOn="True"
             ShouldShowPlaybackControls="True" />
 
         <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html">

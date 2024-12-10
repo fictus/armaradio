@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommunityToolkit.Maui.Core.Primitives;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,7 @@ namespace armaoffline.Services
     public interface IMediaElementService
     {
         event EventHandler<bool> MediaLoadedChanged;
+        event EventHandler<MediaFailedEventArgs> MediaFailedEvent;
         event EventHandler MediaEndedEvent;
         Task SetMediaSource(string source);
         Task SetMetaData(string artistName, string songName);

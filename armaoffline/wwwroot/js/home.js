@@ -32,6 +32,14 @@ function downloadSelectedPlaylistSongs(playListId) {
 }
 
 function onOfflinePlayerOnload() {
+    $("div.page-body-content").on("click", function () {
+        closeOfflinePlayerDimmedScreen();
+    });
+
+    $("div.screen-sleep-dimmed").on("click", function () {
+        closeOfflinePlayerDimmedScreen();
+    });
+
     $("#sldPlayerLocation").on("input", function (e) {
         let newPlaybackPosition = parseFloat(e.target.value);
 
@@ -49,6 +57,10 @@ async function refreshArmaLoaderUI() {
 
 async function refreshOfflinePlayerUI() {
     await DotNet.invokeMethodAsync("armaoffline", "RefreshUIFromOfflineRadio");
+}
+
+async function closeOfflinePlayerDimmedScreen() {
+    await DotNet.invokeMethodAsync("armaoffline", "CloseOfflinePlayerDimmedScreen");
 }
 
 async function downloadPendingSong(videoId) {
@@ -206,10 +218,16 @@ function playNextAvailableSong() {
 }
 
 async function playSong(videoId, artistName, songName, fromPlayFirstSong) {
+    $("#lblDimmed_Artist").html(artistName);
+    $("#lblDimmed_Song").html(songName);
+
     await DotNet.invokeMethodAsync("armaoffline", "Play", videoId, artistName, songName, fromPlayFirstSong);
 }
 
 async function clearPlayer() {
+    $("#lblDimmed_Artist").html("");
+    $("#lblDimmed_Song").html("");
+
     await DotNet.invokeMethodAsync("armaoffline", "Play", "", "", "", false);
 }
 

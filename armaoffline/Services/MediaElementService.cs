@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.Maui.Core;
+using CommunityToolkit.Maui.Core.Primitives;
 using CommunityToolkit.Maui.Views;
 using Microsoft.Maui.Controls;
 
@@ -14,12 +15,21 @@ namespace armaoffline.Services
         private readonly MediaElement _mediaElement;
         public event EventHandler<bool> MediaLoadedChanged;
         public event EventHandler MediaEndedEvent;
+        public event EventHandler<MediaFailedEventArgs> MediaFailedEvent;
 
         public MediaElementService(MediaElement mediaElement)
         {
             _mediaElement = mediaElement ?? throw new ArgumentNullException(nameof(mediaElement));
             //_mediaElement.MediaOpened += OnMediaOpened;
             _mediaElement.MediaEnded += OnMediaEnded;
+            _mediaElement.MediaFailed += OnMediaFailedEvent;
+
+#if ANDROID
+            _mediaElement.ShouldKeepScreenOn = true;
+#endif
+#if IOS
+            _mediaElement.ShouldKeepScreenOn = true;  
+#endif
         }
 
         public Task SetMediaSource(string source)
@@ -106,6 +116,12 @@ namespace armaoffline.Services
         {
             // Trigger the media ended event
             MediaEndedEvent?.Invoke(this, e);
+        }
+
+        private void OnMediaFailedEvent(object sender, MediaFailedEventArgs e)
+        {
+            // Trigger the media ended event
+            MediaFailedEvent?.Invoke(this, e);
         }
 
         public bool IsMediaLoaded()

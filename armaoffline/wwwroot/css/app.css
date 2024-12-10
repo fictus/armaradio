@@ -242,6 +242,28 @@ div.bottom-gap {
     height: 250px;
 }
 
+div.screen-sleep-dimmed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: black;
+    opacity: 0.8;
+    z-index: 2;
+}
+
+div.screen-sleep-dimmed:not(.show) {
+    display: none;
+}
+
+div.screen-sleep-now-playing {
+    position: absolute;
+    top: 35%;
+    left: 0;
+    right: 0;
+}
+
 div.player-float-bottom {
     position: fixed;
     bottom: 0;
@@ -250,6 +272,7 @@ div.player-float-bottom {
     background-color: #E9ECEF;
     border: 1px solid #CED4DA;
     text-align: center;
+    z-index: 3;
 }
 
 div.player-body {
@@ -288,6 +311,10 @@ div.player-body {
     width: 40px;
     height: 40px;
     background: url(../images/player_skip.png) no-repeat center center / cover;
+}
+
+.font-white {
+    color: white;
 }
 
 .block-item {

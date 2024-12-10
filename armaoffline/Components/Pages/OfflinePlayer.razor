@@ -10,37 +10,49 @@
     
 }
 
-<div class="row">
-    <div class="col-md-12">
-        <button id="btnLoadOfflinePlayerForUser" class="btn btn-primary" @onclick="GetRandomSongsFromAllUserPlaylsts">Random Songs</button>
+<div class="page-body-content">
+    <div class="row">
+        <div class="col-md-12">
+            <button id="btnLoadOfflinePlayerForUser" class="btn btn-primary" @onclick="GetRandomSongsFromAllUserPlaylsts">Random Songs</button>
+        </div>
     </div>
-</div>
-<div class="row mt-4">
-    <div class="col-md-12">
-        <div class="input-group mb-3">
-            <span class="input-group-text" id="basic-addon1">Playlist:</span>
-            <select id="cmbOfflinePlaylists" class="form-select" @onchange="OnChangeOfflinePlaylistsHandler">
-                <option value=""></option>
-                @{
-                    foreach (var item in offlinePlaylists)
-                    {
-                        <option value="@item.Id">@item.PlaylistName</option>
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1">Playlist:</span>
+                <select id="cmbOfflinePlaylists" class="form-select" @onchange="OnChangeOfflinePlaylistsHandler">
+                    <option value=""></option>
+                    @{
+                        foreach (var item in offlinePlaylists)
+                        {
+                            <option value="@item.Id">@item.PlaylistName</option>
+                        }
                     }
-                }
-            </select>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <table id="tblMainPlayList">
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="bottom-gap"></div>
+</div>
+
+<!-- Player Controls -->
+<div class="screen-sleep-dimmed @(ShowDimmedScreen)">
+    <div class="screen-sleep-now-playing ps-5 pe-5">
+        <div class="align-center">
+            <h3 id="lblDimmed_Artist" class="font-white"></h3>
+        </div>
+        <div class="align-center">
+            <h4 id="lblDimmed_Song" class="font-white"></h4>
         </div>
     </div>
 </div>
-<div class="row mt-3">
-    <div class="col-md-12">
-        <table id="tblMainPlayList">
-            <tbody></tbody>
-        </table>
-    </div>
-</div>
-<div class="bottom-gap"></div>
-
-<!-- Player Controls -->
 <div class="player-float-bottom">
     <div class="player-body ps-5 pe-5">
         <div>
@@ -68,12 +80,15 @@
     private static Action<string, string, string, bool> _playAction;
     private static Action<double?> _playerPositionAction;
     private static Action _updateUI;
+    private static Action _closeDimmedScreen;
 
     private System.Timers.Timer _elapsedTimer;
-    private System.Timers.Timer _heartbeatTimer;
+    private System.Timers.Timer _dimmedScreenTimer;
+    private int _dimmedScreenTimerSeconds = 0;
     public bool IsPlaying { get; private set; } = false;
     public string ElapsedTime { get; private set; } = "00:00";
     public string TotalTime { get; private set; } = "00:00";
+    private string ShowDimmedScreen { get; set; }
 
     protected override void OnInitialized()
     {
@@ -85,7 +100,11 @@
         _elapsedTimer = new System.Timers.Timer(1000);
         _elapsedTimer.Elapsed += UpdateElapsedTime;
 
+        _dimmedScreenTimer = new System.Timers.Timer(1000);
+        _dimmedScreenTimer.Elapsed += DimmedScreenTickEvent;
+
         _audioPlayer.MediaEndedEvent += OnPlaybackEnded;
+        _audioPlayer.MediaFailedEvent += OnAudioFailed;
 
         _playAction = PlaySong;
         _playerPositionAction = PlayerAudioPosition;
@@ -100,6 +119,7 @@
             await JS.InvokeVoidAsync("onOfflinePlayerOnload");
 
             _updateUI = RefreshPageUI;
+            _closeDimmedScreen = CloseDimmedScreen;
         }
     }
 
@@ -109,11 +129,32 @@
         _updateUI?.Invoke();
     }
 
+    [JSInvokable]
+    public static void CloseOfflinePlayerDimmedScreen()
+    {
+        _closeDimmedScreen?.Invoke();
+    }
+
     private void RefreshPageUI()
     {
         InvokeAsync(() =>
         {
             StateHasChanged();
+        });
+    }
+
+    private void CloseDimmedScreen()
+    {
+        InvokeAsync(() =>
+        {
+            ShowDimmedScreen = "";
+
+            if (!IsPlaying)
+            {
+                _dimmedScreenTimer.Stop();
+            }
+
+            _dimmedScreenTimerSeconds = 0;
         });
     }
 
@@ -166,6 +207,11 @@
                     _elapsedTimer.Start();
                     IsPlaying = true;
 
+                    if (_dimmedScreenTimerSeconds == 0)
+                    {
+                        _dimmedScreenTimer.Start();
+                    }
+
                     StateHasChanged();
                 });
             }
@@ -181,6 +227,9 @@
 
                     ElapsedTime = "00:00";
                     TotalTime = "00:00";
+
+                    _dimmedScreenTimer.Stop();
+                    _dimmedScreenTimerSeconds = 0;
 
                     await JS.InvokeVoidAsync("updatePlayerSliderPosition", 0);
 
@@ -203,6 +252,11 @@
 
                     _elapsedTimer.Start();
                     IsPlaying = true;
+
+                    if (_dimmedScreenTimerSeconds == 0)
+                    {
+                        _dimmedScreenTimer.Start();
+                    }
 
                     StateHasChanged();
                 });
@@ -317,6 +371,21 @@
         });
     }
 
+    private async void DimmedScreenTickEvent(object sender, System.Timers.ElapsedEventArgs e)
+    {
+        await InvokeAsync(() =>
+        {
+            if (IsPlaying && _dimmedScreenTimerSeconds > 120)
+            {
+                ShowDimmedScreen = "show";
+
+                StateHasChanged();
+            }
+
+            _dimmedScreenTimerSeconds++;
+        });
+    }
+
     private async void OnPlaybackEnded(object sender, EventArgs e)
     {
         // Ensure this runs on the UI thread
@@ -327,6 +396,15 @@
         });
     }
 
+    private async void OnAudioFailed(object sender, CommunityToolkit.Maui.Core.Primitives.MediaFailedEventArgs e)
+    {
+        // Ensure this runs on the UI thread
+        await InvokeAsync(async () =>
+        {
+            // Automatically move to the next song
+            await NextSong();
+        });
+    }
 
     public void Dispose()
     {
