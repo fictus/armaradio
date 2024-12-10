@@ -26,13 +26,43 @@ namespace armaoffline
 
             // Acquire a wake lock with the correct flags
             PowerManager powerManager = (PowerManager)GetSystemService(Context.PowerService);
+
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.M)
+            {
+                // Check if the app is already ignoring battery optimizations
+                if (!powerManager.IsIgnoringBatteryOptimizations(Platform.CurrentActivity?.PackageName))
+                {
+                    // Request battery optimization exemption
+                    var intent = new Intent(Android.Provider.Settings.ActionRequestIgnoreBatteryOptimizations);
+                    intent.SetData(Android.Net.Uri.Parse("package:" + Platform.CurrentActivity?.PackageName));
+
+                    try
+                    {
+                        Platform.CurrentActivity?.StartActivity(intent);
+                    }
+                    catch (ActivityNotFoundException)
+                    {
+                        // Fallback if the intent is not supported
+                        Android.Util.Log.Warn("BatteryOptimization", "Could not request battery optimization exemption");
+                    }
+                }
+            }
+
             wakeLock = powerManager.NewWakeLock(WakeLockFlags.Partial, "armaoffline:AudioPlaybackLock");
             wakeLock.Acquire();
         }
 
         protected override void OnDestroy()
         {
-            wakeLock?.Release();
+            if (wakeLock != null)
+            {
+                if (wakeLock.IsHeld)
+                {
+                    wakeLock.Release();
+                }
+                wakeLock.Dispose();
+                wakeLock = null;
+            }
 
             // Properly release media session and stop service
 

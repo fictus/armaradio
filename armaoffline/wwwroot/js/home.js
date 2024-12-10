@@ -47,6 +47,10 @@ async function refreshArmaLoaderUI() {
     await DotNet.invokeMethodAsync("armaoffline", "RefreshUI");
 }
 
+async function refreshOfflinePlayerUI() {
+    await DotNet.invokeMethodAsync("armaoffline", "RefreshUIFromOfflineRadio");
+}
+
 async function downloadPendingSong(videoId) {
     await DotNet.invokeMethodAsync("armaoffline", "DownloadFile", videoId);
 }
@@ -162,10 +166,14 @@ function preparePlayNowRow(btn, fromPlayFirstSong) {
         playSong(videoId, artistName, songName, fromPlayFirstSong);
 
         if ($("#tblMainPlayList").find("tr.now-playing").length) {
-            $("#tblMainPlayList").find("tr.now-playing")[0].scrollIntoView({
-                behavior: "smooth",
-                block: "center"
-            });
+            setTimeout(function () {
+                $("#tblMainPlayList").find("tr.now-playing")[0].scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+
+                refreshOfflinePlayerUI();
+            }, 1);
         }
     }
 }
@@ -210,7 +218,6 @@ async function setAudioToPosition(position) {
 }
 
 function updatePlayerSliderPosition(position) {
-    console.log(position);
     $("#sldPlayerLocation").val(position);
 }
 

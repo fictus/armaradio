@@ -15,10 +15,10 @@
         <button id="btnLoadOfflinePlayerForUser" class="btn btn-primary" @onclick="GetRandomSongsFromAllUserPlaylsts">Random Songs</button>
     </div>
 </div>
-<div class="row mt-3">
+<div class="row mt-4">
     <div class="col-md-12">
         <div class="input-group mb-3">
-            <span class="input-group-text col-4" id="basic-addon1">Playlist:</span>
+            <span class="input-group-text" id="basic-addon1">Playlist:</span>
             <select id="cmbOfflinePlaylists" class="form-select" @onchange="OnChangeOfflinePlaylistsHandler">
                 <option value=""></option>
                 @{
@@ -67,6 +67,7 @@
         armaoffline.Providers.ServiceLocator.ServiceProvider.GetRequiredService<armaoffline.Repositories.IArmaApi>();
     private static Action<string, string, string, bool> _playAction;
     private static Action<double?> _playerPositionAction;
+    private static Action _updateUI;
 
     private System.Timers.Timer _elapsedTimer;
     private System.Timers.Timer _heartbeatTimer;
@@ -97,7 +98,23 @@
         if (firstRender)
         {
             await JS.InvokeVoidAsync("onOfflinePlayerOnload");
+
+            _updateUI = RefreshPageUI;
         }
+    }
+
+    [JSInvokable]
+    public static void RefreshUIFromOfflineRadio()
+    {
+        _updateUI?.Invoke();
+    }
+
+    private void RefreshPageUI()
+    {
+        InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
     }
 
     private void HandleLocationChanged(object sender, LocationChangedEventArgs e)
