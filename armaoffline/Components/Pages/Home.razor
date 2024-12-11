@@ -4,6 +4,7 @@
 @inject armaoffline.Data.IDapperHelper _dapper
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
+@inject MauiProgram.StartupErrorService _startupErrorService
 @page "/"
 @{
     
@@ -57,9 +58,20 @@
         </div>
     </div>
 </div>
+<div id="dvStartupErrors">
+    @if (_startupErrorService != null && _startupErrorService.ErrorMessage != null && _startupErrorService.ErrorMessage.Count > 0)
+    {
+        foreach (var error in _startupErrorService.ErrorMessage)
+        {
+            <div class="mt-2 font-red">
+                @(error)
+            </div>
+        }
+    }
+</div>
 
 @code {
-    List<ArmaUserDataItem> offlineUsers { get; set; }
+    List<ArmaUserDataItem> offlineUsers { get; set; } = new List<ArmaUserDataItem>();
     private string userName = string.Empty;
     private string password = string.Empty;
     private string token = string.Empty;

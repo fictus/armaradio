@@ -13,10 +13,14 @@ namespace armaoffline
         public static MauiApp CreateMauiApp()
         {
             MauiApp app = null;
+            MauiAppBuilder builder = null;
+            var startupErrorService = new StartupErrorService();
 
             try
             {
-                var builder = MauiApp.CreateBuilder();
+                builder = MauiApp.CreateBuilder();
+                builder.Services.AddSingleton(startupErrorService);
+
                 builder
                     .UseMauiApp<App>()
                     .UseMauiCommunityToolkitMediaElement()                   
@@ -60,14 +64,15 @@ namespace armaoffline
                 {
                     System.Diagnostics.Debug.WriteLine($"Service Registration Error: {serviceEx}");
                     Console.WriteLine($"Service Registration Error: {serviceEx}");
-                    throw;
+
+                    startupErrorService.AddError($"Startup Error: {serviceEx.Message} - {serviceEx.StackTrace}");
+
+                    //throw;
                 }
 
                 app = builder.Build();
 
                 ServiceLocator.ServiceProvider = app.Services;
-
-                return app;
             }
             catch (Exception ex)
             {
@@ -78,8 +83,23 @@ namespace armaoffline
                 // Log full stack trace
                 System.Diagnostics.Debug.WriteLine($"Full Stack Trace: {ex.StackTrace}");
 
+                startupErrorService.AddError($"Startup Error: {ex.Message} - {ex.StackTrace}");
+
                 // Rethrow to ensure the error is visible
-                throw;
+                //throw;
+            }
+
+            return app;
+        }
+
+        public class StartupErrorService
+        {
+            public List<string> ErrorMessage { get; set; } = new List<string>();
+            public bool HasError => ErrorMessage.Count > 0;
+
+            public void AddError(string errorMessage)
+            {
+                ErrorMessage.Add(errorMessage);
             }
         }
     }

@@ -31,6 +31,17 @@ function downloadSelectedPlaylistSongs(playListId) {
     }
 }
 
+function updateDownloadQueueRemainingCount(countRemaining) {
+    $("#lblDownloadingCountRemaining").html(countRemaining);
+}
+
+function updateDownloadQueueMessage(countRemaining, labelDetails, show) {
+    $("#lblDownloadingCountRemaining").html(countRemaining);
+    $("#lblDownloadingCurrently").html(labelDetails);
+
+    $("div.dv-download-progress-holder").css("display", (show ? "" : "none"));
+}
+
 function onOfflinePlayerOnload() {
     $("div.page-body-content").on("click", function () {
         closeOfflinePlayerDimmedScreen();

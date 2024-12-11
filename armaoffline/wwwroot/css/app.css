@@ -249,7 +249,7 @@ div.screen-sleep-dimmed {
     bottom: 0;
     right: 0;
     background-color: black;
-    opacity: 0.8;
+    opacity: 0.9;
     z-index: 2;
 }
 
@@ -311,6 +311,21 @@ div.player-body {
     width: 40px;
     height: 40px;
     background: url(../images/player_skip.png) no-repeat center center / cover;
+}
+
+div.dv-download-progress-holder {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #E9ECEF;
+    border: 1px solid #CED4DA;
+    text-align: center;
+    z-index: 3;
+}
+
+.font-red {
+    color: red;
 }
 
 .font-white {

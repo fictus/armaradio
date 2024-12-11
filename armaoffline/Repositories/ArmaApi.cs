@@ -248,7 +248,18 @@ namespace armaoffline.Repositories
                 }
             }
 
-            returnItem = returnItem.Where(sg => !string.IsNullOrWhiteSpace(sg.VideoId)).ToList();
+            returnItem = returnItem.Where(sg => !string.IsNullOrWhiteSpace(sg.VideoId))
+                .Select(ng =>
+                {
+                    return new ArmaPlaylistDataItem()
+                    {
+                        Id = ng.Id,
+                        VideoId = ng.VideoId,
+                        Artist = ng.Artist,
+                        Song = ng.Song,
+                        PlaylistId = playlistId
+                    };
+                }).ToList();
 
             return returnItem;
         }
