@@ -88,6 +88,7 @@
     public bool IsPlaying { get; private set; } = false;
     public string ElapsedTime { get; private set; } = "00:00";
     public string TotalTime { get; private set; } = "00:00";
+    private int _maxDimScreenSeconds { get; set; }
     private string ShowDimmedScreen { get; set; }
 
     protected override void OnInitialized()
@@ -96,6 +97,15 @@
         var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
         UserId = (int.TryParse(query["userid"], out int _userId) ? _userId : null);
         offlinePlaylists = (UserId.HasValue ? _armaApi.Offline_GetAvailablePlaylists(UserId.Value) : new List<ArmaUserPlaylistDataItem>());
+
+        if (System.Diagnostics.Debugger.IsAttached)
+        {
+            _maxDimScreenSeconds = 10;
+        }
+        else
+        {
+            _maxDimScreenSeconds = 120;
+        }
 
         _elapsedTimer = new System.Timers.Timer(1000);
         _elapsedTimer.Elapsed += UpdateElapsedTime;
@@ -135,26 +145,28 @@
         _closeDimmedScreen?.Invoke();
     }
 
-    private void RefreshPageUI()
+    private async void RefreshPageUI()
     {
-        InvokeAsync(() =>
+        await InvokeAsync(() =>
         {
             StateHasChanged();
         });
     }
 
-    private void CloseDimmedScreen()
+    private async void CloseDimmedScreen()
     {
-        InvokeAsync(() =>
+        await InvokeAsync(() =>
         {
-            ShowDimmedScreen = "";
-
             if (!IsPlaying)
             {
                 _dimmedScreenTimer.Stop();
             }
 
+            ShowDimmedScreen = "";
+
             _dimmedScreenTimerSeconds = 0;
+
+            StateHasChanged();
         });
     }
 
@@ -375,7 +387,7 @@
     {
         await InvokeAsync(() =>
         {
-            if (IsPlaying && _dimmedScreenTimerSeconds > 120)
+            if (IsPlaying && _dimmedScreenTimerSeconds > _maxDimScreenSeconds)
             {
                 ShowDimmedScreen = "show";
 
