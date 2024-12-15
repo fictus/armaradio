@@ -15,3 +15,6 @@ arma_miner/obj/
 /armaradio/wwwroot/AudioFiles
 /armaoffline/bin/Release/net8.0-android
 /armaoffline/armaoffline.csproj.user
+/arma_historycompiler/bin/Debug/net8.0
+/arma_historycompiler/obj
+/arma_historycompiler/tempFiles/listenbrainz-listens-dump-1910-20241112-000003-incremental/listens/2024
