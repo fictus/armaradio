@@ -121,6 +121,7 @@ namespace armaradio.Repositories
 
                 using (HttpClient client = new HttpClient())
                 {
+                    System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                     var encodedFormData = new FormUrlEncodedContent(formData);
 
                     using (var response = client.PostAsync(url, encodedFormData).Result)
@@ -166,6 +167,7 @@ namespace armaradio.Repositories
 
             using (HttpClient client = new HttpClient())
             {
+                System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
 
                 using (var response = client.GetAsync(url).Result)
@@ -198,6 +200,7 @@ namespace armaradio.Repositories
 
                         using (HttpClient client = new HttpClient())
                         {
+                            System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
 
                             using (var response = client.GetAsync(url).Result)
@@ -228,6 +231,7 @@ namespace armaradio.Repositories
 
                     using (HttpClient client = new HttpClient())
                     {
+                        System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
 
                         using (var response = client.GetAsync(url).Result)
@@ -256,6 +260,17 @@ namespace armaradio.Repositories
             {
                 artistId = playlists.artists.items[0].id;
             }
+
+            //if (string.IsNullOrWhiteSpace(artistId))
+            //{
+            //    if (playlists != null && playlists.tracks != null && playlists.tracks.items != null && playlists.tracks.items.Count > 0)
+            //    {
+            //        if (playlists.tracks.items[0].artists != null && playlists.tracks.items[0].artists.Count > 0)
+            //        {
+            //            artistId = playlists.tracks.items[0].artists[0].id;
+            //        }
+            //    }
+            //}
 
             if (playlists.tracks != null && playlists.tracks.items != null && playlists.tracks.items.Count > 0)
             {
@@ -291,6 +306,7 @@ namespace armaradio.Repositories
 
                 using (HttpClient client = new HttpClient())
                 {
+                    System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                     client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
 
                     using (var response = client.GetAsync(url).Result)
@@ -316,6 +332,7 @@ namespace armaradio.Repositories
 
             string url = $"https://open.spotify.com/search/{Uri.EscapeUriString(artistInfo.Name)}/playlists";
 
+            System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
             var config = AngleSharp.Configuration.Default.WithDefaultLoader();
