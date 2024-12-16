@@ -30,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Sql\" />
     <Folder Include="wwwroot\AudioFiles\" />
     <Folder Include="wwwroot\files\" />
     <Folder Include="wwwroot\images\records-art\" />
