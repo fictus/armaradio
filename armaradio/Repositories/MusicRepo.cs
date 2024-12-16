@@ -56,6 +56,14 @@ namespace armaradio.Repositories
             });
         }
 
+        public List<ArmaArtistDataItem> Artist_FindArtistsInternal(string search)
+        {
+            return _dapper.GetList<ArmaArtistDataItem>("radioconn", "Arma_SearchArtistsInternal", new
+            {
+                artist_name = search
+            });
+        }
+
         public List<ArtistDataItem> Artist_GetArtistList(string search)
         {
             return _dapper.GetList<ArtistDataItem>("radioconn", "Artist_GetArtistList", new
@@ -249,7 +257,24 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
-        public RadioSessionRecommendedResponse GetRadioSessionRecommendedSongsFromArtist(string artistName, string songName)
+        public List<ArmaRecommendationDataItem> GetRadioSessionRecommendedSongsFromArtist(string artistName, string songName)
+        {
+            List<ArmaRecommendationDataItem> returnItem = new List<ArmaRecommendationDataItem>();
+
+            ArmaArtistDataItem currentArtist = (Artist_FindArtistsInternal(artistName) ?? new List<ArmaArtistDataItem>()).FirstOrDefault();
+
+            if (currentArtist != null)
+            {
+                returnItem = _dapper.GetList<ArmaRecommendationDataItem>("recommendations", "arma_get_suggestions_by_artist", new
+                {
+                    artist_mbid = currentArtist.Artist_MBId
+                });
+            }
+
+            return returnItem;
+        }
+
+        public RadioSessionRecommendedResponse GetRadioSessionRecommendedSongsFromArtist_OLD(string artistName, string songName)
         {
             RadioSessionRecommendedResponse returnItem = null;
             ArtistPlaylistsResponse playlists = GetArtistPlaylists(artistName, songName);
