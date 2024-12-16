@@ -269,18 +269,38 @@ div.player-float-bottom {
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: #E9ECEF;
-    border: 1px solid #CED4DA;
     text-align: center;
     z-index: 3;
 }
 
-div.player-body {
+div.player-float-bottom:not(.show) {
+    background-color: #E9ECEF;
+    border: 1px solid #CED4DA;
+}
+
+div.player-float-bottom.show {
+    background-color: black;
+    border: 1px solid black;
+}
+
+div.player-float-bottom:not(.show) div.player-body {
     padding: 12px;
     display: inline-block;
     background-color: white;
     margin-left: auto;
     margin-right: auto;
+}
+
+div.player-float-bottom.show div.player-body {
+    padding: 12px;
+    display: inline-block;
+    background-color: black;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+div.player-float-bottom.show div.player-body label {
+    color: white;
 }
 
 .player-btn {
