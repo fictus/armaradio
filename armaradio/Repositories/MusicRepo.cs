@@ -268,7 +268,73 @@ namespace armaradio.Repositories
                 returnItem = _dapper.GetList<ArmaRecommendationDataItem>("recommendations", "arma_get_suggestions_by_artist", new
                 {
                     artist_mbid = currentArtist.Artist_MBId
-                });
+                }) ?? new List<ArmaRecommendationDataItem>();
+
+                if (returnItem.Count == 0)
+                {
+                    List<string> relatedArtists = GetSimilarArtistNames(artistName);
+
+                    for (int i = 0; i < relatedArtists.Count; i++)
+                    {
+                        currentArtist = (Artist_FindArtistsInternal(relatedArtists[i]) ?? new List<ArmaArtistDataItem>()).FirstOrDefault();
+
+                        if (currentArtist != null)
+                        {
+                            returnItem = _dapper.GetList<ArmaRecommendationDataItem>("recommendations", "arma_get_suggestions_by_artist", new
+                            {
+                                artist_mbid = currentArtist.Artist_MBId
+                            }) ?? new List<ArmaRecommendationDataItem>();
+                        }
+
+                        if (returnItem.Count > 0)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return returnItem;
+        }
+
+        public List<string> GetSimilarArtistNames(string artistName)
+        {
+            List<string> returnItem = new List<string>();
+            string url = $"https://www.music-map.com/{Uri.EscapeUriString(artistName)}";
+
+            System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
+            var config = AngleSharp.Configuration.Default.WithDefaultLoader();
+            var browsingContext = BrowsingContext.New(config);
+
+            browsingContext.OpenAsync(url).Wait();
+
+            var namestHolder = browsingContext.Active.QuerySelector("#gnodMap");
+
+            if (namestHolder != null)
+            {
+                var allNamesLinks = namestHolder.QuerySelectorAll("a");
+
+                if (allNamesLinks != null)
+                {
+                    for (int i = 0; i < allNamesLinks.Count(); i++)
+                    {
+                        if (i != 0)
+                        {
+                            var link = allNamesLinks[i];
+
+                            try
+                            {
+                                returnItem.Add(link.Text().Trim());
+                            }
+                            catch (Exception ex)
+                            {
+
+                            }
+                        }
+                    }
+                }
             }
 
             return returnItem;
