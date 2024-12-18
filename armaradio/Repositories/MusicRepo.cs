@@ -272,7 +272,8 @@ namespace armaradio.Repositories
 
                 if (returnItem.Count == 0)
                 {
-                    List<string> relatedArtists = GetSimilarArtistNames(artistName);
+                    List<string> relatedArtists = GetSimilarArtistNames(artistName) ?? new List<string>();
+                    relatedArtists = relatedArtists.OrderBy(an => Guid.NewGuid()).ToList();
 
                     for (int i = 0; i < relatedArtists.Count; i++)
                     {
