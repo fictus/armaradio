@@ -562,6 +562,23 @@ function prebufferNextRadioSong() {
                     "Range": "bytes=0-1"
                 }
             });
+        } else {
+            armaradio.masterAJAXPost({
+                artistName: songData.artistName,
+                songName: songData.songName
+            }, "Music", "GetUrlByArtistSongName")
+                .then(function (response) {
+                    if (response) {
+                        if (response.hasVideo) {
+                            fetch(ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + response.videoId, {
+                                method: "GET",
+                                headers: {
+                                    "Range": "bytes=0-1"
+                                }
+                            });
+                        }
+                    }
+                });
         }
     }
 }
