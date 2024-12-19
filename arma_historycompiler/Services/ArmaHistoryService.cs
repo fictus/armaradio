@@ -82,9 +82,8 @@ namespace arma_historycompiler.Services
             }
         }
 
-        public async Task RunQueueList()
+        public async Task RunQueueList(List<QueueDataItem> queueItems)
         {
-            List<QueueDataItem> queueItems = _dapper.GetList<QueueDataItem>("radioconn", "queue_get_pending_list");
             List<ArtistDataItem> allArtists = _dapper.GetList<ArtistDataItem>("armaradio", "Operations_GetAllMBArtistIdsWithDBSource");
 
             if (queueItems != null && queueItems.Count > 0)

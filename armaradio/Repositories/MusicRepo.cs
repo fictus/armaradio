@@ -265,10 +265,18 @@ namespace armaradio.Repositories
 
             if (currentArtist != null)
             {
-                returnItem = _dapper.GetList<ArmaRecommendationDataItem>("recommendations", "arma_get_suggestions_by_artist", new
+                returnItem = _dapper.GetList<ArmaRecommendationDataItem>("recommendations", "arma_get_suggestions_by_renge_related_artists", new
                 {
                     artist_mbid = currentArtist.Artist_MBId
                 }) ?? new List<ArmaRecommendationDataItem>();
+
+                if (returnItem.Count == 0)
+                {
+                    returnItem = _dapper.GetList<ArmaRecommendationDataItem>("recommendations", "arma_get_suggestions_by_artist", new
+                    {
+                        artist_mbid = currentArtist.Artist_MBId
+                    }) ?? new List<ArmaRecommendationDataItem>();
+                }
 
                 if (returnItem.Count == 0)
                 {
