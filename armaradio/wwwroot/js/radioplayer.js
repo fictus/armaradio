@@ -273,32 +273,53 @@ function playNextSong() {
 
     if (songData) {
         if (!fromRandomSongs) {
-            armaradio.masterAJAXPost({
-                artistName: songData.artistName,
-                songName: songData.songName
-            }, "Music", "GetUrlByArtistSongName")
-                .then(function (response) {
-                    if (response) {
-                        if (response.hasVideo) {
-                            $("#lnkRadioOptions").attr({
-                                "data-videoid": response.videoId,
-                                "data-artistname": songData.artistName,
-                                "data-songname": songData.songName,
-                                "data-alternateids": (response.alternateIds || []).join(",")
-                            });
-                            $("#lblRadioPlayer_SongTitle").html(songData.songName);
-                            $("#lblRadioPlayer_ArtistName").html(songData.artistName);
+            let currentVideoId = $.trim(songData.videoId);
 
-                            $("a.lnk-attribution-notice").attr("data-artistname", songData.artistName);
-                            $("a.lnk-attribution-notice").attr("data-songname", songData.songName);
-                            $("a.lnk-attribution-notice").attr("data-url", "https://www.youtube.com/watch?v=" + response.videoId);
+            if (currentVideoId == "") {
+                armaradio.masterAJAXPost({
+                    artistName: songData.artistName,
+                    songName: songData.songName
+                }, "Music", "GetUrlByArtistSongName")
+                    .then(function (response) {
+                        if (response) {
+                            if (response.hasVideo) {
+                                $("#lnkRadioOptions").attr({
+                                    "data-videoid": response.videoId,
+                                    "data-artistname": songData.artistName,
+                                    "data-songname": songData.songName,
+                                    "data-alternateids": (response.alternateIds || []).join(",")
+                                });
+                                $("#lblRadioPlayer_SongTitle").html(songData.songName);
+                                $("#lblRadioPlayer_ArtistName").html(songData.artistName);
 
-                            initializeRadioPlayer(response.videoId);
+                                $("a.lnk-attribution-notice").attr("data-artistname", songData.artistName);
+                                $("a.lnk-attribution-notice").attr("data-songname", songData.songName);
+                                $("a.lnk-attribution-notice").attr("data-url", "https://www.youtube.com/watch?v=" + response.videoId);
+
+                                initializeRadioPlayer(response.videoId);
+                            }
                         }
-                    }
 
-                    armaradio.masterPageWait(false);
+                        armaradio.masterPageWait(false);
+                    });
+            } else {
+                $("#lnkRadioOptions").attr({
+                    "data-videoid": songData.videoId,
+                    "data-artistname": songData.artistName,
+                    "data-songname": songData.songName,
+                    "data-alternateids": (songData.alternateIds || []).join(",")
                 });
+                $("#lblRadioPlayer_SongTitle").html(songData.songName);
+                $("#lblRadioPlayer_ArtistName").html(songData.artistName);
+
+                $("a.lnk-attribution-notice").attr("data-artistname", songData.artistName);
+                $("a.lnk-attribution-notice").attr("data-songname", songData.songName);
+                $("a.lnk-attribution-notice").attr("data-url", "https://www.youtube.com/watch?v=" + songData.videoId);
+
+                initializeRadioPlayer(songData.videoId);
+
+                armaradio.masterPageWait(false);
+            }
         } else {
             $("#lnkRadioOptions").attr({
                 "data-videoid": songData.videoId,
@@ -570,12 +591,25 @@ function prebufferNextRadioSong() {
                 .then(function (response) {
                     if (response) {
                         if (response.hasVideo) {
+                            let altVideoIds = response.alternateIds || [];
+
                             fetch(ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + response.videoId, {
                                 method: "GET",
                                 headers: {
                                     "Range": "bytes=0-1"
                                 }
                             });
+
+                            for (let i = 0; i < allSongs.length; i++) {
+                                if (allSongs[i].id == currentId) {
+                                    allSongs[i].videoId = response.videoId;
+                                    allSongs[i].alternateIds = altVideoIds;
+
+                                    $("#dvRadioPlayer_currentlyPlaying").data("playerSongs", allSongs);
+
+                                    break;
+                                }
+                            }
                         }
                     }
                 });
