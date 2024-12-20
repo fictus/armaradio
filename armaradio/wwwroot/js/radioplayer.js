@@ -577,7 +577,7 @@ function prebufferNextRadioSong() {
         let videoId = $.trim(songData.videoId);
 
         if (videoId != "") {
-            fetch(ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId, {
+            fetch(ajaxPointCall + "/Music/BufferAudioFile?VideoId=" + videoId, {
                 method: "GET",
                 headers: {
                     "Range": "bytes=0-1"
@@ -593,7 +593,7 @@ function prebufferNextRadioSong() {
                         if (response.hasVideo) {
                             let altVideoIds = response.alternateIds || [];
 
-                            fetch(ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + response.videoId, {
+                            fetch(ajaxPointCall + "/Music/BufferAudioFile?VideoId=" + response.videoId, {
                                 method: "GET",
                                 headers: {
                                     "Range": "bytes=0-1"

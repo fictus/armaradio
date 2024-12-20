@@ -645,7 +645,7 @@ namespace armaradio.Controllers
 
                     if (!System.IO.File.Exists(endFileName))
                     {
-                        _musicRepo.DownloadMp4File($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}", endFileName);
+                        await _musicRepo.DownloadMp4File($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}", endFileName);
 
                         //long fileSize = new FileInfo(endFileName).Length;
                         //DateTime localMtime = DateTime.Now;
@@ -876,7 +876,92 @@ namespace armaradio.Controllers
             }
         }
 
-        
+        [HttpGet]
+        public async Task<IActionResult> BufferAudioFile(string VideoId)
+        {
+            try
+            {
+                _operation.SetRequestBody(new
+                {
+                    VideoId = VideoId
+                });
+                using (_operation)
+                {
+                    //List<AdaptiveFormatDataItem> audioStreams = _musicRepo.GetAudioStreams(VideoId);
+                    string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
+                    string downloadFolder = (IsLinux ? $"{rootPath}/AudioFiles/" : $"{rootPath}\\AudioFiles\\");
+                    string endFileName = endFileName = $"{downloadFolder}{VideoId.Trim()}.m4a";
+                    string fileType = "audio/mp4"; // MimeTypes.GetMimeType($"tmpFileName.m4a");
+                    string containerName = "m4a";
+                    bool fromConvertedFile = false;
+
+                    if (!System.IO.Directory.Exists(downloadFolder))
+                    {
+                        System.IO.Directory.CreateDirectory(downloadFolder);
+                    }
+
+                    if (!System.IO.File.Exists(endFileName))
+                    {
+                        await _musicRepo.DownloadMp4File($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}", endFileName);
+                    }
+
+                    bool fileWasFlaggedForDeletion = false;
+                    var fileInfo = new FileInfo(endFileName);
+                    long fileLength = fileInfo.Length;
+
+                    // Handle range requests
+                    var rangeHeader = Request.Headers["Range"].ToString();
+                    if (string.IsNullOrEmpty(rangeHeader))
+                    {
+                        // No range requested, return full file
+                        Response.Headers.Append("Accept-Ranges", "bytes");
+                        Response.ContentType = fileType;
+                        Response.Headers.Append("Content-Disposition", $"inline; filename=\"{VideoId}.{containerName}\"");
+
+                        _musicRepo.FlagFileForDeletion(endFileName);
+
+                        fileWasFlaggedForDeletion = true;
+
+                        return PhysicalFile(endFileName, fileType, enableRangeProcessing: true);
+                    }
+
+                    // Parse range
+                    var rangeValue = rangeHeader.Replace("bytes=", string.Empty);
+                    var rangeParts = rangeValue.Split('-');
+                    var rangeStart = long.Parse(rangeParts[0]);
+                    var rangeEnd = rangeParts.Length > 1 && long.TryParse(rangeParts[1], out var temp)
+                        ? Math.Min(temp, fileLength - 1)
+                        : fileLength - 1;
+
+                    // Validate range
+                    if (rangeStart > rangeEnd || rangeStart > fileLength - 1 || rangeEnd >= fileLength)
+                    {
+                        Response.Headers.Append("Content-Range", $"bytes */{fileLength}");
+                        return StatusCode(StatusCodes.Status416RangeNotSatisfiable);
+                    }
+
+                    Response.StatusCode = StatusCodes.Status206PartialContent;
+                    Response.Headers.Append("Content-Range", $"bytes {rangeStart}-{rangeEnd}/{fileLength}");
+                    Response.Headers.Append("Accept-Ranges", "bytes");
+                    Response.Headers.Append("Content-Type", fileType);
+                    Response.Headers.Append("Content-Disposition", $"inline; filename=\"{VideoId}.{containerName}\"");
+
+                    if (!fileWasFlaggedForDeletion)
+                    {
+                        _musicRepo.FlagFileForDeletion(endFileName);
+                    }
+
+                    return new FileStreamResult(new FileStream(endFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite), fileType)
+                    {
+                        EnableRangeProcessing = true
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
 
         //[HttpGet]
         //public async Task<IActionResult> FetchAudioFile(string VideoId)
@@ -969,6 +1054,10 @@ namespace armaradio.Controllers
                     {
                         fileNameParts.Add(SongName.Trim());
                     }
+                    if (string.IsNullOrWhiteSpace(ArtistName) && string.IsNullOrWhiteSpace(SongName) && !string.IsNullOrWhiteSpace(VideoId))
+                    {
+                        fileNameParts.Add(VideoId.Trim());
+                    }
 
                     string downloadFileName = $"{(Latinize(SanitizeFileName(string.Join(" - ", fileNameParts.ToArray())))).Trim()}";
 
@@ -979,7 +1068,7 @@ namespace armaradio.Controllers
                             System.IO.Directory.CreateDirectory(downloadFolder);
                         }
 
-                        _musicRepo.DownloadMp4File($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}", endTempFile);
+                        await _musicRepo.DownloadMp4File($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}", endTempFile);
 
                         //List<string> fileNameParts = new List<string>();
                         //string endFile = $"{downloadFolder}{fileHandle}";

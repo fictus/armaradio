@@ -1568,9 +1568,9 @@ namespace armaradio.Repositories
             return $"{decodedUrl}&sig={signature}";
         }
 
-        public void DownloadMp4File(string url, string endFileName)
+        public async Task DownloadMp4File(string url, string endFileName)
         {
-            _armaYTDownloader.DownloadAudioFileAsync(url, endFileName).Wait();
+            await _armaYTDownloader.DownloadAudioFileAsync(url, endFileName);
 
             //bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 

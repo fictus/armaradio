@@ -1734,7 +1734,7 @@ function prebufferNextSong() {
             let videoId = $.trim(nextPlay.attr("data-videoid"));
 
             if (videoId != "") {
-                fetch(ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId, {
+                fetch(ajaxPointCall + "/Music/BufferAudioFile?VideoId=" + videoId, {
                     method: "GET",
                     headers: {
                         "Range": "bytes=0-1"
