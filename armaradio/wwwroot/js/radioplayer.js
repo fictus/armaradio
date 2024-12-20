@@ -130,7 +130,7 @@ function loadRadioPlayer(artistName, songName, fromPlaylist, reloadFromCache, fr
                                     canvasCtrl = $("#offcanvasSongOptions");
                                 }
 
-                                if (canvasCtrl.length) {
+                                if ((canvasCtrl || []).length) {
                                     canvasCtrl.find("button.btn-close").trigger("click");
                                 }
                             }
@@ -195,7 +195,7 @@ function loadRadioPlayer(artistName, songName, fromPlaylist, reloadFromCache, fr
                                 canvasCtrl = $("#offcanvasSongOptions");
                             }
 
-                            if (canvasCtrl.length) {
+                            if ((canvasCtrl || []).length) {
                                 canvasCtrl.find("button.btn-close").trigger("click");
                             }
                         }

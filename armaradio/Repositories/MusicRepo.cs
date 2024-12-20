@@ -257,6 +257,19 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
+        public List<string> GetGenresByArtist(string artistName)
+        {
+            List<string> returnItem = new List<string>();
+            ArtistPlaylistsResponse playlists = GetArtistPlaylists(artistName, "");
+
+            if (playlists != null && playlists.artists != null && playlists.artists.items != null && playlists.artists.items.Count > 0)
+            {
+                returnItem = playlists.artists.items[0].genres ?? new List<string>();
+            }
+
+            return returnItem;
+        }
+
         public List<ArmaRecommendationDataItem> GetRadioSessionRecommendedSongsFromArtist(string artistName, string songName)
         {
             List<ArmaRecommendationDataItem> returnItem = new List<ArmaRecommendationDataItem>();
@@ -269,6 +282,32 @@ namespace armaradio.Repositories
                 {
                     artist_mbid = currentArtist.Artist_MBId
                 }) ?? new List<ArmaRecommendationDataItem>();
+
+                //if (returnItem.Count == 0)
+                //{
+                //    // no results returned, more than likely no genres exists in DB so let's try to populate them
+                //    List<string> genres = GetGenresByArtist(currentArtist.ArtistName) ?? new List<string>();
+
+                //    if (genres.Count > 0)
+                //    {
+                //        using (var con = _dapper.GetConnection("radioconn"))
+                //        {
+                //            foreach (var genre in genres)
+                //            {
+                //                _dapper.ExecuteNonQuery(con, "Operations_MBInsertGenreByName", new
+                //                {
+                //                    artist_id = currentArtist.Id,
+                //                    genre_name = genre
+                //                });
+                //            }
+                //        }
+                //    }
+
+                //    returnItem = _dapper.GetList<ArmaRecommendationDataItem>("recommendations", "arma_get_suggestions_by_renge_related_artists", new
+                //    {
+                //        artist_mbid = currentArtist.Artist_MBId
+                //    }) ?? new List<ArmaRecommendationDataItem>();
+                //}
 
                 if (returnItem.Count == 0)
                 {
