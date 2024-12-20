@@ -280,7 +280,8 @@ namespace armaradio.Repositories
             {
                 returnItem = _dapper.GetList<ArmaRecommendationDataItem>("recommendations", "arma_get_suggestions_by_renge_related_artists", new
                 {
-                    artist_mbid = currentArtist.Artist_MBId
+                    artist_mbid = currentArtist.Artist_MBId,
+                    only_by_genre = true
                 }) ?? new List<ArmaRecommendationDataItem>();
 
                 //if (returnItem.Count == 0)
@@ -309,9 +310,36 @@ namespace armaradio.Repositories
                 //    }) ?? new List<ArmaRecommendationDataItem>();
                 //}
 
+                List<string> relatedArtists = new List<string>();
+
                 if (returnItem.Count == 0)
                 {
-                    returnItem = _dapper.GetList<ArmaRecommendationDataItem>("recommendations", "arma_get_suggestions_by_artist", new
+                    relatedArtists = GetSimilarArtistNames(artistName) ?? new List<string>();
+                    relatedArtists = relatedArtists.OrderBy(an => Guid.NewGuid()).ToList();
+
+                    for (int i = 0; i < relatedArtists.Count; i++)
+                    {
+                        currentArtist = (Artist_FindArtistsInternal(relatedArtists[i]) ?? new List<ArmaArtistDataItem>()).FirstOrDefault();
+
+                        if (currentArtist != null)
+                        {
+                            returnItem = _dapper.GetList<ArmaRecommendationDataItem>("recommendations", "arma_get_suggestions_by_renge_related_artists", new
+                            {
+                                artist_mbid = currentArtist.Artist_MBId,
+                                only_by_genre = true
+                            }) ?? new List<ArmaRecommendationDataItem>();
+                        }
+
+                        if (returnItem.Count > 0)
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                if (returnItem.Count == 0)
+                {
+                    returnItem = _dapper.GetList<ArmaRecommendationDataItem>("recommendations", "arma_get_suggestions_by_renge_related_artists", new
                     {
                         artist_mbid = currentArtist.Artist_MBId
                     }) ?? new List<ArmaRecommendationDataItem>();
@@ -319,9 +347,27 @@ namespace armaradio.Repositories
 
                 if (returnItem.Count == 0)
                 {
-                    List<string> relatedArtists = GetSimilarArtistNames(artistName) ?? new List<string>();
-                    relatedArtists = relatedArtists.OrderBy(an => Guid.NewGuid()).ToList();
+                    for (int i = 0; i < relatedArtists.Count; i++)
+                    {
+                        currentArtist = (Artist_FindArtistsInternal(relatedArtists[i]) ?? new List<ArmaArtistDataItem>()).FirstOrDefault();
 
+                        if (currentArtist != null)
+                        {
+                            returnItem = _dapper.GetList<ArmaRecommendationDataItem>("recommendations", "arma_get_suggestions_by_renge_related_artists", new
+                            {
+                                artist_mbid = currentArtist.Artist_MBId
+                            }) ?? new List<ArmaRecommendationDataItem>();
+                        }
+
+                        if (returnItem.Count > 0)
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                if (returnItem.Count == 0)
+                {
                     for (int i = 0; i < relatedArtists.Count; i++)
                     {
                         currentArtist = (Artist_FindArtistsInternal(relatedArtists[i]) ?? new List<ArmaArtistDataItem>()).FirstOrDefault();
