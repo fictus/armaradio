@@ -18,3 +18,5 @@ arma_miner/obj/
 /arma_historycompiler/bin/Debug/net8.0
 /arma_historycompiler/obj
 /arma_historycompiler/tempFiles/listenbrainz-listens-dump-1910-20241112-000003-incremental/listens/2024
+/arma_genregenerator/bin/Debug/net8.0
+/arma_genregenerator/obj
