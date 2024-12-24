@@ -9,7 +9,7 @@ namespace arma_historycompiler.Services
 {
     public interface IArmaHistoryService
     {
-        Task RunUpdateRoutine();
-        Task RunQueueList(List<QueueDataItem> queueItems);
+        Task GetPendingLinks();
+        Task RunQueueItem(QueueDataItem queueItem);
     }
 }

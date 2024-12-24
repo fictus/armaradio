@@ -33,96 +33,131 @@ namespace arma_historycompiler.Services
             _configuration = configuration;
         }
 
-        public async Task RunUpdateRoutine()
+        public async Task GetPendingLinks()
         {
-            VersionDataItem siteVersion = GetLatestVersion();
+            string url = "https://data.metabrainz.org/pub/musicbrainz/listenbrainz/incremental/";
 
-            if (siteVersion != null)
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
+
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
             {
-                //MBSyncQueueDataItem versionHasBeenProcessed = _dapper.GetFirstOrDefault<MBSyncQueueDataItem>("radioconn", "Operations_Sync_CheckIfVersionHasBeenProcessed", new
-                //{
-                //    version_number = siteVersion.Version
-                //});
-
-                MBSyncQueueDataItem versionHasBeenProcessed = new MBSyncQueueDataItem()
+                if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    HasBeenProcessed = false
-                };
-
-                if (versionHasBeenProcessed != null && !versionHasBeenProcessed.HasBeenProcessed)
-                {
-                    //_dapper.ExecuteNonQuery("radioconn", "Operations_Sync_AddVersionToStaging", new
-                    //{
-                    //    version_number = siteVersion.Version
-                    //});
-
-                    string tempFilesDir = EmptyFilesFromTempFolder();
-
-                    DownloadHistoryFile(siteVersion.FileUrl, tempFilesDir, siteVersion.Version);
-
-                    //bool artistErrors = _armaArtistsOps.ProcessArtistFile(siteVersion.ArtistsFileUrl, tempFilesDir, siteVersion.Version, versionHasBeenProcessed.FirstTimeProcess);
-
-                    var listenFiles = Directory.EnumerateFiles(tempFilesDir, "*.listens", SearchOption.AllDirectories).ToList();
-                    string listenFile = (listenFiles != null && listenFiles.Count > 0 ? listenFiles[0] : "");
-                    List<ArtistDataItem> allArtists = _dapper.GetList<ArtistDataItem>("armaradio", "Operations_GetAllMBArtistIdsWithDBSource");
-
-                    using (var conn = _dapper.GetConnection("radioconn"))
+                    string htmlContent;
+                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
                     {
-                        ProcessFile(conn, listenFile, allArtists);
+                        htmlContent = sr.ReadToEnd();
                     }
 
-                    EmptyFilesFromTempFolder();
+                    if (!string.IsNullOrEmpty(htmlContent))
+                    {
+                        var parser = new HtmlParser();
+                        var document = parser.ParseDocument(htmlContent);
 
-                    //_dapper.ExecuteNonQuery("radioconn", "Operations_Sync_AddVersionToCompleted", new
-                    //{
-                    //    version_number = siteVersion.Version,
-                    //    errors_occurred = ((artistErrors || albumErrors) ? true : false)
-                    //});
+                        var allLinks = document.QuerySelectorAll("a");
+
+                        foreach (var currentLink in allLinks)
+                        {
+                            string latestUrl = currentLink.GetAttribute("href");
+
+                            if (!currentLink.GetAttribute("href").Contains(".."))
+                            {
+                                string version = currentLink.Text();
+
+                                if (!string.IsNullOrWhiteSpace(latestUrl))
+                                {
+                                    request = (HttpWebRequest)WebRequest.Create($"{url}{latestUrl}");
+                                    request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
+
+                                    using (HttpWebResponse responseInner = (HttpWebResponse)request.GetResponse())
+                                    {
+                                        if (responseInner.StatusCode == HttpStatusCode.OK)
+                                        {
+                                            htmlContent = "";
+                                            using (StreamReader sr = new StreamReader(responseInner.GetResponseStream()))
+                                            {
+                                                htmlContent = sr.ReadToEnd();
+                                            }
+
+                                            if (!string.IsNullOrEmpty(htmlContent))
+                                            {
+                                                var parserInner = new HtmlParser();
+                                                var documentInner = parserInner.ParseDocument(htmlContent);
+
+                                                IHtmlCollection<IElement> allSubLinks = documentInner.QuerySelectorAll("a");
+
+                                                foreach (var link in allSubLinks)
+                                                {
+                                                    if (!link.GetAttribute("href").Contains(".."))
+                                                    {
+                                                        string fileUrl = $"{url}{version}/{(link.GetAttribute("href"))}";
+                                                        string fileKey = link.GetAttribute("href").Split('.', StringSplitOptions.RemoveEmptyEntries)[0];
+
+                                                        if (!string.IsNullOrWhiteSpace(fileKey))
+                                                        {
+                                                            _dapper.ExecuteNonQuery("radioconn", "queue_insert_queue_item", new
+                                                            {
+                                                                file_url = fileUrl,
+                                                                file_key = fileKey
+                                                            });
+                                                        }
+
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
+
+            await Task.Delay(0);
         }
 
-        public async Task RunQueueList(List<QueueDataItem> queueItems)
+        public async Task RunQueueItem(QueueDataItem queueItem)
         {
-            List<ArtistDataItem> allArtists = _dapper.GetList<ArtistDataItem>("armaradio", "Operations_GetAllMBArtistIdsWithDBSource");
-
-            if (queueItems != null && queueItems.Count > 0)
+            if (queueItem != null)
             {
+                List<ArtistDataItem> allArtists = _dapper.GetList<ArtistDataItem>("armaradio", "Operations_GetAllMBArtistIdsWithDBSource");
+
                 using (var conn = _dapper.GetConnection("radioconn"))
                 {
-                    foreach (var queueItem in queueItems)
+                    try
                     {
-                        try
+                        _dapper.ExecuteNonQuery(conn, "queue_set_list_started", new
                         {
-                            _dapper.ExecuteNonQuery("radioconn", "queue_set_list_started", new
-                            {
-                                id = queueItem.id
-                            });
+                            id = queueItem.id
+                        });
 
-                            string tempFolder = EmptyFilesFromTempFolder();
+                        string tempFolder = EmptyFilesFromTempFolder();
 
-                            DownloadHistoryFile(queueItem.file_url, tempFolder, "");
+                        DownloadHistoryFile(queueItem.file_url, tempFolder, "");
 
-                            var listenFiles = Directory.EnumerateFiles(tempFolder, "*.listens", SearchOption.AllDirectories).ToList();
-                            string listenFile = (listenFiles != null && listenFiles.Count > 0 ? listenFiles[0] : "");
+                        var listenFiles = Directory.EnumerateFiles(tempFolder, "*.listens", SearchOption.AllDirectories).ToList();
+                        string listenFile = (listenFiles != null && listenFiles.Count > 0 ? listenFiles[0] : "");
 
-                            ProcessFile(conn, listenFile, allArtists);
+                        await Task.Delay(1);
+                        ProcessFile(conn, listenFile, allArtists);
 
-                            EmptyFilesFromTempFolder();
+                        EmptyFilesFromTempFolder();
 
-                            _dapper.ExecuteNonQuery("radioconn", "queue_set_list_completed", new
-                            {
-                                id = queueItem.id
-                            });
-                        }
-                        catch (Exception ex)
+                        _dapper.ExecuteNonQuery(conn, "queue_set_list_completed", new
                         {
-                            _dapper.ExecuteNonQuery("radioconn", "queue_set_list_error_message", new
-                            {
-                                id = queueItem.id,
-                                error = ex.Message.ToString()
-                            });
-                        }
+                            id = queueItem.id
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        _dapper.ExecuteNonQuery(conn, "queue_set_list_error_message", new
+                        {
+                            id = queueItem.id,
+                            error = ex.Message.ToString()
+                        });
                     }
                 }
             }
@@ -184,83 +219,6 @@ namespace arma_historycompiler.Services
                     }
 
                     var otherItem = currentItem;
-                }
-            }
-
-            return returnItem;
-        }
-
-        private VersionDataItem GetLatestVersion()
-        {
-            VersionDataItem returnItem = null;
-            string url = "https://data.metabrainz.org/pub/musicbrainz/listenbrainz/incremental/";
-            string latestUrl = "";
-            string version = "";
-
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
-
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-            {
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    string htmlContent;
-                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
-                    {
-                        htmlContent = sr.ReadToEnd();
-                    }
-
-                    if (!string.IsNullOrEmpty(htmlContent))
-                    {
-                        var parser = new HtmlParser();
-                        var document = parser.ParseDocument(htmlContent);
-
-                        var allLinks = document.QuerySelectorAll("a");
-
-                        latestUrl = allLinks != null ? allLinks.Last().GetAttribute("href") : "";
-                        version = allLinks != null ? allLinks.Last().Text() : "";
-                    }
-                }
-            }
-
-            if (!string.IsNullOrWhiteSpace(latestUrl))
-            {
-                returnItem = new VersionDataItem()
-                {
-                    Version = version
-                };
-
-                request = (HttpWebRequest)WebRequest.Create($"{url}{latestUrl}");
-                request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
-
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                {
-                    if (response.StatusCode == HttpStatusCode.OK)
-                    {
-                        string htmlContent;
-                        using (StreamReader sr = new StreamReader(response.GetResponseStream()))
-                        {
-                            htmlContent = sr.ReadToEnd();
-                        }
-
-                        if (!string.IsNullOrEmpty(htmlContent))
-                        {
-                            var parser = new HtmlParser();
-                            var document = parser.ParseDocument(htmlContent);
-
-                            IHtmlCollection<IElement> allLinks = document.QuerySelectorAll("a");
-
-                            foreach (var link in allLinks)
-                            {
-                                if (!link.GetAttribute("href").Contains(".."))
-                                {
-                                    returnItem.FileUrl = $"{url}{version}/{(link.GetAttribute("href"))}";
-
-                                    break;
-                                }
-                            }
-                        }
-                    }
                 }
             }
 

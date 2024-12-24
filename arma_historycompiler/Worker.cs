@@ -9,7 +9,6 @@ namespace arma_historycompiler
         private readonly ILogger<Worker> _logger;
         private readonly IArmaHistoryService _historyService;
         private readonly IDapperHelper _dapper;
-        private DateTime? _runDatetime;
 
         public Worker(
             ILogger<Worker> logger,
@@ -31,14 +30,15 @@ namespace arma_historycompiler
                     _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                 }
 
-                //await _historyService.RunUpdateRoutine();
-                List<QueueDataItem> queueItems = _dapper.GetList<QueueDataItem>("radioconn", "queue_get_pending_list");
+                await _historyService.GetPendingLinks();
 
-                while (queueItems.Count > 0)
+                QueueDataItem queueItem = _dapper.GetList<QueueDataItem>("radioconn", "queue_get_pending_list").FirstOrDefault();
+
+                while (queueItem != null)
                 {
-                    await _historyService.RunQueueList(queueItems);
+                    await _historyService.RunQueueItem(queueItem);
 
-                    queueItems = _dapper.GetList<QueueDataItem>("radioconn", "queue_get_pending_list");
+                    queueItem = _dapper.GetList<QueueDataItem>("radioconn", "queue_get_pending_list").FirstOrDefault();
                 }
 
                 await Task.Delay((1000 * 60), stoppingToken);

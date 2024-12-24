@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "armaradioSongsAlike", "arma
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "armaoffline", "armaoffline\armaoffline.csproj", "{3983311C-295E-4CB2-918A-8806CA773986}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "arma_historycompiler", "arma_historycompiler\arma_historycompiler.csproj", "{128DB6F0-6167-4FA8-8284-1F808ABDD28E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "arma_historycompiler", "arma_historycompiler\arma_historycompiler.csproj", "{128DB6F0-6167-4FA8-8284-1F808ABDD28E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "arma_genregenerator", "arma_genregenerator\arma_genregenerator.csproj", "{6EBCE9FD-321A-4252-916E-CD539F1226FE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +49,10 @@ Global
 		{128DB6F0-6167-4FA8-8284-1F808ABDD28E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{128DB6F0-6167-4FA8-8284-1F808ABDD28E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{128DB6F0-6167-4FA8-8284-1F808ABDD28E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EBCE9FD-321A-4252-916E-CD539F1226FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EBCE9FD-321A-4252-916E-CD539F1226FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EBCE9FD-321A-4252-916E-CD539F1226FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EBCE9FD-321A-4252-916E-CD539F1226FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
