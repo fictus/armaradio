@@ -306,31 +306,24 @@ namespace armaradio.Repositories
                     only_by_genre = true
                 }) ?? new List<ArmaRecommendationDataItem>();
 
-                //if (returnItem.Count == 0)
-                //{
-                //    // no results returned, more than likely no genres exists in DB so let's try to populate them
-                //    List<string> genres = GetGenresByArtist(currentArtist.ArtistName) ?? new List<string>();
+                if (returnItem.Count == 0)
+                {
+                    List<ArmaApiSimilarArtistIdDataItem> likeArtists = SiteApiGetSimilarArtistIds(currentArtist.Artist_MBId);
 
-                //    if (genres.Count > 0)
-                //    {
-                //        using (var con = _dapper.GetConnection("radioconn"))
-                //        {
-                //            foreach (var genre in genres)
-                //            {
-                //                _dapper.ExecuteNonQuery(con, "Operations_MBInsertGenreByName", new
-                //                {
-                //                    artist_id = currentArtist.Id,
-                //                    genre_name = genre
-                //                });
-                //            }
-                //        }
-                //    }
+                    foreach (var simArtist in likeArtists)
+                    {
+                        returnItem = _dapper.GetList<ArmaRecommendationDataItem>("recommendations", "arma_get_suggestions_by_renge_related_artists", new
+                        {
+                            artist_mbid = simArtist.artist_mbid,
+                            only_by_genre = true
+                        }) ?? new List<ArmaRecommendationDataItem>();
 
-                //    returnItem = _dapper.GetList<ArmaRecommendationDataItem>("recommendations", "arma_get_suggestions_by_renge_related_artists", new
-                //    {
-                //        artist_mbid = currentArtist.Artist_MBId
-                //    }) ?? new List<ArmaRecommendationDataItem>();
-                //}
+                        if (returnItem.Count > 0)
+                        {
+                            break;
+                        }
+                    }
+                }
 
                 List<string> relatedArtists = new List<string>();
 
@@ -431,6 +424,11 @@ namespace armaradio.Repositories
                         artist_name = currentArtist.ArtistName,
                         artist_mbid = currentArtist.Artist_MBId
                     });
+
+                    if (i >= 20)
+                    {
+                        break;
+                    }
                 }
             }
 
