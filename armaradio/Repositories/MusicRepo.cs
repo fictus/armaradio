@@ -29,6 +29,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Net.Http.Json;
+using System.Reflection;
 
 namespace armaradio.Repositories
 {
@@ -48,11 +49,32 @@ namespace armaradio.Repositories
             _armaYTDownloader = armaYTDownloader;
         }
 
+        public Guid? GetSiteApiToken()
+        {
+            return _dapper.GetFirstOrDefault<Guid?>("radioconn", "Arma_SiteGetApiToken");
+        }
+
+        public bool UseSiteApiToken(Guid token)
+        {
+            return _dapper.GetFirstOrDefault<bool>("radioconn", "Arma_SiteUseApiToken", new
+            {
+                token = token
+            });
+        }
+
         public List<ArmaArtistDataItem> Artist_FindArtists(string search)
         {
             return _dapper.GetList<ArmaArtistDataItem>("radioconn", "Arma_SearchArtists", new
             {
                 artist_name = search
+            });
+        }
+
+        public ArmaArtistDataItem Artist_GetArtistByMBid(string artist_mbid)
+        {
+            return _dapper.GetFirstOrDefault<ArmaArtistDataItem>("radioconn", "Arma_GetArtistByMBid", new
+            {
+                artist_mbid = artist_mbid
             });
         }
 
@@ -385,6 +407,30 @@ namespace armaradio.Repositories
                             break;
                         }
                     }
+                }
+            }
+
+            return returnItem;
+        }
+
+        public List<ArmaApiSimilarArtistIdDataItem> SiteApiGetSimilarArtistIds(string artistid)
+        {
+            List<ArmaApiSimilarArtistIdDataItem> returnItem = new List<ArmaApiSimilarArtistIdDataItem>();
+            ArmaArtistDataItem queryArtist = Artist_GetArtistByMBid(artistid);
+            List<string> relatedArtists = GetSimilarArtistNames(queryArtist.ArtistName) ?? new List<string>();
+            relatedArtists = relatedArtists.OrderBy(an => Guid.NewGuid()).ToList();
+
+            for (int i = 0; i < relatedArtists.Count; i++)
+            {
+                ArmaArtistDataItem currentArtist = (Artist_FindArtistsInternal(relatedArtists[i]) ?? new List<ArmaArtistDataItem>()).FirstOrDefault();
+
+                if (currentArtist != null)
+                {
+                    returnItem.Add(new ArmaApiSimilarArtistIdDataItem()
+                    {
+                        artist_name = currentArtist.ArtistName,
+                        artist_mbid = currentArtist.Artist_MBId
+                    });
                 }
             }
 

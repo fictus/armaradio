@@ -7,6 +7,8 @@ namespace armaradio.Repositories
 {
     public interface IMusicRepo
     {
+        Guid? GetSiteApiToken();
+        bool UseSiteApiToken(Guid token);
         List<TrackDataItem> GetCurrentTop100();
         List<ArmaArtistDataItem> Artist_FindArtists(string search);
         ArmaArtistAlbumsResponse Albums_GetArtistsAlbums(int artistId);
@@ -15,6 +17,7 @@ namespace armaradio.Repositories
         string GetApiToken();
         RadioSessionSongsResponse GetRadioPlalistSongsFromArtist(string artistName);
         List<ArmaRecommendationDataItem> GetRadioSessionRecommendedSongsFromArtist(string artistName, string songName);
+        List<ArmaApiSimilarArtistIdDataItem> SiteApiGetSimilarArtistIds(string artistid);
         Task<ArmaAISongsResponse> GetAIRecommendedSongs(string artistName, string songName, int limit = 10);
         ArtistPlaylistsResponse GetArtistPlaylists(string artistName, string songName);
         List<ArtistDataItem> Artist_GetArtistList(string search);

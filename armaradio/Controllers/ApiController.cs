@@ -202,6 +202,36 @@ namespace armaradio.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetRelatedArtistIDs(string artistid, string tk)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(artistid) || string.IsNullOrWhiteSpace(tk))
+                {
+                    throw new Exception("Invalid request");
+                }
+
+                List<ArmaApiSimilarArtistIdDataItem> returnItems = new List<ArmaApiSimilarArtistIdDataItem>();
+
+                if (Guid.TryParse(tk, out Guid _token))
+                {
+                    bool isTokenValid = _musicRepo.UseSiteApiToken(_token);
+
+                    if (isTokenValid)
+                    {
+                        returnItems = _musicRepo.SiteApiGetSimilarArtistIds(artistid) ?? new List<ArmaApiSimilarArtistIdDataItem>();
+                    }
+                }
+
+                return new JsonResult(returnItems);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
+            }
+        }
+
         //private static void ConvertToMp3(string inputFilePath, string outputFilePath)
         //{
         //    FFMpegArguments
