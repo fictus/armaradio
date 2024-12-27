@@ -315,7 +315,8 @@ namespace armaradio.Repositories
                         returnItem = _dapper.GetList<ArmaRecommendationDataItem>("recommendations", "arma_get_suggestions_by_renge_related_artists", new
                         {
                             artist_mbid = simArtist.artist_mbid,
-                            only_by_genre = true
+                            only_by_genre = true,
+                            use_spotify_genres = true
                         }) ?? new List<ArmaRecommendationDataItem>();
 
                         if (returnItem.Count > 0)
