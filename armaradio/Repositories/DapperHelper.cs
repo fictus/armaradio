@@ -97,6 +97,21 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
+        public List<T> GetList<T>(string ConnectionName, string StoredProcedure, DynamicParameters DynamicParameters, int Timeout)
+        {
+            List<T> returnItem = null;
+
+            using (var db = GetConnection(ConnectionName))
+            {
+                returnItem = db.Query<T>(StoredProcedure,
+                    DynamicParameters,
+                    commandType: System.Data.CommandType.StoredProcedure,
+                    commandTimeout: Timeout).ToList();
+            }
+
+            return returnItem;
+        }
+
         public List<T> GetList<T>(SqlConnection DbConnection, string StoredProcedure, DynamicParameters DynamicParameters)
         {
             List<T> returnItem = null;

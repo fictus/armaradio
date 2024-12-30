@@ -331,6 +331,13 @@ function mainload_attacheEvents() {
                 .then(function (response) {
                     attachListToTable(response);
                 });
+        } else if (selectedId == "13") {
+            armaradio.masterPageWait(true);
+
+            armaradio.masterAJAXGet({}, "Music", "GetTrendingLastFMSongs")
+                .then(function (response) {
+                    attachListToTable(response);
+                });
         }
         //else if (selectedId == "3") {
         //    if ($("#dvPopupLoadPlaylists").length) {

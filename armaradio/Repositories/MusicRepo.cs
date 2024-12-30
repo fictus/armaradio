@@ -791,6 +791,11 @@ namespace armaradio.Repositories
             return _dapper.GetList<TrackDataItem>("radioconn", "Tracks_GetTop50UserFavorites");
         }
 
+        public List<TrackDataItem> Tracks_GetTop100LastFMTrending()
+        {
+            return _dapper.GetList<TrackDataItem>("recommendations", "arma_get_top_played_songs", null, 120);
+        }
+
         public List<TrackDataItem> GetCurrentTop100()
         {
             List<TrackDataItem> returnItem = new List<TrackDataItem>();
