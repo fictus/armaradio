@@ -307,18 +307,26 @@ namespace armaradio.Controllers
             {
                 using (_operation)
                 {
-                    List<TrackDataItem> returnItem = _musicRepo.Tracks_GetTop100LastFMTrending();
-                    var finalList = returnItem.Select(sg =>
-                    {
-                        return new
-                        {
-                            tid = sg.tid,
-                            artistName = sg.artist_name,
-                            songName = sg.track_name
-                        };
-                    });
+                    List<TrackDataItem> returnItem = new List<TrackDataItem>();
+                    Guid? requestId = _musicRepo.Tracks_CacheTop100LastFMTrending();
 
-                    return new JsonResult(finalList);
+                    if (requestId.HasValue)
+                    {
+                        returnItem = _musicRepo.Tracks_GetTop100LastFMTrending(requestId.Value);
+                        var finalList = returnItem.Select(sg =>
+                        {
+                            return new
+                            {
+                                tid = sg.tid,
+                                artistName = sg.artist_name,
+                                songName = sg.track_name
+                            };
+                        });
+
+                        return new JsonResult(finalList);
+                    }
+
+                    return new JsonResult(new List<TrackDataItem>());
                 }
             }
             catch (Exception ex)

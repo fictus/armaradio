@@ -22,7 +22,8 @@ namespace armaradio.Repositories
         ArtistPlaylistsResponse GetArtistPlaylists(string artistName, string songName);
         List<ArtistDataItem> Artist_GetArtistList(string search);
         List<TrackDataItem> Tracks_GetTop50Songs();
-        List<TrackDataItem> Tracks_GetTop100LastFMTrending();
+        Guid? Tracks_CacheTop100LastFMTrending();
+        List<TrackDataItem> Tracks_GetTop100LastFMTrending(Guid requestId);
         List<TrackDataItem> GetCurrentTop40DanceSingles();
         List<TrackDataItem> GetCurrentTranceTop100();
         List<TrackDataItem> GetCurrentTranceHype100();
