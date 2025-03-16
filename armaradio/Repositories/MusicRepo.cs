@@ -30,6 +30,7 @@ using System.Text;
 using System.Threading;
 using System.Net.Http.Json;
 using System.Reflection;
+using System.IO.Compression;
 
 namespace armaradio.Repositories
 {
@@ -111,6 +112,18 @@ namespace armaradio.Repositories
 
                 return returnItem;
             }
+        }
+        public byte[] CompressJsonString(string data)
+        {
+            byte[] buffer = Encoding.UTF8.GetBytes(data);
+
+            var memoryStream = new MemoryStream();
+            using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
+            {
+                gZipStream.Write(buffer, 0, buffer.Length);
+            }
+
+            return memoryStream.ToArray();
         }
 
         public List<ArmaAlbumSongDataItem> Albums_GetAlbumSongs(int artistId, int albumId)

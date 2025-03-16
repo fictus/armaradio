@@ -447,7 +447,24 @@ namespace armaradio.Controllers
                 {
                     ArmaArtistAlbumsResponse returnItem = _musicRepo.Albums_GetArtistsAlbums(value.ArtistId);
 
-                    return new JsonResult(returnItem);
+                    var acceptEncoding = Request.Headers["Accept-Encoding"];
+
+                    if (acceptEncoding.ToString().Contains("gzip"))
+                    {
+                        Response.Headers.Add("Content-Encoding", "gzip");
+                        var serializerSettings = new Newtonsoft.Json.JsonSerializerSettings
+                        {
+                            ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
+                        };
+
+                        var gzipData = _musicRepo.CompressJsonString(Newtonsoft.Json.JsonConvert.SerializeObject(returnItem, serializerSettings));
+
+                        return new FileContentResult(gzipData, "application/gzip");
+                    }
+                    else
+                    {
+                        return new JsonResult(returnItem);
+                    }
                 }
             }
             catch (Exception ex)

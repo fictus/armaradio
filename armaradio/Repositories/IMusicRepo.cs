@@ -12,6 +12,7 @@ namespace armaradio.Repositories
         List<TrackDataItem> GetCurrentTop100();
         List<ArmaArtistDataItem> Artist_FindArtists(string search);
         ArmaArtistAlbumsResponse Albums_GetArtistsAlbums(int artistId);
+        byte[] CompressJsonString(string data);
         List<ArmaAlbumSongDataItem> Albums_GetAlbumSongs(int artistId, int albumId);
         List<ArmaRandomSongDataItem> Songs_GetRandomFromPlaylists(string userIdentity);
         string GetApiToken();
