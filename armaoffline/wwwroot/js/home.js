@@ -214,7 +214,7 @@ function playFirstAvailableSong() {
 }
 
 function playNextAvailableSong() {
-    let currentIndex = $("#tblMainPlayList").find("tr.now-playing").index() + 1;
+    let currentIndex = ($(".player-btn.player-repeat").hasClass("repeat-on") ? $("#tblMainPlayList").find("tr.now-playing").index() : $("#tblMainPlayList").find("tr.now-playing").index() + 1);
     let nextSongTr = $("#tblMainPlayList").find("tr").eq(currentIndex);
 
     if (nextSongTr.length) {

@@ -7,7 +7,7 @@
 @inject Services.IMediaElementService _audioPlayer
 @page "/offlineplayer"
 @{
-    
+
 }
 
 <div class="page-body-content">
@@ -64,8 +64,11 @@
                 <div class="player-inner"></div>
             </button>
         </div>
-        <div class="align-center">
+        <div class="align-center relative">
             <label>@ElapsedTime / @TotalTime</label>
+            <button @onclick="PlayerRepeat" class="player-btn player-repeat @(IsRepeat ? "repeat-on" : "repeat-off")">
+                <div class="player-inner"></div>
+            </button>
         </div>
     </div>
 </div>
@@ -86,6 +89,7 @@
     private System.Timers.Timer _dimmedScreenTimer;
     private int _dimmedScreenTimerSeconds = 0;
     public bool IsPlaying { get; private set; } = false;
+    public bool IsRepeat { get; private set; } = false;
     public string ElapsedTime { get; private set; } = "00:00";
     public string TotalTime { get; private set; } = "00:00";
     private int _maxDimScreenSeconds { get; set; }
@@ -340,6 +344,11 @@
         }
     }
 
+    private async void PlayerRepeat()
+    {
+        IsRepeat = (IsRepeat ? false : true);
+    }
+
     private async Task NextSong()
     {
         await InvokeAsync(async () =>
@@ -400,10 +409,8 @@
 
     private async void OnPlaybackEnded(object sender, EventArgs e)
     {
-        // Ensure this runs on the UI thread
         await InvokeAsync(async () =>
         {
-            // Automatically move to the next song
             await NextSong();
         });
     }
