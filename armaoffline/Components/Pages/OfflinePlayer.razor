@@ -16,6 +16,14 @@
             <button id="btnLoadOfflinePlayerForUser" class="btn btn-primary" @onclick="GetRandomSongsFromAllUserPlaylsts">Random Songs</button>
         </div>
     </div>
+    <div class="row mt-2">
+        <div class="col-md-4 align-right">
+            <span>Search:</span>
+        </div>
+        <div class="col-md-8">
+            <input id="txtOfflineSearchSongs" type="text" class="form-control" @oninput="OnKeyPressOfflineSearchSong" />
+        </div>
+    </div>
     <div class="row mt-4">
         <div class="col-md-12">
             <div class="input-group mb-3">
@@ -194,6 +202,14 @@
         List<ArmaPlaylistDataItem> randomSongs = (UserId.HasValue ? _armaApi.Offline_GetRandomSongs(UserId.Value) : new List<ArmaPlaylistDataItem>());
 
         await JS.InvokeVoidAsync("populateSongsToPlayerTable", randomSongs);
+    }
+
+    private async void OnKeyPressOfflineSearchSong(ChangeEventArgs e)
+    {
+        string searchText = e.Value.ToString();
+        List<ArmaPlaylistDataItem> randomSongs = (UserId.HasValue ? _armaApi.Offline_SearchSongs(UserId.Value, searchText) : new List<ArmaPlaylistDataItem>());
+
+        await JS.InvokeVoidAsync("populateSongsToPlayerTable", randomSongs);        
     }
 
     private async void OnChangeOfflinePlaylistsHandler(ChangeEventArgs e)

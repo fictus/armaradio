@@ -334,6 +334,42 @@ namespace armaoffline.Repositories
             return returnItem;
         }
 
+        public List<ArmaPlaylistDataItem> Offline_SearchSongs(int UserId, string SearchText)
+        {
+            List<ArmaPlaylistDataItem> returnItem = new List<ArmaPlaylistDataItem>();
+
+            if (!string.IsNullOrWhiteSpace(SearchText))
+            {
+                SearchText = $"%{SearchText.TrimStart('%').TrimEnd('%')}%";
+
+                returnItem = _dapper.GetList<ArmaPlaylistDataItem>(@"
+                    select
+                        us.id as Id,
+                        us.artist as Artist,
+                        us.songname as Song,
+                        us.videoid as VideoId
+                    from playlists pl
+                    inner join usersongs us
+                        on us.playlistid = pl.id
+                    where
+                        pl.userid=@userid
+                        and pl.songsavailableoffline = 1
+                        and (
+                            us.artist like @searchText
+                            or
+                            us.songname like @searchText
+                        );
+                    ",
+                    new
+                    {
+                        userid = UserId,
+                        searchText = SearchText
+                    });
+            }
+
+            return returnItem;
+        }
+
         public ApiAudioDetailsDataItem GetAudioFileDetails(string VideoId)
         {
             ApiAudioDetailsDataItem returnItem = null;
