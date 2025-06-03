@@ -36,7 +36,7 @@ namespace armaradio.Repositories
                 BufferSize = 16000, // Increased buffer size
                 ConcurrentFragments = 4, // Download multiple fragments concurrently
                 Retries = 5,
-                RetrySleep = retrySleep,
+                //RetrySleep = retrySleep,
                 FragmentRetries = 10, // Retry failed fragments
                 ForceIPv4 = true, // Force IPv4 to potentially avoid slow IPv6 connections
                 SocketTimeout = 60,
