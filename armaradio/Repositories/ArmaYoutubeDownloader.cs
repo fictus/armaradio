@@ -17,6 +17,12 @@ namespace armaradio.Repositories
 
         public async Task DownloadAudioFileAsync(string url, string endFileName)
         {
+            var retrySleep = new MultiValue<string>();
+
+            retrySleep.Values.Add("http:exp=1:30");
+            retrySleep.Values.Add("fragment:linear=1:10:2");
+            retrySleep.Values.Add("5");
+
             var options = new OptionSet
             {
                 Format = "bestaudio[ext=m4a]/bestaudio",
@@ -29,9 +35,11 @@ namespace armaradio.Repositories
                 Downloader = "native",
                 BufferSize = 16000, // Increased buffer size
                 ConcurrentFragments = 4, // Download multiple fragments concurrently
+                Retries = 5,
+                RetrySleep = retrySleep,
                 FragmentRetries = 10, // Retry failed fragments
                 ForceIPv4 = true, // Force IPv4 to potentially avoid slow IPv6 connections
-                SocketTimeout = 10,
+                SocketTimeout = 60,
                 DownloaderArgs = "-4"
                 //Verbose = true
             };
