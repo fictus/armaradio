@@ -26,6 +26,7 @@ namespace armaradio.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IMusicRepo _musicRepo;
         private readonly IWebHostEnvironment _hostEnvironment;
+        private readonly IDapperHelper _dapper;
         private readonly ArmaYoutubeDownloader _armaYTDownloader;
         public ApiController(
             IArmaAuth authControl,
@@ -33,6 +34,7 @@ namespace armaradio.Controllers
             UserManager<IdentityUser> userManager,
             IMusicRepo musicRepo,
             IWebHostEnvironment hostEnvironment,
+            IDapperHelper dapper,
             ArmaYoutubeDownloader armaYTDownloader
         )
         {
@@ -41,6 +43,7 @@ namespace armaradio.Controllers
             _userManager = userManager;
             _musicRepo = musicRepo;
             _hostEnvironment = hostEnvironment;
+            _dapper = dapper;
             _armaYTDownloader = armaYTDownloader;
 
             IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
@@ -198,6 +201,13 @@ namespace armaradio.Controllers
             }
             catch (Exception ex)
             {
+                _dapper.ExecuteNonQuery("radioconn", "ArmaError_LogError", new
+                {
+                    ErrorController = "ArmaRadio_Api",
+                    ErrorMethod = "GetAudioFile",
+                    ErrorMessage = ex.Message.ToString()
+                });
+
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message.ToString());
             }
         }

@@ -415,8 +415,10 @@ namespace armaoffline.Repositories
             }
         }
 
-        public void GetAudioFile(string VideoId)
+        public bool? GetAudioFile(string VideoId)
         {
+            bool? returnItem = null;
+
             string fileName = _dapper.GetFirstOrDefault<string>(@"
                 select
                     filename
@@ -457,6 +459,11 @@ namespace armaoffline.Repositories
                 }
             }
 
+            if (!string.IsNullOrWhiteSpace(VideoId) && CheckIfAudioFileExists($"{VideoId}.m4a"))
+            {
+                return false;
+            }
+            
             if ((!string.IsNullOrWhiteSpace(VideoId) && string.IsNullOrWhiteSpace(fileName)) || (!string.IsNullOrWhiteSpace(VideoId) && !CheckIfAudioFileExists($"{VideoId}.m4a")))
             {
                 byte[] fileBytes = null;
@@ -502,9 +509,17 @@ namespace armaoffline.Repositories
                             videoid = VideoId.Trim(),
                             filename = fileNameFinal
                         });
+
+                        returnItem = true;
+                    }
+                    else
+                    {
+                        returnItem = false;
                     }
                 }
             }
+
+            return returnItem;
         }
 
         public void MarkPlaylistSongsAsDownloaded(int PlaylistId)

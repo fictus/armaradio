@@ -59,7 +59,14 @@ namespace armaradio.Attributes
             }
             catch (Exception ex)
             {
-                // Optionally log the exception or handle it as needed
+                var _dapper = httpContext.RequestServices.GetRequiredService<Repositories.IDapperHelper>();
+
+                _dapper.ExecuteNonQuery("radioconn", "ArmaError_LogError", new
+                {
+                    ErrorController = "ApiTokenAttribute",
+                    ErrorMethod = "IsUserAuthorized",
+                    ErrorMessage = ex.Message.ToString()
+                });
             }
 
             return returnItem;

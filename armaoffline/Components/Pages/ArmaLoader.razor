@@ -104,7 +104,14 @@
                     await JS.InvokeVoidAsync("updateDownloadQueueMessage", $"({_downloadQueue.Count} remaining):", $"{fullSongName}", true);
                     //StateHasChanged();
 
-                    _armaStaticApi.GetAudioFile(currentSong.VideoId);
+                    int errorCounter = 0;
+                    bool? downloadResulsts = _armaStaticApi.GetAudioFile(currentSong.VideoId);
+
+                    while (!downloadResulsts.HasValue && errorCounter < 5)
+                    {
+                        downloadResulsts = _armaStaticApi.GetAudioFile(currentSong.VideoId);
+                        errorCounter++;
+                    }
 
                     _downloadQueue.RemoveAt(0);
                 }
