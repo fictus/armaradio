@@ -415,7 +415,7 @@ namespace armaoffline.Repositories
             }
         }
 
-        public bool? GetAudioFile(string VideoId)
+        public async Task<bool?> GetAudioFile(string VideoId)
         {
             bool? returnItem = null;
 
@@ -474,7 +474,7 @@ namespace armaoffline.Repositories
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpUtility.UrlEncode(_globalState.appToken));
 
                     string endPoint = "https://armarad.com/Api"; // $"{(Debugger.IsAttached ? "https://localhost:7001/Api" : "https://armarad.com/Api")}";
-                    var response = client.GetAsync($"{endPoint}/GetAudioFile?VideoId={HttpUtility.UrlEncode(VideoId.Trim())}").Result;
+                    var response = await client.GetAsync($"{endPoint}/GetAudioFile?VideoId={HttpUtility.UrlEncode(VideoId.Trim())}");
 
                     if (response != null && response.IsSuccessStatusCode)
                     {

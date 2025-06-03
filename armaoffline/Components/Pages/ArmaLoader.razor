@@ -106,15 +106,24 @@
 
                     //_armaStaticApi.GetAudioFile(currentSong.VideoId);
 
-                    int errorCounter = 0;
-                    bool? downloadResulsts = _armaStaticApi.GetAudioFile(currentSong.VideoId);
+                    //int errorCounter = 0;
+                    bool? downloadResulsts = await _armaStaticApi.GetAudioFile(currentSong.VideoId);
 
-                    while (!downloadResulsts.HasValue && errorCounter < 5)
+                    // while (!downloadResulsts.HasValue && errorCounter < 5)
+                    // {
+                    //     downloadResulsts = _armaStaticApi.GetAudioFile(currentSong.VideoId);
+                    //     errorCounter++;
+
+                    //     await Task.Delay(1000);
+                    // }
+
+                    if (downloadResulsts.HasValue)
                     {
-                        downloadResulsts = _armaStaticApi.GetAudioFile(currentSong.VideoId);
-                        errorCounter++;
-
-                        await Task.Delay(1000);
+                        await JS.InvokeVoidAsync("updateDownloadQueueStatus", currentSong.VideoId, 1);
+                    }
+                    else
+                    {
+                        await JS.InvokeVoidAsync("updateDownloadQueueStatus", currentSong.VideoId, 0);
                     }
 
                     _downloadQueue.RemoveAt(0);
@@ -141,13 +150,40 @@
 
         if (playlistId.HasValue)
         {
-            firstPlaylist = _armaApi.GetPlaylistById(playlistId.Value);
+            firstPlaylist = _armaApi.GetPlaylistById(playlistId.Value) ?? new List<ArmaPlaylistDataItem>();
+
+            foreach (var song in firstPlaylist)
+            {
+                if (CheckIfAudioFileExists($"{song.VideoId}.m4a"))
+                {
+                    song.FileExists = true;
+                }
+            }
         }
 
         selectedPlaylstId = playlistId;
         await JS.InvokeVoidAsync("populateSongsToDownloadTable", firstPlaylist, playlistId);
 
         StateHasChanged();
+    }
+
+    private bool CheckIfAudioFileExists(string FileName)
+    {
+        if (!string.IsNullOrWhiteSpace(FileName))
+        {
+            string audioFolderPath = Path.Combine(FileSystem.AppDataDirectory, "audio");
+
+            if (!Directory.Exists(audioFolderPath))
+            {
+                Directory.CreateDirectory(audioFolderPath);
+            }
+
+            string filePath = Path.Combine(audioFolderPath, FileName.Trim());
+
+            return File.Exists(filePath);
+        }
+
+        return false;
     }
 
     [JSInvokable]

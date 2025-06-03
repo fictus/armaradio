@@ -13,6 +13,7 @@ namespace armaoffline.Models
         public string Song { get; set; }
         public string VideoId { get; set; }
         public int? PlaylistId { get; set; }
+        public bool FileExists { get; set; }
 
     }
 }

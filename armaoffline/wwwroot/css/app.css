@@ -138,6 +138,21 @@ div.div-thumbnail::before {
     background-color: #def1ff;
 }
 
+html body #tblSongsList.table-striped > tbody > tr:nth-of-type(odd) {
+    --bs-table-accent-bg: transparent;
+}
+#tblSongsList tr td {
+    background-color: white;
+}
+
+#tblSongsList tr.tr-status-0 td {
+    background-color: #F6D9D9;
+}
+
+#tblSongsList tr.tr-status-1 td {
+    background-color: #bdffb9;
+}
+
 #tblMainPlayList {
     border-collapse: collapse;
     width: 100%;

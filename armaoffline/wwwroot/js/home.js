@@ -35,6 +35,23 @@ function updateDownloadQueueRemainingCount(countRemaining) {
     $("#lblDownloadingCountRemaining").html(countRemaining);
 }
 
+function updateDownloadQueueStatus(videoId, statusCode) {
+    let tbl = $("#tblSongsList");
+    let tr = tbl.find("tbody tr[data-videoid='" + videoId + "']");
+
+    if (tr.length) {
+        tr.removeClass("tr-status-0");
+        tr.removeClass("tr-status-1");
+
+        if (statusCode == 0) {
+            tr.addClass("tr-status-0");
+        }
+        if (statusCode == 1) {
+            tr.addClass("tr-status-1");
+        }
+    }
+}
+
 function updateDownloadQueueMessage(countRemaining, labelDetails, show) {
     $("#lblDownloadingCountRemaining").html(countRemaining);
     $("#lblDownloadingCurrently").html(labelDetails);
@@ -114,12 +131,16 @@ function populateSongsToDownloadTable(data, playListId) {
 
         let currentTr = $("<tr></tr>")
             .attr({
-                //"class": "table-primary",
+                "class": (data[i].fileExists ? "tr-status-1" : ""),
                 "data-videoid": data[i].videoId,
                 "data-artist": data[i].artist,
                 "data-song": data[i].song
-            })
-            .html(songInfo.join(" - "));
+            });
+
+        currentTr.append(
+            $("<td></td>")
+                .html(songInfo.join(" - "))
+        );
 
         tbl.find("tbody").append(currentTr);
     }
