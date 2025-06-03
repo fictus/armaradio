@@ -166,7 +166,7 @@ namespace armaradio.Controllers
 
         [ApiTokenAttribute]
         [HttpGet]
-        public IActionResult GetAudioFile(string VideoId)
+        public async Task<IActionResult> GetAudioFile(string VideoId)
         {
             try
             {
@@ -184,7 +184,7 @@ namespace armaradio.Controllers
 
                     if (!System.IO.File.Exists(endFileName))
                     {
-                        _musicRepo.DownloadMp4File($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}", endFileName);
+                        await _musicRepo.DownloadMp4File($"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}", endFileName);
                     }
 
                     _musicRepo.FlagFileForDeletion(endFileName);
