@@ -38,16 +38,19 @@ namespace armaradio.Repositories
     {
         private readonly IDapperHelper _dapper;
         private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
-        private readonly ArmaYoutubeDownloader _armaYTDownloader;
+        //private readonly ArmaYoutubeDownloader _armaYTDownloader;
+        private readonly IArmaAudioDownloader _armaAudioDownloader;
         public MusicRepo(
             IDapperHelper dapper,
             Microsoft.Extensions.Configuration.IConfiguration configuration,
-            ArmaYoutubeDownloader armaYTDownloader
+            //ArmaYoutubeDownloader armaYTDownloader
+            IArmaAudioDownloader armaAudioDownloader
         )
         {
             _dapper = dapper;
             _configuration = configuration;
-            _armaYTDownloader = armaYTDownloader;
+            //_armaYTDownloader = armaYTDownloader;
+            _armaAudioDownloader = armaAudioDownloader;
         }
 
         public Guid? GetSiteApiToken()
@@ -1687,7 +1690,9 @@ namespace armaradio.Repositories
 
         public async Task DownloadMp4File(string url, string endFileName)
         {
-            await _armaYTDownloader.DownloadAudioFileAsync(url, endFileName);
+            //await _armaYTDownloader.DownloadAudioFileAsync(url, endFileName);
+            await _armaAudioDownloader.DownloadAudioAsync(url, endFileName);
+
 
             //bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 

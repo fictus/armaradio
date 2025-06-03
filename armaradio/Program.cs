@@ -80,6 +80,7 @@ builder.Services.AddSingleton<YoutubeDL>(sp =>
 });
 
 builder.Services.AddTransient<ArmaYoutubeDownloader>();
+builder.Services.AddTransient<IArmaAudioDownloader, ArmaAudioDownloader>();
 
 builder.Services.AddDbContext<DataContext>(options =>
 {
