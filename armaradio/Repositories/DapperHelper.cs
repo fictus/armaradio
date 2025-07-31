@@ -73,16 +73,6 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
-        public List<T> GetList<T>(SqlConnection DbConnection, string StoredProcedure)
-        {
-            List<T> returnItem = null;
-
-            returnItem = DbConnection.Query<T>(StoredProcedure,
-                commandType: System.Data.CommandType.StoredProcedure).ToList();
-
-            return returnItem;
-        }
-
         public List<T> GetList<T>(string ConnectionName, string StoredProcedure, DynamicParameters DynamicParameters)
         {
             List<T> returnItem = null;
@@ -112,6 +102,45 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
+        public List<T> GetList<T>(string ConnectionName, string StoredProcedure, object DynamicParameters, int Timeout)
+        {
+            List<T> returnItem = null;
+
+            using (var db = GetConnection(ConnectionName))
+            {
+                returnItem = db.Query<T>(StoredProcedure,
+                    DynamicParameters,
+                    commandType: System.Data.CommandType.StoredProcedure,
+                    commandTimeout: Timeout).ToList();
+            }
+
+            return returnItem;
+        }
+
+        public List<T> GetList<T>(string ConnectionName, string StoredProcedure, object DynamicParameters)
+        {
+            List<T> returnItem = null;
+
+            using (var db = GetConnection(ConnectionName))
+            {
+                returnItem = db.Query<T>(StoredProcedure,
+                    DynamicParameters,
+                    commandType: System.Data.CommandType.StoredProcedure).ToList();
+            }
+
+            return returnItem;
+        }
+
+        public List<T> GetList<T>(SqlConnection DbConnection, string StoredProcedure)
+        {
+            List<T> returnItem = null;
+
+            returnItem = DbConnection.Query<T>(StoredProcedure,
+                commandType: System.Data.CommandType.StoredProcedure).ToList();
+
+            return returnItem;
+        }
+
         public List<T> GetList<T>(SqlConnection DbConnection, string StoredProcedure, DynamicParameters DynamicParameters)
         {
             List<T> returnItem = null;
@@ -131,20 +160,6 @@ namespace armaradio.Repositories
                 DynamicParameters,
                 commandType: System.Data.CommandType.StoredProcedure,
                 commandTimeout: Timeout).ToList();
-
-            return returnItem;
-        }
-
-        public List<T> GetList<T>(string ConnectionName, string StoredProcedure, object DynamicParameters)
-        {
-            List<T> returnItem = null;
-
-            using (var db = GetConnection(ConnectionName))
-            {
-                returnItem = db.Query<T>(StoredProcedure,
-                    DynamicParameters,
-                    commandType: System.Data.CommandType.StoredProcedure).ToList();
-            }
 
             return returnItem;
         }

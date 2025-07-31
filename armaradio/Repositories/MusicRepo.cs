@@ -79,7 +79,7 @@ namespace armaradio.Repositories
             return _dapper.GetFirstOrDefault<ArmaArtistDataItem>("radioconn", "Arma_GetArtistByMBid", new
             {
                 artist_mbid = artist_mbid
-            });
+            }, (60 * 2));
         }
 
         public List<ArmaArtistDataItem> Artist_FindArtistsInternal(string search)
@@ -87,7 +87,7 @@ namespace armaradio.Repositories
             return _dapper.GetList<ArmaArtistDataItem>("radioconn", "Arma_SearchArtistsInternal", new
             {
                 artist_name = search
-            });
+            }, (60 * 2));
         }
 
         public List<ArtistDataItem> Artist_GetArtistList(string search)
@@ -320,7 +320,7 @@ namespace armaradio.Repositories
                 {
                     artist_mbid = currentArtist.Artist_MBId,
                     only_by_genre = true
-                }) ?? new List<ArmaRecommendationDataItem>();
+                }, (60 * 2)) ?? new List<ArmaRecommendationDataItem>();
 
                 if (returnItem.Count == 0)
                 {
@@ -333,7 +333,7 @@ namespace armaradio.Repositories
                             artist_mbid = simArtist.artist_mbid,
                             only_by_genre = true,
                             use_spotify_genres = true
-                        }) ?? new List<ArmaRecommendationDataItem>();
+                        }, (60 * 2)) ?? new List<ArmaRecommendationDataItem>();
 
                         if (returnItem.Count > 0)
                         {
@@ -359,7 +359,7 @@ namespace armaradio.Repositories
                             {
                                 artist_mbid = currentArtist.Artist_MBId,
                                 only_by_genre = true
-                            }) ?? new List<ArmaRecommendationDataItem>();
+                            }, (60 * 2)) ?? new List<ArmaRecommendationDataItem>();
                         }
 
                         if (returnItem.Count > 0)
@@ -374,7 +374,7 @@ namespace armaradio.Repositories
                     returnItem = _dapper.GetList<ArmaRecommendationDataItem>("recommendations", "arma_get_suggestions_by_renge_related_artists", new
                     {
                         artist_mbid = currentArtist.Artist_MBId
-                    }) ?? new List<ArmaRecommendationDataItem>();
+                    }, (60 * 2)) ?? new List<ArmaRecommendationDataItem>();
                 }
 
                 if (returnItem.Count == 0)
@@ -388,7 +388,7 @@ namespace armaradio.Repositories
                             returnItem = _dapper.GetList<ArmaRecommendationDataItem>("recommendations", "arma_get_suggestions_by_renge_related_artists", new
                             {
                                 artist_mbid = currentArtist.Artist_MBId
-                            }) ?? new List<ArmaRecommendationDataItem>();
+                            }, (60 * 2)) ?? new List<ArmaRecommendationDataItem>();
                         }
 
                         if (returnItem.Count > 0)
@@ -409,7 +409,7 @@ namespace armaradio.Repositories
                             returnItem = _dapper.GetList<ArmaRecommendationDataItem>("recommendations", "arma_get_suggestions_by_artist", new
                             {
                                 artist_mbid = currentArtist.Artist_MBId
-                            }) ?? new List<ArmaRecommendationDataItem>();
+                            }, (60 * 2)) ?? new List<ArmaRecommendationDataItem>();
                         }
 
                         if (returnItem.Count > 0)
