@@ -7,30 +7,34 @@ using armaradio.Models.Request;
 using armaradio.Models.Response;
 using armaradio.Models.Youtube;
 using Dapper;
+using FFMpegCore.Enums;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Identity.Client;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Globalization;
-using System.Net;
-using System.Text.RegularExpressions;
-using System.Web;
-using YoutubeDLSharp.Options;
-using YoutubeDLSharp;
-using YoutubeExplode.Common;
-using YoutubeExplode.Videos;
 using System.Diagnostics;
-using FFMpegCore.Enums;
-using System.Runtime.InteropServices;
-using static System.Net.Mime.MediaTypeNames;
-using Microsoft.Identity.Client;
+using System.Globalization;
+using System.IO.Compression;
+using System.Net;
 using System.Net.Http.Headers;
-using System.Text;
-using System.Threading;
 using System.Net.Http.Json;
 using System.Reflection;
-using System.IO.Compression;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Web;
+using YoutubeDLSharp;
+using YoutubeDLSharp.Options;
+using YoutubeExplode.Common;
+using YoutubeExplode.Videos;
+using YouTubeMusicAPI.Models;
+using YouTubeMusicAPI.Models.Search;
+using YouTubeMusicAPI.Pagination;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace armaradio.Repositories
 {
@@ -40,6 +44,21 @@ namespace armaradio.Repositories
         private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
         private readonly ArmaYoutubeDownloader _armaYTDownloader;
         private readonly IArmaAudioDownloader _armaAudioDownloader;
+        private static readonly Random _random = new Random();
+        private static readonly string[] _cookieNames =
+        {
+            "__Secure-3PSID",
+            "__Secure-1PAPISID",
+            "__Secure-3PAPISID",
+            "SSID",
+            "HSID",
+            "SID",
+            "SAPISID",
+            "__Secure-3PSIDTS",
+            "APISID",
+            "__Secure-1PSID",
+            "__Secure-1PSIDTS"
+        };
         public MusicRepo(
             IDapperHelper dapper,
             Microsoft.Extensions.Configuration.IConfiguration configuration,
@@ -1904,54 +1923,79 @@ namespace armaradio.Repositories
 
             if (!string.IsNullOrWhiteSpace(searchText))
             {
-                string userInput = HttpUtility.UrlEncode(searchText);
-
-                string url = $"https://www.youtube.com/results?search_query={userInput}&sp=EgIQAQ%253D%253D";
-
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-                request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
-
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                var cookie = _cookieNames.Select(name =>
+                new Cookie(name, GenerateRandomString(20))
                 {
-                    if (response.StatusCode == HttpStatusCode.OK)
+                    Domain = ".youtube.com"
+                });
+
+                YouTubeMusicAPI.Client.YouTubeMusicClient ytClient = new YouTubeMusicAPI.Client.YouTubeMusicClient(cookies: cookie);
+
+                PaginatedAsyncEnumerable<SearchResult> searchResults = ytClient.SearchAsync(searchText, SearchCategory.Songs);
+                IReadOnlyList<SearchResult> bufferedSearchResults = searchResults.FetchItemsAsync(0, 30).Result;
+
+                foreach (SongSearchResult song in bufferedSearchResults.Cast<SongSearchResult>())
+                {
+                    returnItem.Add(new YTGeneralSearchDataItem()
                     {
-                        string htmlContent;
-                        using (StreamReader sr = new StreamReader(response.GetResponseStream()))
-                        {
-                            htmlContent = sr.ReadToEnd();
-                        }
+                        videoId = song.Id,
+                        artistName = (song.Artists != null && song.Artists.Count() > 0 ? song.Artists[0].Name : ""),
+                        songName = song.Name,
+                        thumbNail = null
+                    });
+                }
 
-                        if (!string.IsNullOrEmpty(htmlContent))
-                        {
-                            string pattern = @"var ytInitialData = (.*?);\s*</script>";
-                            Match match = Regex.Match(htmlContent, pattern);
+                if (returnItem.Count == 0)
+                {
+                    string userInput = HttpUtility.UrlEncode(searchText);
 
-                            if (match.Success)
+                    string url = $"https://www.youtube.com/results?search_query={userInput}&sp=EgIQAQ%253D%253D";
+
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                    request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
+
+                    using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                    {
+                        if (response.StatusCode == HttpStatusCode.OK)
+                        {
+                            string htmlContent;
+                            using (StreamReader sr = new StreamReader(response.GetResponseStream()))
                             {
-                                string jsonString = match.Groups[1].Value;
-                                //jsonString = jsonString.Replace("'", "\"");
-                                YTArtistSongNameResponse jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject<YTArtistSongNameResponse>(jsonString);
+                                htmlContent = sr.ReadToEnd();
+                            }
 
-                                foreach (var content in jsonObject.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents)
+                            if (!string.IsNullOrEmpty(htmlContent))
+                            {
+                                string pattern = @"var ytInitialData = (.*?);\s*</script>";
+                                Match match = Regex.Match(htmlContent, pattern);
+
+                                if (match.Success)
                                 {
-                                    if (content.itemSectionRenderer != null && content.itemSectionRenderer.contents != null)
-                                    {
-                                        foreach (var subContent in content.itemSectionRenderer.contents)
-                                        {
-                                            if (subContent.videoRenderer != null && !string.IsNullOrWhiteSpace(subContent.videoRenderer.videoId))
-                                            {
-                                                string artistSong = subContent.videoRenderer.title?.runs?.Count > 0 ? (subContent.videoRenderer.title.runs[0].text ?? "") : "";
-                                                string artistName = (artistSong.Split('-').First() ?? "").Trim();
-                                                string songName = (artistSong.Contains("-") ? artistSong.Substring(artistSong.IndexOf("-") + 1).Trim() : "");
-                                                Thumbnails thumbNail = subContent.videoRenderer.thumbnail?.thumbnails?.Count > 0 ? subContent.videoRenderer.thumbnail.thumbnails[0] : null;
+                                    string jsonString = match.Groups[1].Value;
+                                    //jsonString = jsonString.Replace("'", "\"");
+                                    YTArtistSongNameResponse jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject<YTArtistSongNameResponse>(jsonString);
 
-                                                returnItem.Add(new YTGeneralSearchDataItem()
+                                    foreach (var content in jsonObject.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents)
+                                    {
+                                        if (content.itemSectionRenderer != null && content.itemSectionRenderer.contents != null)
+                                        {
+                                            foreach (var subContent in content.itemSectionRenderer.contents)
+                                            {
+                                                if (subContent.videoRenderer != null && !string.IsNullOrWhiteSpace(subContent.videoRenderer.videoId))
                                                 {
-                                                    videoId = subContent.videoRenderer.videoId,
-                                                    artistName = artistName,
-                                                    songName = songName,
-                                                    thumbNail = thumbNail
-                                                });
+                                                    string artistSong = subContent.videoRenderer.title?.runs?.Count > 0 ? (subContent.videoRenderer.title.runs[0].text ?? "") : "";
+                                                    string artistName = (artistSong.Split('-').First() ?? "").Trim();
+                                                    string songName = (artistSong.Contains("-") ? artistSong.Substring(artistSong.IndexOf("-") + 1).Trim() : "");
+                                                    Thumbnails thumbNail = subContent.videoRenderer.thumbnail?.thumbnails?.Count > 0 ? subContent.videoRenderer.thumbnail.thumbnails[0] : null;
+
+                                                    returnItem.Add(new YTGeneralSearchDataItem()
+                                                    {
+                                                        videoId = subContent.videoRenderer.videoId,
+                                                        artistName = artistName,
+                                                        songName = songName,
+                                                        thumbNail = thumbNail
+                                                    });
+                                                }
                                             }
                                         }
                                     }
@@ -1968,6 +2012,19 @@ namespace armaradio.Repositories
             }
 
             return returnItem;
+        }
+
+        private string GenerateRandomString(int length)
+        {
+            const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.";
+            char[] stringChars = new char[length];
+
+            for (int i = 0; i < stringChars.Length; i++)
+            {
+                stringChars[i] = chars[_random.Next(chars.Length)];
+            }
+
+            return new string(stringChars);
         }
 
         // implement Creative Commons search from DuckDuckGo
