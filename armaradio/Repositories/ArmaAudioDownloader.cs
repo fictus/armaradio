@@ -22,7 +22,7 @@ namespace armaradio.Repositories
                 // Determine yt-dlp executable name based on OS
                 var ytDlpExecutable = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                     ? "C:\\YTDL\\yt-dlp.exe"
-                    : "/usr/local/bin/yt-dlp";
+                    : "/home/fictus/.local/bin/yt-dlp"; // "/usr/local/bin/yt-dlp";
 
                 var arguments = new StringBuilder()
                     .Append("--extract-audio ")
