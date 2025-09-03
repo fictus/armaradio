@@ -99,7 +99,7 @@ namespace armaradio.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An exception occurred in the Get method");
+                _logger.LogError(ex, ex.Message.ToString() + "; Stack-Trace: " + ex.StackTrace.ToString());
 
                 throw;
             }
