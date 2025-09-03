@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 namespace armaradio.Repositories
 {
@@ -10,7 +11,7 @@ namespace armaradio.Repositories
         {
         }
 
-        public async Task<string> DownloadAudioAsync(string youtubeUrl, string outputFileName)
+        public async Task<string> DownloadAudioAsync(string youtubeUrl, string outputFileName, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -57,17 +58,37 @@ namespace armaradio.Repositories
                 };
 
                 using var process = new Process { StartInfo = processInfo };
-                process.Start();
+                var tcs = new TaskCompletionSource<int>();
+                process.EnableRaisingEvents = true;
+                process.Exited += (sender, args) => tcs.TrySetResult(process.ExitCode);
 
-                // Read output streams (important to prevent deadlocks)
-                var output = await process.StandardOutput.ReadToEndAsync();
-                var error = await process.StandardError.ReadToEndAsync();
+                // Start the process
+                if (!process.Start())
+                {
+                    throw new InvalidOperationException("Failed to start yt-dlp process");
+                }
 
-                await process.WaitForExitAsync();
+                // Read streams asynchronously to prevent deadlocks
+                var outputTask = process.StandardOutput.ReadToEndAsync();
+                var errorTask = process.StandardError.ReadToEndAsync();
+
+                // Wait for process exit with cancellation support
+                await using (cancellationToken.Register(() =>
+                {
+                    try { process.Kill(true); } catch { /* Ignore */ }
+                    tcs.TrySetCanceled(cancellationToken);
+                }))
+                {
+                    await tcs.Task.ConfigureAwait(false);
+                }
+
+                // Get the results after process exits
+                var output = await outputTask.ConfigureAwait(false);
+                var error = await errorTask.ConfigureAwait(false);
 
                 if (process.ExitCode != 0)
                 {
-                    throw new Exception($"yt-dlp failed: {error}");
+                    throw new Exception($"yt-dlp failed with exit code {process.ExitCode}: {error}");
                 }
 
                 return outputFileName;

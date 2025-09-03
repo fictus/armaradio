@@ -2,6 +2,6 @@
 {
     public interface IArmaAudioDownloader
     {
-        Task<string> DownloadAudioAsync(string youtubeUrl, string outputFileName);
+        Task<string> DownloadAudioAsync(string youtubeUrl, string outputFileName, CancellationToken cancellationToken = default);
     }
 }
