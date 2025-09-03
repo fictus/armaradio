@@ -42,9 +42,9 @@ namespace armaradio.Repositories
                 ForceIPv4 = true, // Force IPv4 to potentially avoid slow IPv6 connections
                 SocketTimeout = 30,
                 KeepFragments = false,
-                WriteInfoJson = false
+                WriteInfoJson = false,
                 //DownloaderArgs = "-4"
-                //Verbose = true
+                Verbose = true
             };
             //var options = new OptionSet
             //{
