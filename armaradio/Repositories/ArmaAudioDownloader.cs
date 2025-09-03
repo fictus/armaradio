@@ -27,15 +27,17 @@ namespace armaradio.Repositories
                 var arguments = new StringBuilder()
                     .Append("--extract-audio ")
                     .Append("--audio-format m4a ")
-                    .Append("--audio-quality 4 ")  // Best quality
-                    .Append("--postprocessor-args \"-strict -2 -b:a 96k -ac 2 -ar 44100\" ")
-                    .Append("--format bestaudio ")  // Ensures we get audio streams only
+                    .Append("--audio-quality 0 ")  // Best quality
+                    .Append("--concurrent-fragments 8 ")
+                    //.Append("--postprocessor-args \"-strict -2 -b:a 96k -ac 2 -ar 44100\" ")
+                    .Append("--format \"bestaudio[ext=m4a]/bestaudio/best\" ")  // Ensures we get audio streams only
+                    .Append("--concurrent-fragments 8 ")
                     .Append("--no-playlist ")      // Avoid accidental playlist downloads
-                    .Append("--throttled-rate 100K ") // Slow down if throttled
                     .Append("--retries 10 ")       // Increased retry attempts
                     .Append("--fragment-retries 10 ")
-                    .Append("--buffer-size 16K ")  // Better network handling
+                    .Append("--buffer-size 1024K ")  // Better network handling
                     .Append("--no-check-certificates ")
+                    .Append("--throttled-rate 500K ") // Slow down if throttled
                     .Append($"--user-agent \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36\" ")
                     //.Append($"--cookies-from-browser chrome ")  // Use your browser cookies
                     //.Append($"--no-check-certificates ")

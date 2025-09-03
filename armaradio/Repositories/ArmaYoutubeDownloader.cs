@@ -25,7 +25,7 @@ namespace armaradio.Repositories
 
             var options = new OptionSet
             {
-                Format = "bestaudio[ext=m4a]/bestaudio",
+                Format = "bestaudio[ext=m4a]/bestaudio[abr<=128]/bestaudio",
                 Output = endFileName,
                 ExtractAudio = true,
                 AudioFormat = AudioConversionFormat.M4a,
@@ -33,14 +33,17 @@ namespace armaradio.Repositories
                 NoCheckCertificates = true,
                 NoWarnings = true,
                 Downloader = "native",
-                BufferSize = 16000, // Increased buffer size
-                ConcurrentFragments = 4, // Download multiple fragments concurrently
-                Retries = 5,
+                BufferSize = 1048576, // Increased buffer size
+                ConcurrentFragments = 8, // Download multiple fragments concurrently
+                Retries = 10,
+                ThrottledRate = 500000,
                 //RetrySleep = retrySleep,
-                FragmentRetries = 10, // Retry failed fragments
+                FragmentRetries = 15, // Retry failed fragments
                 ForceIPv4 = true, // Force IPv4 to potentially avoid slow IPv6 connections
-                SocketTimeout = 60,
-                DownloaderArgs = "-4"
+                SocketTimeout = 30,
+                KeepFragments = false,
+                WriteInfoJson = false
+                //DownloaderArgs = "-4"
                 //Verbose = true
             };
             //var options = new OptionSet
@@ -58,7 +61,7 @@ namespace armaradio.Repositories
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 //options.NoCacheDir = true; // Disable cache directory on Linux
-                options.DownloaderArgs = "-4 native:buffer_size=16k"; // Set native downloader buffer size
+                options.DownloaderArgs = "-4 --buffer-size 1M"; // Set native downloader buffer size
             }
 
             var result = await _youtubeDl.RunAudioDownload(
