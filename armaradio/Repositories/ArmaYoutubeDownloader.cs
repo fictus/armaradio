@@ -74,7 +74,10 @@ namespace armaradio.Repositories
 
             if (!result.Success)
             {
-                throw new Exception((result.ErrorOutput != null && result.ErrorOutput.Length > 0 ? string.Join("; ", result.ErrorOutput) : "An error occurred"));
+                string errorMsg = (result.ErrorOutput != null && result.ErrorOutput.Length > 0 ? string.Join("; ", result.ErrorOutput) : "An error occurred");
+                Console.WriteLine($"yt-dlp failed: {errorMsg}");
+
+                throw new Exception(errorMsg);
             }
         }
     }

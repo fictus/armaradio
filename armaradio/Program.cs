@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Filters;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using YoutubeDLSharp;
 
@@ -72,6 +73,12 @@ builder.Services.AddScoped<ArmaUserOperation>();
 builder.Services.AddSingleton<YoutubeDL>(sp =>
 {
     bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+
+    if (isLinux)
+    {
+        Process.Start("chmod", $"777 /var/www/armaradio/wwwroot/AudioFiles").WaitForExit();
+    }
+
     return new YoutubeDL
     {
         YoutubeDLPath = (isLinux ? "/usr/local/bin/yt-dlp-wrapper" : "C:\\YTDL\\yt-dlp.exe"), //"/home/fictus/.local/bin/yt-dlp"   /usr/local/bin/yt-dlp
