@@ -7,8 +7,12 @@ namespace armaradio.Repositories
 {
     public class ArmaAudioDownloader : IArmaAudioDownloader
     {
-        public ArmaAudioDownloader()
+        private readonly ILogger<ArmaAudioDownloader> _logger;
+        public ArmaAudioDownloader(
+            ILogger<ArmaAudioDownloader> logger
+        )
         {
+            _logger = logger;
         }
 
         public async Task<string> DownloadAudioAsync(string youtubeUrl, string outputFileName, CancellationToken cancellationToken = default)
@@ -95,6 +99,8 @@ namespace armaradio.Repositories
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "An exception occurred in the Get method");
+
                 throw;
             }
         }
