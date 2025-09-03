@@ -14,6 +14,12 @@ using YoutubeDLSharp;
 
 var builder = WebApplication.CreateBuilder(args);
 IWebHostEnvironment hostEnvironment = builder.Environment;
+
+if (OperatingSystem.IsLinux())
+{
+    builder.Host.UseSystemd();
+}
+
 //string url = $"https://spotalike.com/en";
 
 //var browserFetcher = new BrowserFetcher();
