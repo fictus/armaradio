@@ -1,0 +1,79 @@
+(if no repo exists)
+	cd /var/git/armaradio
+	sudo git clone https://fictus:28007753596ea962b9a5508930e498b7cb992e12@github.com/fictus/armaradio.git
+
+
+cd /var/git/armaradio/armaradio
+sudo git pull https://fictus:28007753596ea962b9a5508930e498b7cb992e12@github.com/fictus/armaradio.git
+
+cd /var/git/armaradio/armaradio/
+sudo dotnet publish --configuration Release /var/git/armaradio/armaradio/armaradio/armaradio.csproj
+
+sudo systemctl stop armaradio.service
+sudo rsync -avu --exclude /wwwroot/download --delete "/var/git/armaradio/armaradio/armaradio/bin/Release/net8.0/publish/" "/var/www/armaradio"
+sudo systemctl start armaradio.service
+
+
+
+
+
+ARMAOFFLINE
+BUILD ANDROID RELEASE
+=====================
+D:
+cd D:\eviCORE-CODE\DnnDev\DesktopModules\armaradio\armaoffline
+dotnet publish -f:net8.0-android -c:Release /p:AndroidPackageFormat=apk
+
+D:\eviCORE-CODE\DnnDev\DesktopModules\armaradio\armaoffline\bin\Release\net8.0-android
+
+
+
+
+
+
+sudo nginx -t
+sudo nginx -s reload
+sudo service nginx restart
+
+
+sudo systemctl daemon-reload
+sudo systemctl enable armaradio.service
+sudo systemctl stop armaradio.service
+sudo systemctl start armaradio.service
+sudo systemctl status armaradio.service
+
+
+
+TEST TOKENS:
+
+let tokenFinal = ""; micronet.masterAJAXPostByEndPoint({
+    UserName: "luis.e.valle@gmail.com", Password: "Sheep1979;"
+}, "https://armarad.com/Api/ExternalLogin", "ExternalLogin")
+    .then(function (response) { tokenFinal = response.apiToken; console.log(tokenFinal); });
+
+armaradio.masterAJAXGet({}, "Api", "TestJTokenCall", tokenFinal)
+    .then(function (response) { console.log(response); });
+
+
+(one time only - set folder permissions)
+===================
+sudo chmod 0755 /var/www/armaradio
+
+Start Site:
+
+sudo nano /etc/systemd/system/armaradio.service
+
+[Unit]
+Description=.NET Core armaradio on Ubuntu
+
+[Service]
+WorkingDirectory=/var/www/armaradio
+ExecStart=/usr/bin/dotnet /var/www/armaradio/armaradio.dll
+Restart=always
+RestartSec=10
+SyslogIdentifier=offershare-web-app
+Environment=ASPNETCORE_ENVIRONMENT=Production
+#Environment=ASPNETCORE_ENVIRONMENT=Development
+
+[Install]
+WantedBy=multi-user.target

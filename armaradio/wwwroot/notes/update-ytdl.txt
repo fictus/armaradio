@@ -1,0 +1,6 @@
+
+
+UPDATE YT-DLP:
+========================
+python3.9 -m pip install --user -U "yt-dlp[default]"
+/home/fictus/.local/bin/yt-dlp --version
