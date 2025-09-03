@@ -74,14 +74,14 @@ builder.Services.AddSingleton<YoutubeDL>(sp =>
 {
     bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
-    if (isLinux)
-    {
-        Process.Start("chmod", $"777 /var/www/armaradio/wwwroot/AudioFiles").WaitForExit();
-    }
+    //if (isLinux)
+    //{
+    //    Process.Start("chmod", $"777 /var/www/armaradio/wwwroot/AudioFiles").WaitForExit();
+    //}
 
     return new YoutubeDL
     {
-        YoutubeDLPath = (isLinux ? "/usr/local/bin/yt-dlp-wrapper" : "C:\\YTDL\\yt-dlp.exe"), //"/home/fictus/.local/bin/yt-dlp"   /usr/local/bin/yt-dlp
+        YoutubeDLPath = (isLinux ? "/usr/local/bin/yt-dlp" : "C:\\YTDL\\yt-dlp.exe"), //"/home/fictus/.local/bin/yt-dlp"   /usr/local/bin/yt-dlp  "/usr/local/bin/yt-dlp-wrapper"
         FFmpegPath = (isLinux ? "/usr/bin/ffmpeg" : "C:\\ffmpeg\\ffmpeg.exe")
     };
 });
