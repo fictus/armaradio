@@ -458,7 +458,7 @@ function initializeRadioPlayer(videoId, dispose) {
             muted: true,
             autoplay: false,
             controls: true,
-            poster: "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID(),
+            poster: getRandomRadioBackground(),
             sources: [{
                 src: (ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId),
                 type: "audio/mp4"
@@ -534,7 +534,7 @@ function initializeRadioPlayer(videoId, dispose) {
     } else {
         radioPlayerMain.pause();
 
-        let newPoster = "https://random-image-pepebigotes.vercel.app/api/random-image?g=" + generateGUID();
+        let newPoster = getRandomRadioBackground();
         let newSource = ajaxPointCall + "/Music/FetchAudioFile?VideoId=" + videoId;
 
         radioPlayerMain.poster(newPoster);
