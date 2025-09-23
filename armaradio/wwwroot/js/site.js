@@ -318,7 +318,7 @@ function generateGUID() {
 }
 
 function getRandomRadioBackground() {
-    let imageUrl = ajaxPointCall + "/images/radio-bkg/rad-cover-" + randNumber(10) + ".jpg";
+    let imageUrl = ajaxPointCall + "/images/radio-bkg/rad-cover-" + randNumber(14) + ".jpg";
 
     return imageUrl;
 }
