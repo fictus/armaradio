@@ -1,4 +1,4 @@
-var arma_mainSearchSelectedType = "1";
+var arma_mainSearchSelectedType = "2";
 var isIOSDevice = false;
 var localHomePlayer;
 var soundWaveColor = "#E14B4B";
@@ -98,11 +98,11 @@ function mainload_attacheEvents() {
                 $("#spSearchSpinner").css("display", "none");
                 clearSelectedArtist();
 
-                if (arma_mainSearchSelectedType == "1") {
-                    $("#txtMainGeneralSearch").css("display", "");
-                    $("#txtMainGeneralSearch").attr("placeholder", "Artist Search");
-                    $("#btnMain_GeneralSearch").css("display", "none");
-                } else if (arma_mainSearchSelectedType == "2") {
+                //if (arma_mainSearchSelectedType == "1") {
+                //    $("#txtMainGeneralSearch").css("display", "");
+                //    $("#txtMainGeneralSearch").attr("placeholder", "Artist Search");
+                //    $("#btnMain_GeneralSearch").css("display", "none");
+                if (arma_mainSearchSelectedType == "2") {
                     $("#txtMainGeneralSearch").css("display", "");
                     $("#txtMainGeneralSearch").attr("placeholder", "General Search");
                     $("#btnMain_GeneralSearch").css("display", "");
@@ -119,7 +119,7 @@ function mainload_attacheEvents() {
                         }
                     }
 
-                    $("#cmbMasterSearchOptions").find("a.dropdown-item[data-type='1']").trigger("click");
+                    $("#cmbMasterSearchOptions").find("a.dropdown-item[data-type='2']").trigger("click");
                 }
 
                 $("#txtMainGeneralSearch")[0].focus();
