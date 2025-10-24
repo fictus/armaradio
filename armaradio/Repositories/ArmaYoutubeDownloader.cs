@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AngleSharp.Dom;
+using Microsoft.Extensions.Logging;
 using System.Runtime.InteropServices;
 using YoutubeDLSharp;
 using YoutubeDLSharp.Options;
@@ -7,22 +8,31 @@ namespace armaradio.Repositories
 {
     public class ArmaYoutubeDownloader
     {
+        private readonly bool IsWindows = false;
         private readonly YoutubeDL _youtubeDl;
         private readonly ILogger<ArmaAudioDownloader> _logger;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
         public ArmaYoutubeDownloader(
             YoutubeDL youtubeDl,
-            ILogger<ArmaAudioDownloader> logger
+            ILogger<ArmaAudioDownloader> logger,
+            IWebHostEnvironment hostEnvironment
         )
         {
             _youtubeDl = youtubeDl;
             _logger = logger;
+            _hostEnvironment = hostEnvironment;
+
+            IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         }
 
         public async Task DownloadAudioFileAsync(string url, string endFileName)
         {
             try
             {
+                string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
+                string cookiesFile = (!IsWindows ? $"{rootPath}/cookies/file.txt" : $"{rootPath}\\cookies\\file.txt");
+
                 var retrySleep = new MultiValue<string>();
 
                 retrySleep.Values.Add("http:exp=1:30");
@@ -31,7 +41,7 @@ namespace armaradio.Repositories
 
                 var options = new OptionSet
                 {
-                    Format = "bestaudio[ext=m4a]/bestaudio[abr<=128]/bestaudio",
+                    Format = "bestaudio[ext=m4a]/bestaudio", //"bestaudio[ext=m4a]/bestaudio[abr<=128]/bestaudio",
                     Output = endFileName,
                     ExtractAudio = true,
                     AudioFormat = AudioConversionFormat.M4a,
@@ -51,7 +61,8 @@ namespace armaradio.Repositories
                     WriteInfoJson = false,
                     //DownloaderArgs = "-4"
                     Verbose = true,
-                    SleepInterval = 5
+                    SleepInterval = 5,
+                    Cookies = cookiesFile
                 };
                 //var options = new OptionSet
                 //{
