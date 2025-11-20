@@ -20,3 +20,13 @@ arma_miner/obj/
 /arma_historycompiler/tempFiles/listenbrainz-listens-dump-1910-20241112-000003-incremental/listens/2024
 /arma_genregenerator/bin/Debug/net8.0
 /arma_genregenerator/obj
+/armaradio/appsettings.json
+/armaradio/appsettings.Development.json
+/arma_genregenerator/appsettings.Development.json
+/arma_genregenerator/appsettings.json
+/arma_historycompiler/appsettings.Development.json
+/arma_historycompiler/appsettings.json
+/arma_miner/appsettings.Development.json
+/arma_miner/appsettings.json
+/armaradioSongsAlike/appsettings.Development.json
+/armaradioSongsAlike/appsettings.json
