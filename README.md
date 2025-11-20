@@ -8,6 +8,7 @@ YOU MUST create your own appsettings.json files
 
 ARMARADIO appsettings.json must look like this:
 
+```
 {
   "Logging": {
     "LogLevel": {
@@ -26,3 +27,4 @@ ARMARADIO appsettings.json must look like this:
     "apiClientSecret": "XXXX"
   }
 }
+```
