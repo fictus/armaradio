@@ -38,6 +38,6 @@ armaradio solution appsettings.json must look like this:
 
 **the other projects** - I was no longer using them at the end, so I can't really recall what their purpose was.
 
-# TO DO
+# SQL
 
-**SQL** - include SQL Database table schemas, stored procedures, views, UDFs.
+All database table schemas, stored procedures & UDFs can be found in the **armaradio** prject under the **SQL** folder.
