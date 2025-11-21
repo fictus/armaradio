@@ -40,4 +40,4 @@ armaradio solution appsettings.json must look like this:
 
 # SQL
 
-All database table schemas, stored procedures & UDFs can be found in the **armaradio** prject under the **SQL** folder.
+All database table schemas, stored procedures & UDFs can be found in the **armaradio** project under the **SQL** folder.
