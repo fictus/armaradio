@@ -1,0 +1,53 @@
+USE [top100]
+GO
+/****** Object:  Table [dbo].[Daily_Keys]    Script Date: 11/21/2025 9:23:34 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Daily_Keys](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[DateKey] [date] NOT NULL,
+	[EntryDateTime] [datetime] NULL,
+ CONSTRAINT [PK_Daily_Keys] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Daily_Top100]    Script Date: 11/21/2025 9:23:35 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Daily_Top100](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[key_id] [int] NOT NULL,
+	[rank] [int] NOT NULL,
+	[artist] [nvarchar](500) NULL,
+	[song] [nvarchar](1000) NULL,
+ CONSTRAINT [PK_Daily_Top100] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Daily_Top100Archived]    Script Date: 11/21/2025 9:23:35 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Daily_Top100Archived](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[key_id] [int] NOT NULL,
+	[rank] [int] NOT NULL,
+	[artist] [nvarchar](500) NULL,
+	[song] [nvarchar](1000) NULL,
+ CONSTRAINT [PK_Daily_Top100Archived] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Daily_Keys] ADD  CONSTRAINT [DF_Daily_Keys_EntryDateTime]  DEFAULT (getdate()) FOR [EntryDateTime]
+GO
