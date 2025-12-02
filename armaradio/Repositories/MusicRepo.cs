@@ -1924,28 +1924,6 @@ namespace armaradio.Repositories
 
             if (!string.IsNullOrWhiteSpace(searchText))
             {
-                var cookie = _cookieNames.Select(name =>
-                new Cookie(name, GenerateRandomString(20))
-                {
-                    Domain = ".youtube.com"
-                });
-
-                YouTubeMusicAPI.Client.YouTubeMusicClient ytClient = new YouTubeMusicAPI.Client.YouTubeMusicClient(cookies: cookie);
-
-                PaginatedAsyncEnumerable<SearchResult> searchResults = ytClient.SearchAsync(searchText, SearchCategory.Songs);
-                IReadOnlyList<SearchResult> bufferedSearchResults = searchResults.FetchItemsAsync(0, 30).Result;
-
-                foreach (SongSearchResult song in bufferedSearchResults.Cast<SongSearchResult>())
-                {
-                    returnItem.Add(new YTGeneralSearchDataItem()
-                    {
-                        videoId = song.Id,
-                        artistName = (song.Artists != null && song.Artists.Count() > 0 ? song.Artists[0].Name : ""),
-                        songName = song.Name,
-                        thumbNail = null
-                    });
-                }
-
                 if (returnItem.Count == 0)
                 {
                     string userInput = HttpUtility.UrlEncode(searchText);
@@ -2002,6 +1980,34 @@ namespace armaradio.Repositories
                                     }
                                 }
                             }
+                        }
+                    }
+                }
+
+                if (true) // add more records
+                {
+                    var cookie = _cookieNames.Select(name =>
+                    new Cookie(name, GenerateRandomString(20))
+                    {
+                        Domain = ".youtube.com"
+                    });
+
+                    YouTubeMusicAPI.Client.YouTubeMusicClient ytClient = new YouTubeMusicAPI.Client.YouTubeMusicClient(cookies: cookie);
+
+                    PaginatedAsyncEnumerable<SearchResult> searchResults = ytClient.SearchAsync(searchText, SearchCategory.Songs);
+                    IReadOnlyList<SearchResult> bufferedSearchResults = searchResults.FetchItemsAsync(0, 30).Result;
+
+                    foreach (SongSearchResult song in bufferedSearchResults.Cast<SongSearchResult>())
+                    {
+                        if (!returnItem.Any(sg => sg.videoId == song.Id))
+                        {
+                            returnItem.Add(new YTGeneralSearchDataItem()
+                            {
+                                videoId = song.Id,
+                                artistName = (song.Artists != null && song.Artists.Count() > 0 ? song.Artists[0].Name : ""),
+                                songName = song.Name,
+                                thumbNail = null
+                            });
                         }
                     }
                 }
