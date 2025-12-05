@@ -18,7 +18,7 @@ The main user interface for music streaming and playlist management. Features in
 - Music recommendation engine integration
 - Responsive web design with modern UI/UX patterns
 
-**Key Technologies:** ASP.NET Core MVC, Entity Framework Core, SignalR, Azure Media Services, JWT Authentication
+**Key Technologies:** ASP.NET Core MVC, Entity Framework Core, JWT Authentication
 
 ### arma_historycompiler - Listening History Service
 
@@ -29,18 +29,18 @@ Continuously syncs user listening data from external music tracking services:
 - Stores timestamped listening data in SQL database for analytics
 - Supports batch processing for efficient data synchronization
 
-**Key Technologies:** .NET Worker Service, REST API Integration, Polly Retry Patterns, Database Bulk Operations
+**Key Technologies:** .NET Worker Service, REST API Integration, Database Bulk Operations
 
 ### arma_miner - Music Metadata Service
 
 **Background Service / Windows Service**
 Maintains comprehensive music metadata database by syncing with music brainz:
-- Fetches artist, album, and track information from MusicBrainz API
+- Fetches artist, album, and track information from MusicBrainz data dumps
 - Handles data normalization and deduplication
 - Maintains relationship mapping between artists, albums, and tracks
 - Supports incremental updates to minimize API load
 
-**Key Technologies:** .NET Worker Service, MusicBrainz API, Entity Relationship Management, Data Validation
+**Key Technologies:** .NET Worker Service, MusicBrainz data, Entity Relationship Management, Data Validation
 
 ### armaradio_ops - Database Seeding Service
 
