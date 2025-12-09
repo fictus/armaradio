@@ -221,12 +221,12 @@ namespace armaradio.Repositories
 
             if (!string.IsNullOrWhiteSpace(songName))
             {
-                url = $"https://api.spotify.com/v1/search?q={Uri.EscapeUriString($"artist:{artistName} track:{songName}")}&type={Uri.EscapeUriString("track,playlist")}&limit=5";
-                //url = $"https://api.spotify.com/v1/search?q=remaster%20track%3A{Uri.EscapeUriString(songName.Trim())}&artist%3A{Uri.EscapeUriString(artistName.Trim())}&type=playlist%2Cartist&limit=5";
+                url = $"https://api.spotify.com/v1/search?q={Uri.EscapeDataString($"artist:{artistName} track:{songName}")}&type={Uri.EscapeDataString("track,playlist")}&limit=5";
+                //url = $"https://api.spotify.com/v1/search?q=remaster%20track%3A{Uri.EscapeDataString(songName.Trim())}&artist%3A{Uri.EscapeDataString(artistName.Trim())}&type=playlist%2Cartist&limit=5";
             }
             else
             {
-                url = $"https://api.spotify.com/v1/search?q=artist%3A{Uri.EscapeUriString(artistName.Trim())}&type=playlist%2Cartist";
+                url = $"https://api.spotify.com/v1/search?q=artist%3A{Uri.EscapeDataString(artistName.Trim())}&type=playlist%2Cartist";
             }
 
             string accessToken = GetApiToken();
@@ -475,11 +475,9 @@ namespace armaradio.Repositories
         public List<string> GetSimilarArtistNames(string artistName)
         {
             List<string> returnItem = new List<string>();
-            string url = $"https://www.music-map.com/{Uri.EscapeUriString(artistName)}";
+            string url = $"https://www.music-map.com/{Uri.EscapeDataString(artistName)}";
 
             System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
             var config = AngleSharp.Configuration.Default.WithDefaultLoader();
             var browsingContext = BrowsingContext.New(config);
 
@@ -596,11 +594,9 @@ namespace armaradio.Repositories
                 artist_id = 6954 //artistId
             });
 
-            string url = $"https://open.spotify.com/search/{Uri.EscapeUriString(artistInfo.Name)}/playlists";
+            string url = $"https://open.spotify.com/search/{Uri.EscapeDataString(artistInfo.Name)}/playlists";
 
             System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
             var config = AngleSharp.Configuration.Default.WithDefaultLoader();
             var browsingContext = BrowsingContext.New(config);
 
@@ -840,7 +836,7 @@ namespace armaradio.Repositories
             });
         }
 
-        public List<TrackDataItem> GetCurrentTop100()
+        public async Task<List<TrackDataItem>> GetCurrentTop100()
         {
             List<TrackDataItem> returnItem = new List<TrackDataItem>();
             int? key_id = _dapper.GetFirstOrDefault<int?>("radioconn", "Top100_GetDailyKey");
@@ -860,51 +856,49 @@ namespace armaradio.Repositories
                 {
                     string url = "https://www.billboard.com/charts/hot-100/";
 
-                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-                    request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
-
-                    using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                    using (HttpClient client = new HttpClient())
                     {
-                        if (response.StatusCode == HttpStatusCode.OK)
+                        client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36");
+
+                        using (HttpResponseMessage response = await client.GetAsync(url))
                         {
-                            string htmlContent;
-                            using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                            if (response.StatusCode == HttpStatusCode.OK)
                             {
-                                htmlContent = sr.ReadToEnd();
-                            }
+                                string htmlContent = await response.Content.ReadAsStringAsync();
 
-                            if (!string.IsNullOrEmpty(htmlContent))
-                            {
-                                var parser = new HtmlParser();
-                                var document = parser.ParseDocument(htmlContent);
-
-                                var chartHolder = document.QuerySelector("div.chart-results-list");
-
-                                var allDivs = chartHolder.QuerySelectorAll("div.o-chart-results-list-row-container");
-
-                                int rankId = 0;
-
-                                foreach (var div in allDivs)
+                                if (!string.IsNullOrEmpty(htmlContent))
                                 {
-                                    rankId++;
+                                    var parser = new HtmlParser();
+                                    var document = parser.ParseDocument(htmlContent);
 
-                                    try
+                                    var chartHolder = document.QuerySelector("div.chart-results-list");
+
+                                    var allDivs = chartHolder.QuerySelectorAll("div.o-chart-results-list-row-container");
+
+                                    int rankId = 0;
+
+                                    foreach (var div in allDivs)
                                     {
-                                        var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
-                                        string songName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
-                                        string artistName = (dataHolder.QuerySelector("span").Text() ?? "").Trim();
+                                        rankId++;
 
-                                        returnItem.Add(new TrackDataItem()
+                                        try
                                         {
-                                            artist_name = artistName,
-                                            track_name = songName,
-                                            tid = key_id.Value,
-                                            usability_score = rankId
-                                        });
-                                    }
-                                    catch (Exception ex)
-                                    {
+                                            var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
+                                            string songName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
+                                            string artistName = (dataHolder.QuerySelector("span").Text() ?? "").Trim();
 
+                                            returnItem.Add(new TrackDataItem()
+                                            {
+                                                artist_name = artistName,
+                                                track_name = songName,
+                                                tid = key_id.Value,
+                                                usability_score = rankId
+                                            });
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
                                     }
                                 }
                             }
@@ -940,55 +934,53 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
-        public List<TrackDataItem> GetCurrentLatinTop50()
+        public async Task<List<TrackDataItem>> GetCurrentLatinTop50()
         {
             List<TrackDataItem> returnItem = new List<TrackDataItem>();
 
             string url = "https://www.billboard.com/charts/latin-songs/";
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
-
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (HttpClient client = new HttpClient())
             {
-                if (response.StatusCode == HttpStatusCode.OK)
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36");
+
+                using (HttpResponseMessage response = await client.GetAsync(url))
                 {
-                    string htmlContent;
-                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        htmlContent = sr.ReadToEnd();
-                    }
+                        string htmlContent = await response.Content.ReadAsStringAsync();
 
-                    if (!string.IsNullOrEmpty(htmlContent))
-                    {
-                        var parser = new HtmlParser();
-                        var document = parser.ParseDocument(htmlContent);
-
-                        var allDivs = document.QuerySelectorAll("div.o-chart-results-list-row-container");
-
-                        int rankId = 0;
-
-                        foreach (var div in allDivs)
+                        if (!string.IsNullOrEmpty(htmlContent))
                         {
-                            rankId++;
+                            var parser = new HtmlParser();
+                            var document = parser.ParseDocument(htmlContent);
 
-                            try
+                            var allDivs = document.QuerySelectorAll("div.o-chart-results-list-row-container");
+
+                            int rankId = 0;
+
+                            foreach (var div in allDivs)
                             {
-                                var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
-                                string songName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
-                                string artistName = (dataHolder.QuerySelector("span").Text() ?? "").Trim();
+                                rankId++;
 
-                                returnItem.Add(new TrackDataItem()
+                                try
                                 {
-                                    artist_name = artistName,
-                                    track_name = songName,
-                                    tid = 0,
-                                    usability_score = rankId
-                                });
-                            }
-                            catch (Exception ex)
-                            {
+                                    var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
+                                    string songName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
+                                    string artistName = (dataHolder.QuerySelector("span").Text() ?? "").Trim();
 
+                                    returnItem.Add(new TrackDataItem()
+                                    {
+                                        artist_name = artistName,
+                                        track_name = songName,
+                                        tid = 0,
+                                        usability_score = rankId
+                                    });
+                                }
+                                catch (Exception ex)
+                                {
+
+                                }
                             }
                         }
                     }
@@ -998,55 +990,53 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
-        public List<TrackDataItem> GetCurrentTopDanceElectronic()
+        public async Task<List<TrackDataItem>> GetCurrentTopDanceElectronic()
         {
             List<TrackDataItem> returnItem = new List<TrackDataItem>();
 
             string url = "https://www.billboard.com/charts/dance-electronic-songs/";
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
-
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (HttpClient client = new HttpClient())
             {
-                if (response.StatusCode == HttpStatusCode.OK)
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36");
+
+                using (HttpResponseMessage response = await client.GetAsync(url))
                 {
-                    string htmlContent;
-                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        htmlContent = sr.ReadToEnd();
-                    }
+                        string htmlContent = await response.Content.ReadAsStringAsync();
 
-                    if (!string.IsNullOrEmpty(htmlContent))
-                    {
-                        var parser = new HtmlParser();
-                        var document = parser.ParseDocument(htmlContent);
-
-                        var allDivs = document.QuerySelectorAll("div.o-chart-results-list-row-container");
-
-                        int rankId = 0;
-
-                        foreach (var div in allDivs)
+                        if (!string.IsNullOrEmpty(htmlContent))
                         {
-                            rankId++;
+                            var parser = new HtmlParser();
+                            var document = parser.ParseDocument(htmlContent);
 
-                            try
+                            var allDivs = document.QuerySelectorAll("div.o-chart-results-list-row-container");
+
+                            int rankId = 0;
+
+                            foreach (var div in allDivs)
                             {
-                                var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
-                                string songName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
-                                string artistName = (dataHolder.QuerySelector("span").Text() ?? "").Trim();
+                                rankId++;
 
-                                returnItem.Add(new TrackDataItem()
+                                try
                                 {
-                                    artist_name = artistName,
-                                    track_name = songName,
-                                    tid = 0,
-                                    usability_score = rankId
-                                });
-                            }
-                            catch (Exception ex)
-                            {
+                                    var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
+                                    string songName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
+                                    string artistName = (dataHolder.QuerySelector("span").Text() ?? "").Trim();
 
+                                    returnItem.Add(new TrackDataItem()
+                                    {
+                                        artist_name = artistName,
+                                        track_name = songName,
+                                        tid = 0,
+                                        usability_score = rankId
+                                    });
+                                }
+                                catch (Exception ex)
+                                {
+
+                                }
                             }
                         }
                     }
@@ -1056,55 +1046,53 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
-        public List<TrackDataItem> GetCurrentTopRockAlternative()
+        public async Task<List<TrackDataItem>> GetCurrentTopRockAlternative()
         {
             List<TrackDataItem> returnItem = new List<TrackDataItem>();
 
             string url = "https://www.billboard.com/charts/rock-songs/";
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
-
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (HttpClient client = new HttpClient())
             {
-                if (response.StatusCode == HttpStatusCode.OK)
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36");
+
+                using (HttpResponseMessage response = await client.GetAsync(url))
                 {
-                    string htmlContent;
-                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        htmlContent = sr.ReadToEnd();
-                    }
+                        string htmlContent = await response.Content.ReadAsStringAsync();
 
-                    if (!string.IsNullOrEmpty(htmlContent))
-                    {
-                        var parser = new HtmlParser();
-                        var document = parser.ParseDocument(htmlContent);
-
-                        var allDivs = document.QuerySelectorAll("div.o-chart-results-list-row-container");
-
-                        int rankId = 0;
-
-                        foreach (var div in allDivs)
+                        if (!string.IsNullOrEmpty(htmlContent))
                         {
-                            rankId++;
+                            var parser = new HtmlParser();
+                            var document = parser.ParseDocument(htmlContent);
 
-                            try
+                            var allDivs = document.QuerySelectorAll("div.o-chart-results-list-row-container");
+
+                            int rankId = 0;
+
+                            foreach (var div in allDivs)
                             {
-                                var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
-                                string songName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
-                                string artistName = (dataHolder.QuerySelector("span").Text() ?? "").Trim();
+                                rankId++;
 
-                                returnItem.Add(new TrackDataItem()
+                                try
                                 {
-                                    artist_name = artistName,
-                                    track_name = songName,
-                                    tid = 0,
-                                    usability_score = rankId
-                                });
-                            }
-                            catch (Exception ex)
-                            {
+                                    var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
+                                    string songName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
+                                    string artistName = (dataHolder.QuerySelector("span").Text() ?? "").Trim();
 
+                                    returnItem.Add(new TrackDataItem()
+                                    {
+                                        artist_name = artistName,
+                                        track_name = songName,
+                                        tid = 0,
+                                        usability_score = rankId
+                                    });
+                                }
+                                catch (Exception ex)
+                                {
+
+                                }
                             }
                         }
                     }
@@ -1114,55 +1102,53 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
-        public List<TrackDataItem> GetTopEmergingArtists()
+        public async Task<List<TrackDataItem>> GetTopEmergingArtists()
         {
             List<TrackDataItem> returnItem = new List<TrackDataItem>();
 
             string url = "https://www.billboard.com/charts/emerging-artists/";
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
-
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (HttpClient client = new HttpClient())
             {
-                if (response.StatusCode == HttpStatusCode.OK)
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36");
+
+                using (HttpResponseMessage response = await client.GetAsync(url))
                 {
-                    string htmlContent;
-                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        htmlContent = sr.ReadToEnd();
-                    }
+                        string htmlContent = await response.Content.ReadAsStringAsync();
 
-                    if (!string.IsNullOrEmpty(htmlContent))
-                    {
-                        var parser = new HtmlParser();
-                        var document = parser.ParseDocument(htmlContent);
-
-                        var allDivs = document.QuerySelectorAll("div.o-chart-results-list-row-container");
-
-                        int rankId = 0;
-
-                        foreach (var div in allDivs)
+                        if (!string.IsNullOrEmpty(htmlContent))
                         {
-                            rankId++;
+                            var parser = new HtmlParser();
+                            var document = parser.ParseDocument(htmlContent);
 
-                            try
+                            var allDivs = document.QuerySelectorAll("div.o-chart-results-list-row-container");
+
+                            int rankId = 0;
+
+                            foreach (var div in allDivs)
                             {
-                                var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
-                                string artistName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
-                                string songName = (dataHolder.QuerySelector("span") != null ? dataHolder.QuerySelector("span").Text() ?? "" : "").Trim();
+                                rankId++;
 
-                                returnItem.Add(new TrackDataItem()
+                                try
                                 {
-                                    artist_name = artistName,
-                                    track_name = songName,
-                                    tid = 0,
-                                    usability_score = rankId
-                                });
-                            }
-                            catch (Exception ex)
-                            {
+                                    var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
+                                    string artistName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
+                                    string songName = (dataHolder.QuerySelector("span") != null ? dataHolder.QuerySelector("span").Text() ?? "" : "").Trim();
 
+                                    returnItem.Add(new TrackDataItem()
+                                    {
+                                        artist_name = artistName,
+                                        track_name = songName,
+                                        tid = 0,
+                                        usability_score = rankId
+                                    });
+                                }
+                                catch (Exception ex)
+                                {
+
+                                }
                             }
                         }
                     }
@@ -1172,55 +1158,53 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
-        public List<TrackDataItem> GetCurrentTopCountrySongs()
+        public async Task<List<TrackDataItem>> GetCurrentTopCountrySongs()
         {
             List<TrackDataItem> returnItem = new List<TrackDataItem>();
 
             string url = "https://www.billboard.com/charts/country-songs/";
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
-
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (HttpClient client = new HttpClient())
             {
-                if (response.StatusCode == HttpStatusCode.OK)
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36");
+
+                using (HttpResponseMessage response = await client.GetAsync(url))
                 {
-                    string htmlContent;
-                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        htmlContent = sr.ReadToEnd();
-                    }
+                        string htmlContent = await response.Content.ReadAsStringAsync();
 
-                    if (!string.IsNullOrEmpty(htmlContent))
-                    {
-                        var parser = new HtmlParser();
-                        var document = parser.ParseDocument(htmlContent);
-
-                        var allDivs = document.QuerySelectorAll("div.o-chart-results-list-row-container");
-
-                        int rankId = 0;
-
-                        foreach (var div in allDivs)
+                        if (!string.IsNullOrEmpty(htmlContent))
                         {
-                            rankId++;
+                            var parser = new HtmlParser();
+                            var document = parser.ParseDocument(htmlContent);
 
-                            try
+                            var allDivs = document.QuerySelectorAll("div.o-chart-results-list-row-container");
+
+                            int rankId = 0;
+
+                            foreach (var div in allDivs)
                             {
-                                var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
-                                string songName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
-                                string artistName = (dataHolder.QuerySelector("span").Text() ?? "").Trim();
+                                rankId++;
 
-                                returnItem.Add(new TrackDataItem()
+                                try
                                 {
-                                    artist_name = artistName,
-                                    track_name = songName,
-                                    tid = 0,
-                                    usability_score = rankId
-                                });
-                            }
-                            catch (Exception ex)
-                            {
+                                    var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
+                                    string songName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
+                                    string artistName = (dataHolder.QuerySelector("span").Text() ?? "").Trim();
 
+                                    returnItem.Add(new TrackDataItem()
+                                    {
+                                        artist_name = artistName,
+                                        track_name = songName,
+                                        tid = 0,
+                                        usability_score = rankId
+                                    });
+                                }
+                                catch (Exception ex)
+                                {
+
+                                }
                             }
                         }
                     }
@@ -1230,55 +1214,53 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
-        public List<TrackDataItem> GetCurrentTopRegionalMexicanoSongs()
+        public async Task<List<TrackDataItem>> GetCurrentTopRegionalMexicanoSongs()
         {
             List<TrackDataItem> returnItem = new List<TrackDataItem>();
 
             string url = "https://www.billboard.com/charts/latin-regional-mexican-airplay/";
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
-
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (HttpClient client = new HttpClient())
             {
-                if (response.StatusCode == HttpStatusCode.OK)
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36");
+
+                using (HttpResponseMessage response = await client.GetAsync(url))
                 {
-                    string htmlContent;
-                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        htmlContent = sr.ReadToEnd();
-                    }
+                        string htmlContent = await response.Content.ReadAsStringAsync();
 
-                    if (!string.IsNullOrEmpty(htmlContent))
-                    {
-                        var parser = new HtmlParser();
-                        var document = parser.ParseDocument(htmlContent);
-
-                        var allDivs = document.QuerySelectorAll("div.o-chart-results-list-row-container");
-
-                        int rankId = 0;
-
-                        foreach (var div in allDivs)
+                        if (!string.IsNullOrEmpty(htmlContent))
                         {
-                            rankId++;
+                            var parser = new HtmlParser();
+                            var document = parser.ParseDocument(htmlContent);
 
-                            try
+                            var allDivs = document.QuerySelectorAll("div.o-chart-results-list-row-container");
+
+                            int rankId = 0;
+
+                            foreach (var div in allDivs)
                             {
-                                var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
-                                string songName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
-                                string artistName = (dataHolder.QuerySelector("span").Text() ?? "").Trim();
+                                rankId++;
 
-                                returnItem.Add(new TrackDataItem()
+                                try
                                 {
-                                    artist_name = artistName,
-                                    track_name = songName,
-                                    tid = 0,
-                                    usability_score = rankId
-                                });
-                            }
-                            catch (Exception ex)
-                            {
+                                    var dataHolder = div.QuerySelector("ul:nth-child(1)").QuerySelector("li:nth-child(4)").QuerySelector("li:nth-child(1)");
+                                    string songName = (dataHolder.QuerySelector("h3").Text() ?? "").Trim();
+                                    string artistName = (dataHolder.QuerySelector("span").Text() ?? "").Trim();
 
+                                    returnItem.Add(new TrackDataItem()
+                                    {
+                                        artist_name = artistName,
+                                        track_name = songName,
+                                        tid = 0,
+                                        usability_score = rankId
+                                    });
+                                }
+                                catch (Exception ex)
+                                {
+
+                                }
                             }
                         }
                     }
@@ -1288,127 +1270,125 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
-        public List<TrackDataItem> GetCurrentTop40DanceSingles()
+        public async Task<List<TrackDataItem>> GetCurrentTop40DanceSingles()
         {
             List<TrackDataItem> returnItem = new List<TrackDataItem>();
             DateTime dateNow = DateTime.Now;
 
             string url = $"https://www.officialcharts.com/charts/dance-singles-chart/{dateNow.ToString("yyyyMMdd")}";
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
-
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (HttpClient client = new HttpClient())
             {
-                if (response.StatusCode == HttpStatusCode.OK)
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36");
+
+                using (HttpResponseMessage response = await client.GetAsync(url))
                 {
-                    string htmlContent;
-                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        htmlContent = sr.ReadToEnd();
-                    }
+                        string htmlContent = await response.Content.ReadAsStringAsync();
 
-                    if (!string.IsNullOrEmpty(htmlContent))
-                    {
-                        string pattern = @"id=""__NUXT_DATA__"" data-ssr=""true"">(.*?)</script>";
-                        Match match = Regex.Match(htmlContent, pattern);
-
-                        if (match.Success)
+                        if (!string.IsNullOrEmpty(htmlContent))
                         {
-                            string currentVideoId = "";
-                            string jsonString = match.Groups[1].Value;
-                            //jsonString = jsonString.Replace("'", "\"");
-                            List<object> jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject<List<object>>(jsonString);
-                            List<object> cleanList = new List<object>();
-                            bool startAdding = false;
+                            string pattern = @"id=""__NUXT_DATA__"" data-ssr=""true"">(.*?)</script>";
+                            Match match = Regex.Match(htmlContent, pattern);
 
-                            cleanList.Add("player-3242342-0");
-
-                            foreach (var item in jsonObject)
+                            if (match.Success)
                             {
-                                if (!startAdding)
-                                {
-                                    if ((item ?? "").ToString() == "track-info")
-                                    {
-                                        startAdding = true;
-                                        continue;
-                                    }
-                                }
-                                else
-                                {
-                                    if (item != null)
-                                    {
-                                        string currentItem = item.ToString().Trim();
+                                string currentVideoId = "";
+                                string jsonString = match.Groups[1].Value;
+                                //jsonString = jsonString.Replace("'", "\"");
+                                List<object> jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject<List<object>>(jsonString);
+                                List<object> cleanList = new List<object>();
+                                bool startAdding = false;
 
-                                        if (!currentItem.StartsWith("{") && !currentItem.EndsWith("}"))
+                                cleanList.Add("player-3242342-0");
+
+                                foreach (var item in jsonObject)
+                                {
+                                    if (!startAdding)
+                                    {
+                                        if ((item ?? "").ToString() == "track-info")
                                         {
-                                            cleanList.Add(item);
+                                            startAdding = true;
+                                            continue;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (item != null)
+                                        {
+                                            string currentItem = item.ToString().Trim();
+
+                                            if (!currentItem.StartsWith("{") && !currentItem.EndsWith("}"))
+                                            {
+                                                cleanList.Add(item);
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            var textinfo = new CultureInfo("en-US", false).TextInfo;
+                                var textinfo = new CultureInfo("en-US", false).TextInfo;
 
-                            for (int i= 0; i < cleanList.Count; i++)
-                            {
-                                if (cleanList[i].ToString().StartsWith("player-") && returnItem.Count < 40)
+                                for (int i = 0; i < cleanList.Count; i++)
                                 {
-                                    returnItem.Add(new TrackDataItem()
+                                    if (cleanList[i].ToString().StartsWith("player-") && returnItem.Count < 40)
                                     {
-                                        artist_name = textinfo.ToTitleCase(cleanList[i + 4].ToString().ToLower()),
-                                        track_name = textinfo.ToTitleCase(cleanList[i + 2].ToString().ToLower()),
-                                        tid = -1,
-                                        usability_score = 0
-                                    });
+                                        returnItem.Add(new TrackDataItem()
+                                        {
+                                            artist_name = textinfo.ToTitleCase(cleanList[i + 4].ToString().ToLower()),
+                                            track_name = textinfo.ToTitleCase(cleanList[i + 2].ToString().ToLower()),
+                                            tid = -1,
+                                            usability_score = 0
+                                        });
+                                    }
+                                    //if (i == 0)
+                                    //{
+                                    //    returnItem.Add(new TrackDataItem()
+                                    //    {
+                                    //        artist_name = cleanList[i + 5].ToString(),
+                                    //        track_name = cleanList[i + 3].ToString(),
+                                    //        tid = -1,
+                                    //        usability_score = 0
+                                    //    });
+                                    //}
+                                    //else
+                                    //{
+
+                                    //}
                                 }
-                                //if (i == 0)
-                                //{
-                                //    returnItem.Add(new TrackDataItem()
-                                //    {
-                                //        artist_name = cleanList[i + 5].ToString(),
-                                //        track_name = cleanList[i + 3].ToString(),
-                                //        tid = -1,
-                                //        usability_score = 0
-                                //    });
-                                //}
-                                //else
-                                //{
-
-                                //}
                             }
+
+
+
+                            //var parser = new HtmlParser();
+                            //var document = parser.ParseDocument(htmlContent);
+
+                            //var chartHolder = document.QuerySelector("div.chart-content");
+
+                            //var allDivs = chartHolder.QuerySelectorAll("div.chart-item");
+
+                            //foreach (var div in allDivs)
+                            //{
+                            //    try
+                            //    {
+                            //        var dataHolder = div.QuerySelector("div.description");
+                            //        string songName = (dataHolder.QuerySelector("a.chart-name").Text() ?? "").Trim();
+                            //        string artistName = (dataHolder.QuerySelector("a.chart-artist").Text() ?? "").Trim();
+
+                            //        returnItem.Add(new TrackDataItem()
+                            //        {
+                            //            artist_name = artistName,
+                            //            track_name = songName,
+                            //            tid = -1,
+                            //            usability_score = 0
+                            //        });
+                            //    }
+                            //    catch (Exception ex)
+                            //    {
+
+                            //    }
+                            //}
                         }
-
-
-
-                        //var parser = new HtmlParser();
-                        //var document = parser.ParseDocument(htmlContent);
-
-                        //var chartHolder = document.QuerySelector("div.chart-content");
-
-                        //var allDivs = chartHolder.QuerySelectorAll("div.chart-item");
-
-                        //foreach (var div in allDivs)
-                        //{
-                        //    try
-                        //    {
-                        //        var dataHolder = div.QuerySelector("div.description");
-                        //        string songName = (dataHolder.QuerySelector("a.chart-name").Text() ?? "").Trim();
-                        //        string artistName = (dataHolder.QuerySelector("a.chart-artist").Text() ?? "").Trim();
-
-                        //        returnItem.Add(new TrackDataItem()
-                        //        {
-                        //            artist_name = artistName,
-                        //            track_name = songName,
-                        //            tid = -1,
-                        //            usability_score = 0
-                        //        });
-                        //    }
-                        //    catch (Exception ex)
-                        //    {
-
-                        //    }
-                        //}
                     }
                 }
             }
@@ -1416,57 +1396,55 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
-        public List<TrackDataItem> GetCurrentTranceTop100()
+        public async Task<List<TrackDataItem>> GetCurrentTranceTop100()
         {
             List<TrackDataItem> returnItem = new List<TrackDataItem>();
 
             string url = "https://www.beatport.com/genre/trance-main-floor/7/top-100";
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
-
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (HttpClient client = new HttpClient())
             {
-                if (response.StatusCode == HttpStatusCode.OK)
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36");
+
+                using (HttpResponseMessage response = await client.GetAsync(url))
                 {
-                    string htmlContent;
-                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        htmlContent = sr.ReadToEnd();
-                    }
+                        string htmlContent = await response.Content.ReadAsStringAsync();
 
-                    if (!string.IsNullOrEmpty(htmlContent))
-                    {
-                        string pattern = @"id=""__NEXT_DATA__"" type=""application/json"">(.*?)</script>";
-                        Match match = Regex.Match(htmlContent, pattern);
-
-                        if (match.Success)
+                        if (!string.IsNullOrEmpty(htmlContent))
                         {
-                            string jsonString = match.Groups[1].Value;
-                            //jsonString = jsonString.Replace("'", "\"");
-                            TranceTopSearchDataItem jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject<TranceTopSearchDataItem>(jsonString);
+                            string pattern = @"id=""__NEXT_DATA__"" type=""application/json"">(.*?)</script>";
+                            Match match = Regex.Match(htmlContent, pattern);
 
-                            if (jsonObject.props.pageProps.dehydratedState.queries.Count > 0)
+                            if (match.Success)
                             {
-                                foreach (var content in jsonObject.props.pageProps.dehydratedState.queries.First().state.data.results)
+                                string jsonString = match.Groups[1].Value;
+                                //jsonString = jsonString.Replace("'", "\"");
+                                TranceTopSearchDataItem jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject<TranceTopSearchDataItem>(jsonString);
+
+                                if (jsonObject.props.pageProps.dehydratedState.queries.Count > 0)
                                 {
-                                    List<string> artists = new List<string>();
-
-                                    foreach (var artist in content.artists)
+                                    foreach (var content in jsonObject.props.pageProps.dehydratedState.queries.First().state.data.results)
                                     {
-                                        artists.Add(artist.name);
+                                        List<string> artists = new List<string>();
+
+                                        foreach (var artist in content.artists)
+                                        {
+                                            artists.Add(artist.name);
+                                        }
+
+                                        string artistName = string.Join(", ", artists.ToArray());
+                                        string songName = $"{content.name}{(!string.IsNullOrWhiteSpace(content.mix_name) ? $" ({content.mix_name})" : "")}";
+
+                                        returnItem.Add(new TrackDataItem()
+                                        {
+                                            artist_name = artistName,
+                                            track_name = songName,
+                                            tid = -1,
+                                            usability_score = 0
+                                        });
                                     }
-
-                                    string artistName = string.Join(", ", artists.ToArray());
-                                    string songName = $"{content.name}{(!string.IsNullOrWhiteSpace(content.mix_name) ? $" ({content.mix_name})" : "")}";
-
-                                    returnItem.Add(new TrackDataItem()
-                                    {
-                                        artist_name = artistName,
-                                        track_name = songName,
-                                        tid = -1,
-                                        usability_score = 0
-                                    });
                                 }
                             }
                         }
@@ -1477,57 +1455,55 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
-        public List<TrackDataItem> GetCurrentTranceHype100()
+        public async Task<List<TrackDataItem>> GetCurrentTranceHype100()
         {
             List<TrackDataItem> returnItem = new List<TrackDataItem>();
 
             string url = "https://www.beatport.com/genre/trance-main-floor/7/hype-100";
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
-
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (HttpClient client = new HttpClient())
             {
-                if (response.StatusCode == HttpStatusCode.OK)
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36");
+
+                using (HttpResponseMessage response = await client.GetAsync(url))
                 {
-                    string htmlContent;
-                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        htmlContent = sr.ReadToEnd();
-                    }
+                        string htmlContent = await response.Content.ReadAsStringAsync();
 
-                    if (!string.IsNullOrEmpty(htmlContent))
-                    {
-                        string pattern = @"id=""__NEXT_DATA__"" type=""application/json"">(.*?)</script>";
-                        Match match = Regex.Match(htmlContent, pattern);
-
-                        if (match.Success)
+                        if (!string.IsNullOrEmpty(htmlContent))
                         {
-                            string jsonString = match.Groups[1].Value;
-                            //jsonString = jsonString.Replace("'", "\"");
-                            TranceTopSearchDataItem jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject<TranceTopSearchDataItem>(jsonString);
+                            string pattern = @"id=""__NEXT_DATA__"" type=""application/json"">(.*?)</script>";
+                            Match match = Regex.Match(htmlContent, pattern);
 
-                            if (jsonObject.props.pageProps.dehydratedState.queries.Count > 0)
+                            if (match.Success)
                             {
-                                foreach (var content in jsonObject.props.pageProps.dehydratedState.queries.First().state.data.results)
+                                string jsonString = match.Groups[1].Value;
+                                //jsonString = jsonString.Replace("'", "\"");
+                                TranceTopSearchDataItem jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject<TranceTopSearchDataItem>(jsonString);
+
+                                if (jsonObject.props.pageProps.dehydratedState.queries.Count > 0)
                                 {
-                                    List<string> artists = new List<string>();
-
-                                    foreach (var artist in content.artists)
+                                    foreach (var content in jsonObject.props.pageProps.dehydratedState.queries.First().state.data.results)
                                     {
-                                        artists.Add(artist.name);
+                                        List<string> artists = new List<string>();
+
+                                        foreach (var artist in content.artists)
+                                        {
+                                            artists.Add(artist.name);
+                                        }
+
+                                        string artistName = string.Join(", ", artists.ToArray());
+                                        string songName = $"{content.name}{(!string.IsNullOrWhiteSpace(content.mix_name) ? $" ({content.mix_name})" : "")}";
+
+                                        returnItem.Add(new TrackDataItem()
+                                        {
+                                            artist_name = artistName,
+                                            track_name = songName,
+                                            tid = -1,
+                                            usability_score = 0
+                                        });
                                     }
-
-                                    string artistName = string.Join(", ", artists.ToArray());
-                                    string songName = $"{content.name}{(!string.IsNullOrWhiteSpace(content.mix_name) ? $" ({content.mix_name})" : "")}";
-
-                                    returnItem.Add(new TrackDataItem()
-                                    {
-                                        artist_name = artistName,
-                                        track_name = songName,
-                                        tid = -1,
-                                        usability_score = 0
-                                    });
                                 }
                             }
                         }
@@ -1552,33 +1528,31 @@ namespace armaradio.Repositories
         }
 
 
-        public List<ProxySocks4DataItem> GetSocks4ProxyList()
+        public async Task<List<ProxySocks4DataItem>> GetSocks4ProxyList()
         {
             ProxySocks4Request requestItem = null;
             List<ProxySocks4DataItem> returnItem = new List<ProxySocks4DataItem>();
 
             string url = $"https://api.proxyscrape.com/v4/free-proxy-list/get?request=get_proxies&skip=0&proxy_format=protocolipport&format=json&limit=25&protocol=socks4";
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
-
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (HttpClient client = new HttpClient())
             {
-                if (response.StatusCode == HttpStatusCode.OK)
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36");
+
+                using (HttpResponseMessage response = await client.GetAsync(url))
                 {
-                    string htmlContent;
-                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        htmlContent = sr.ReadToEnd();
-                    }
+                        string htmlContent = await response.Content.ReadAsStringAsync();
 
-                    if (!string.IsNullOrEmpty(htmlContent))
-                    {
-                        requestItem = Newtonsoft.Json.JsonConvert.DeserializeObject<ProxySocks4Request>(htmlContent);
-
-                        if (requestItem != null && requestItem.proxies != null && requestItem.proxies.Count > 0)
+                        if (!string.IsNullOrEmpty(htmlContent))
                         {
-                            returnItem = requestItem.proxies;
+                            requestItem = Newtonsoft.Json.JsonConvert.DeserializeObject<ProxySocks4Request>(htmlContent);
+
+                            if (requestItem != null && requestItem.proxies != null && requestItem.proxies.Count > 0)
+                            {
+                                returnItem = requestItem.proxies;
+                            }
                         }
                     }
                 }
@@ -1587,48 +1561,46 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
-        public List<AdaptiveFormatDataItem> GetAudioStreams(string VideoId)
+        public async Task<List<AdaptiveFormatDataItem>> GetAudioStreams(string VideoId)
         {
             string fullVideoUrl = $"https://www.youtube.com/watch?v={(VideoId ?? "").Trim()}";
             List<AdaptiveFormatDataItem> returnItem = new List<AdaptiveFormatDataItem>();
 
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(fullVideoUrl);
-            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/119.0.0.0 Safari/537.36";
-
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (HttpClient client = new HttpClient())
             {
-                if (response.StatusCode == HttpStatusCode.OK)
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/119.0.0.0 Safari/537.36");
+
+                using (HttpResponseMessage response = await client.GetAsync(fullVideoUrl))
                 {
-                    string htmlContent;
-                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        htmlContent = sr.ReadToEnd();
-                    }
+                        string htmlContent = await response.Content.ReadAsStringAsync();
 
-                    if (!string.IsNullOrEmpty(htmlContent))
-                    {
-                        var match = Regex.Match(htmlContent, @"ytInitialPlayerResponse\s*=\s*(\{.+?\});");
-                        if (match.Success)
+                        if (!string.IsNullOrEmpty(htmlContent))
                         {
-                            var jsonStr = match.Groups[1].Value;
-                            AudioStreamsRequest streamRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<AudioStreamsRequest>(jsonStr);
-
-                            if (streamRequest != null && streamRequest.streamingData != null && streamRequest.streamingData.adaptiveFormats != null && streamRequest.streamingData.adaptiveFormats.Count > 0)
+                            var match = Regex.Match(htmlContent, @"ytInitialPlayerResponse\s*=\s*(\{.+?\});");
+                            if (match.Success)
                             {
-                                returnItem = streamRequest.streamingData.adaptiveFormats.Where(st => (st.mimeType ?? "").ToLower().Contains("audio")).ToList();
+                                var jsonStr = match.Groups[1].Value;
+                                AudioStreamsRequest streamRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<AudioStreamsRequest>(jsonStr);
 
-                                foreach (var stream in returnItem)
+                                if (streamRequest != null && streamRequest.streamingData != null && streamRequest.streamingData.adaptiveFormats != null && streamRequest.streamingData.adaptiveFormats.Count > 0)
                                 {
-                                    List<string> mimeParts = stream.mimeType.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList();
+                                    returnItem = streamRequest.streamingData.adaptiveFormats.Where(st => (st.mimeType ?? "").ToLower().Contains("audio")).ToList();
 
-                                    stream.mimeTypeSimple = mimeParts[0].Trim();
-                                    stream.containerName = stream.mimeTypeSimple.Split('/').Last();
-                                    stream.codec = (mimeParts.Count > 1 ? (mimeParts[1].Trim().Split('=').Last().Trim().TrimStart('"').TrimEnd('"')) : "");
-                                    stream.streamUrl = DecodeSignatureCipher(stream.signatureCipher);
+                                    foreach (var stream in returnItem)
+                                    {
+                                        List<string> mimeParts = stream.mimeType.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList();
+
+                                        stream.mimeTypeSimple = mimeParts[0].Trim();
+                                        stream.containerName = stream.mimeTypeSimple.Split('/').Last();
+                                        stream.codec = (mimeParts.Count > 1 ? (mimeParts[1].Trim().Split('=').Last().Trim().TrimStart('"').TrimEnd('"')) : "");
+                                        stream.streamUrl = DecodeSignatureCipher(stream.signatureCipher);
+                                    }
                                 }
                             }
-                        }                        
+                        }
                     }
                 }
             }
@@ -1846,7 +1818,7 @@ namespace armaradio.Repositories
                 });
         }
 
-        public YTVideoIdsDataItem Youtube_GetUrlByArtistNameSongName(string artistName, string songName)
+        public async Task<YTVideoIdsDataItem> Youtube_GetUrlByArtistNameSongName(string artistName, string songName)
         {
             YTVideoIdsDataItem returnItem = null;
             List<string> alternateIds = new List<string>();
@@ -1855,60 +1827,58 @@ namespace armaradio.Repositories
 
             string url = $"https://www.youtube.com/results?search_query={userInput}&sp=EgIQAQ%253D%253D";
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
-
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (HttpClient client = new HttpClient())
             {
-                if (response.StatusCode == HttpStatusCode.OK)
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36");
+
+                using (HttpResponseMessage response = await client.GetAsync(url))
                 {
-                    string htmlContent;
-                    using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                    if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        htmlContent = sr.ReadToEnd();
-                    }
+                        string htmlContent = await response.Content.ReadAsStringAsync();
 
-                    if (!string.IsNullOrEmpty(htmlContent))
-                    {
-                        string pattern = @"var ytInitialData = (.*?);\s*</script>";
-                        Match match = Regex.Match(htmlContent, pattern);
-
-                        if (match.Success)
+                        if (!string.IsNullOrEmpty(htmlContent))
                         {
-                            string currentVideoId = "";
-                            string jsonString = match.Groups[1].Value;
-                            //jsonString = jsonString.Replace("'", "\"");
-                            YTArtistSongNameResponse jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject<YTArtistSongNameResponse>(jsonString);
+                            string pattern = @"var ytInitialData = (.*?);\s*</script>";
+                            Match match = Regex.Match(htmlContent, pattern);
 
-                            foreach (var content in jsonObject.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents)
+                            if (match.Success)
                             {
-                                if (content.itemSectionRenderer != null && content.itemSectionRenderer.contents != null)
+                                string currentVideoId = "";
+                                string jsonString = match.Groups[1].Value;
+                                //jsonString = jsonString.Replace("'", "\"");
+                                YTArtistSongNameResponse jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject<YTArtistSongNameResponse>(jsonString);
+
+                                foreach (var content in jsonObject.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents)
                                 {
-                                    foreach (var subContent in content.itemSectionRenderer.contents)
+                                    if (content.itemSectionRenderer != null && content.itemSectionRenderer.contents != null)
                                     {
-                                        if (subContent.videoRenderer != null)
+                                        foreach (var subContent in content.itemSectionRenderer.contents)
                                         {
-                                            if (string.IsNullOrWhiteSpace(currentVideoId))
+                                            if (subContent.videoRenderer != null)
                                             {
-                                                currentVideoId = subContent.videoRenderer.videoId;
+                                                if (string.IsNullOrWhiteSpace(currentVideoId))
+                                                {
+                                                    currentVideoId = subContent.videoRenderer.videoId;
+                                                }
+                                                else
+                                                {
+                                                    alternateIds.Add(subContent.videoRenderer.videoId);
+                                                }
+                                                //currentVideoTitle = content.itemSectionRenderer.contents[0].videoRenderer.title.runs[0].text;
                                             }
-                                            else
-                                            {
-                                                alternateIds.Add(subContent.videoRenderer.videoId);
-                                            }
-                                            //currentVideoTitle = content.itemSectionRenderer.contents[0].videoRenderer.title.runs[0].text;
                                         }
                                     }
                                 }
-                            }
 
-                            if (!string.IsNullOrWhiteSpace(currentVideoId))
-                            {
-                                returnItem = new YTVideoIdsDataItem()
+                                if (!string.IsNullOrWhiteSpace(currentVideoId))
                                 {
-                                    VideoId = currentVideoId,
-                                    AlternateIds = alternateIds
-                                };
+                                    returnItem = new YTVideoIdsDataItem()
+                                    {
+                                        VideoId = currentVideoId,
+                                        AlternateIds = alternateIds
+                                    };
+                                }
                             }
                         }
                     }
@@ -1918,7 +1888,7 @@ namespace armaradio.Repositories
             return returnItem;
         }
 
-        public List<YTGeneralSearchDataItem> Youtube_PerformGeneralSearch(string searchText)
+        public async Task<List<YTGeneralSearchDataItem>> Youtube_PerformGeneralSearch(string searchText)
         {
             List<YTGeneralSearchDataItem> returnItem = new List<YTGeneralSearchDataItem>();
 
@@ -1927,53 +1897,50 @@ namespace armaradio.Repositories
                 if (returnItem.Count == 0)
                 {
                     string userInput = HttpUtility.UrlEncode(searchText);
-
                     string url = $"https://www.youtube.com/results?search_query={userInput}&sp=EgIQAQ%253D%253D";
 
-                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-                    request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
-
-                    using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                    using (HttpClient client = new HttpClient())
                     {
-                        if (response.StatusCode == HttpStatusCode.OK)
+                        client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36");
+
+                        using (HttpResponseMessage response = await client.GetAsync(url))
                         {
-                            string htmlContent;
-                            using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                            if (response.StatusCode == HttpStatusCode.OK)
                             {
-                                htmlContent = sr.ReadToEnd();
-                            }
+                                string htmlContent = await response.Content.ReadAsStringAsync();
 
-                            if (!string.IsNullOrEmpty(htmlContent))
-                            {
-                                string pattern = @"var ytInitialData = (.*?);\s*</script>";
-                                Match match = Regex.Match(htmlContent, pattern);
-
-                                if (match.Success)
+                                if (!string.IsNullOrEmpty(htmlContent))
                                 {
-                                    string jsonString = match.Groups[1].Value;
-                                    //jsonString = jsonString.Replace("'", "\"");
-                                    YTArtistSongNameResponse jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject<YTArtistSongNameResponse>(jsonString);
+                                    string pattern = @"var ytInitialData = (.*?);\s*</script>";
+                                    Match match = Regex.Match(htmlContent, pattern);
 
-                                    foreach (var content in jsonObject.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents)
+                                    if (match.Success)
                                     {
-                                        if (content.itemSectionRenderer != null && content.itemSectionRenderer.contents != null)
-                                        {
-                                            foreach (var subContent in content.itemSectionRenderer.contents)
-                                            {
-                                                if (subContent.videoRenderer != null && !string.IsNullOrWhiteSpace(subContent.videoRenderer.videoId))
-                                                {
-                                                    string artistSong = subContent.videoRenderer.title?.runs?.Count > 0 ? (subContent.videoRenderer.title.runs[0].text ?? "") : "";
-                                                    string artistName = (artistSong.Split('-').First() ?? "").Trim();
-                                                    string songName = (artistSong.Contains("-") ? artistSong.Substring(artistSong.IndexOf("-") + 1).Trim() : "");
-                                                    Thumbnails thumbNail = subContent.videoRenderer.thumbnail?.thumbnails?.Count > 0 ? subContent.videoRenderer.thumbnail.thumbnails[0] : null;
+                                        string jsonString = match.Groups[1].Value;
+                                        //jsonString = jsonString.Replace("'", "\"");
+                                        YTArtistSongNameResponse jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject<YTArtistSongNameResponse>(jsonString);
 
-                                                    returnItem.Add(new YTGeneralSearchDataItem()
+                                        foreach (var content in jsonObject.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents)
+                                        {
+                                            if (content.itemSectionRenderer != null && content.itemSectionRenderer.contents != null)
+                                            {
+                                                foreach (var subContent in content.itemSectionRenderer.contents)
+                                                {
+                                                    if (subContent.videoRenderer != null && !string.IsNullOrWhiteSpace(subContent.videoRenderer.videoId))
                                                     {
-                                                        videoId = subContent.videoRenderer.videoId,
-                                                        artistName = artistName,
-                                                        songName = songName,
-                                                        thumbNail = thumbNail
-                                                    });
+                                                        string artistSong = subContent.videoRenderer.title?.runs?.Count > 0 ? (subContent.videoRenderer.title.runs[0].text ?? "") : "";
+                                                        string artistName = (artistSong.Split('-').First() ?? "").Trim();
+                                                        string songName = (artistSong.Contains("-") ? artistSong.Substring(artistSong.IndexOf("-") + 1).Trim() : "");
+                                                        Thumbnails thumbNail = subContent.videoRenderer.thumbnail?.thumbnails?.Count > 0 ? subContent.videoRenderer.thumbnail.thumbnails[0] : null;
+
+                                                        returnItem.Add(new YTGeneralSearchDataItem()
+                                                        {
+                                                            videoId = subContent.videoRenderer.videoId,
+                                                            artistName = artistName,
+                                                            songName = songName,
+                                                            thumbNail = thumbNail
+                                                        });
+                                                    }
                                                 }
                                             }
                                         }
@@ -2014,7 +1981,7 @@ namespace armaradio.Repositories
 
                 if (returnItem.Count == 0)
                 {
-                    returnItem = DuckDuckGo_PerformGeneralSearch(searchText);
+                    returnItem = await DuckDuckGo_PerformGeneralSearch(searchText);
                 }
             }
 
@@ -2036,7 +2003,7 @@ namespace armaradio.Repositories
 
         // implement Creative Commons search from DuckDuckGo
         // https://duckduckgo.com/?t=h_&q=depeche+mode+somebody&iax=videos&ia=videos&iaf=videoLicense%3AcreativeCommon
-        public List<YTGeneralSearchDataItem> DuckDuckGo_PerformGeneralSearch(string searchText)
+        public async Task<List<YTGeneralSearchDataItem>> DuckDuckGo_PerformGeneralSearch(string searchText)
         {
             List<YTGeneralSearchDataItem> returnItem = new List<YTGeneralSearchDataItem>();
 
@@ -2046,58 +2013,56 @@ namespace armaradio.Repositories
 
                 string url = $"https://duckduckgo.com/?t=h_&q={userInput}&iax=videos&ia=videos&iaf=videoLicense%3AcreativeCommon";
 
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-                request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36";
-
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                using (HttpClient client = new HttpClient())
                 {
-                    if (response.StatusCode == HttpStatusCode.OK)
+                    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/27.0.1453 Safari/537.36");
+
+                    using (HttpResponseMessage response = await client.GetAsync(url))
                     {
-                        string htmlContent;
-                        using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                        if (response.StatusCode == HttpStatusCode.OK)
                         {
-                            htmlContent = sr.ReadToEnd();
-                        }
+                            string htmlContent = await response.Content.ReadAsStringAsync();
 
-                        if (!string.IsNullOrEmpty(htmlContent))
-                        {
-                            var parser = new HtmlParser();
-                            var document = parser.ParseDocument(htmlContent);
-
-                            var chartHolder = document.QuerySelector("#links");
-                            var allDivs = chartHolder.QuerySelectorAll("div.result.web-result");
-
-                            foreach (var div in allDivs)
+                            if (!string.IsNullOrEmpty(htmlContent))
                             {
-                                try
+                                var parser = new HtmlParser();
+                                var document = parser.ParseDocument(htmlContent);
+
+                                var chartHolder = document.QuerySelector("#links");
+                                var allDivs = chartHolder.QuerySelectorAll("div.result.web-result");
+
+                                foreach (var div in allDivs)
                                 {
-                                    var videoAlink = (div.QuerySelector("h2")).QuerySelector("a");
-                                    string videoUrl = videoAlink.GetAttribute("href");
-
-                                    if ((videoUrl ?? "").Contains("youtube"))
+                                    try
                                     {
-                                        string videoId = videoUrl.Split('=').Last();
+                                        var videoAlink = (div.QuerySelector("h2")).QuerySelector("a");
+                                        string videoUrl = videoAlink.GetAttribute("href");
 
-                                        if (!(returnItem.Any(v => v.videoId == videoId)))
+                                        if ((videoUrl ?? "").Contains("youtube"))
                                         {
-                                            string nameText = videoAlink.Text().Trim();
-                                            nameText = (nameText.Replace("youtube", "", StringComparison.OrdinalIgnoreCase)).Trim().TrimEnd('-').TrimEnd('|').Trim();
-                                            string artistName = (nameText.Split('-').FirstOrDefault() ?? "").Trim();
-                                            string songName = (nameText.Contains("-") ? nameText.Substring(nameText.IndexOf("-") + 1).Trim() : "");
+                                            string videoId = videoUrl.Split('=').Last();
 
-                                            returnItem.Add(new YTGeneralSearchDataItem()
+                                            if (!(returnItem.Any(v => v.videoId == videoId)))
                                             {
-                                                videoId = videoId,
-                                                artistName = artistName,
-                                                songName = songName,
-                                                thumbNail = null
-                                            });
+                                                string nameText = videoAlink.Text().Trim();
+                                                nameText = (nameText.Replace("youtube", "", StringComparison.OrdinalIgnoreCase)).Trim().TrimEnd('-').TrimEnd('|').Trim();
+                                                string artistName = (nameText.Split('-').FirstOrDefault() ?? "").Trim();
+                                                string songName = (nameText.Contains("-") ? nameText.Substring(nameText.IndexOf("-") + 1).Trim() : "");
+
+                                                returnItem.Add(new YTGeneralSearchDataItem()
+                                                {
+                                                    videoId = videoId,
+                                                    artistName = artistName,
+                                                    songName = songName,
+                                                    thumbNail = null
+                                                });
+                                            }
                                         }
                                     }
-                                }
-                                catch (Exception ex)
-                                {
+                                    catch (Exception ex)
+                                    {
 
+                                    }
                                 }
                             }
                         }

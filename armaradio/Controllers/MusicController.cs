@@ -58,13 +58,13 @@ namespace armaradio.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetCurrentTop100()
+        public async Task<IActionResult> GetCurrentTop100()
         {
             try
             {
                 using (_operation)
                 {
-                    List<TrackDataItem> returnItem = _musicRepo.GetCurrentTop100();
+                    List<TrackDataItem> returnItem = await _musicRepo.GetCurrentTop100();
                     var finalList = returnItem.Select(sg =>
                     {
                         return new
@@ -85,13 +85,13 @@ namespace armaradio.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetCurrentTop40DanceSingles()
+        public async Task<IActionResult> GetCurrentTop40DanceSingles()
         {
             try
             {
                 using (_operation)
                 {
-                    List<TrackDataItem> returnItem = _musicRepo.GetCurrentTop40DanceSingles();
+                    List<TrackDataItem> returnItem = await _musicRepo.GetCurrentTop40DanceSingles();
                     var finalList = returnItem.Select(sg =>
                     {
                         return new
@@ -112,13 +112,13 @@ namespace armaradio.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetCurrentTranceTop100()
+        public async Task<IActionResult> GetCurrentTranceTop100()
         {
             try
             {
                 using (_operation)
                 {
-                    List<TrackDataItem> returnItem = _musicRepo.GetCurrentTranceTop100();
+                    List<TrackDataItem> returnItem = await _musicRepo.GetCurrentTranceTop100();
                     var finalList = returnItem.Select(sg =>
                     {
                         return new
@@ -139,13 +139,13 @@ namespace armaradio.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetCurrentTranceHype100()
+        public async Task<IActionResult> GetCurrentTranceHype100()
         {
             try
             {
                 using (_operation)
                 {
-                    List<TrackDataItem> returnItem = _musicRepo.GetCurrentTranceHype100();
+                    List<TrackDataItem> returnItem = await _musicRepo.GetCurrentTranceHype100();
                     var finalList = returnItem.Select(sg =>
                     {
                         return new
@@ -166,13 +166,13 @@ namespace armaradio.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetCurrentLatinTop50()
+        public async Task<IActionResult> GetCurrentLatinTop50()
         {
             try
             {
                 using (_operation)
                 {
-                    List<TrackDataItem> returnItem = _musicRepo.GetCurrentLatinTop50();
+                    List<TrackDataItem> returnItem = await _musicRepo.GetCurrentLatinTop50();
                     var finalList = returnItem.Select(sg =>
                     {
                         return new
@@ -193,13 +193,13 @@ namespace armaradio.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetCurrentTopDanceElectronic()
+        public async Task<IActionResult> GetCurrentTopDanceElectronic()
         {
             try
             {
                 using (_operation)
                 {
-                    List<TrackDataItem> returnItem = _musicRepo.GetCurrentTopDanceElectronic();
+                    List<TrackDataItem> returnItem = await _musicRepo.GetCurrentTopDanceElectronic();
                     var finalList = returnItem.Select(sg =>
                     {
                         return new
@@ -220,13 +220,13 @@ namespace armaradio.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetCurrentTopRockAlternative()
+        public async Task<IActionResult> GetCurrentTopRockAlternative()
         {
             try
             {
                 using (_operation)
                 {
-                    List<TrackDataItem> returnItem = _musicRepo.GetCurrentTopRockAlternative();
+                    List<TrackDataItem> returnItem = await _musicRepo.GetCurrentTopRockAlternative();
                     var finalList = returnItem.Select(sg =>
                     {
                         return new
@@ -247,13 +247,13 @@ namespace armaradio.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetTopEmergingArtists()
+        public async Task<IActionResult> GetTopEmergingArtists()
         {
             try
             {
                 using (_operation)
                 {
-                    List<TrackDataItem> returnItem = _musicRepo.GetTopEmergingArtists();
+                    List<TrackDataItem> returnItem = await _musicRepo.GetTopEmergingArtists();
                     var finalList = returnItem.Select(sg =>
                     {
                         return new
@@ -274,13 +274,13 @@ namespace armaradio.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetCurrentTopCountrySongs()
+        public async Task<IActionResult> GetCurrentTopCountrySongs()
         {
             try
             {
                 using (_operation)
                 {
-                    List<TrackDataItem> returnItem = _musicRepo.GetCurrentTopCountrySongs();
+                    List<TrackDataItem> returnItem = await _musicRepo.GetCurrentTopCountrySongs();
                     var finalList = returnItem.Select(sg =>
                     {
                         return new
@@ -336,13 +336,13 @@ namespace armaradio.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetCurrentTopRegionalMexicanoSongs()
+        public async Task<IActionResult> GetCurrentTopRegionalMexicanoSongs()
         {
             try
             {
                 using (_operation)
                 {
-                    List<TrackDataItem> returnItem = _musicRepo.GetCurrentTopRegionalMexicanoSongs();
+                    List<TrackDataItem> returnItem = await _musicRepo.GetCurrentTopRegionalMexicanoSongs();
                     var finalList = returnItem.Select(sg =>
                     {
                         return new
@@ -1568,14 +1568,14 @@ namespace armaradio.Controllers
         }
 
         [HttpPost]
-        public IActionResult GetUrlByArtistSongName([FromBody] MusicUrlByArtistSongRequest value)
+        public async Task<IActionResult> GetUrlByArtistSongName([FromBody] MusicUrlByArtistSongRequest value)
         {
             try
             {
                 _operation.SetRequestBody(value);
                 using (_operation)
                 {
-                    YTVideoIdsDataItem videoIds = _musicRepo.Youtube_GetUrlByArtistNameSongName(value.artistName, value.songName);
+                    YTVideoIdsDataItem videoIds = await _musicRepo.Youtube_GetUrlByArtistNameSongName(value.artistName, value.songName);
 
                     if (videoIds != null)
                     {
@@ -1606,7 +1606,7 @@ namespace armaradio.Controllers
         }
 
         [HttpGet]
-        public IActionResult GeneralSearch(string SearchText)
+        public async Task<IActionResult> GeneralSearch(string SearchText)
         {
             try
             {
@@ -1616,7 +1616,7 @@ namespace armaradio.Controllers
                 });
                 using (_operation)
                 {
-                    List<YTGeneralSearchDataItem> returnItem = _musicRepo.Youtube_PerformGeneralSearch(SearchText);
+                    List<YTGeneralSearchDataItem> returnItem = await _musicRepo.Youtube_PerformGeneralSearch(SearchText);
 
                     return new JsonResult(returnItem);
                 }
