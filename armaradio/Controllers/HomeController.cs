@@ -246,6 +246,55 @@ namespace armaradio.Controllers
 
         [HttpPost]
         [Authorize]
+        public async Task<IActionResult> ResetPassword([FromBody] RegisterRequest value)
+        {
+            try
+            {
+                _operation.SetRequestBody(value);
+                using (_operation)
+                {
+                    ArmaUser currentUser = _authControl.GetCurrentUser();
+
+                    if (value == null || currentUser == null)
+                    {
+                        throw new Exception("Invalid request");
+                    }
+                    if (string.IsNullOrWhiteSpace(value.Password) || string.IsNullOrWhiteSpace(value.ConfirmPassword))
+                    {
+                        throw new Exception("'Password' is required");
+                    }
+                    if (value.Password != value.ConfirmPassword)
+                    {
+                        throw new Exception("'Confirm Password' does not match Password");
+                    }
+
+                    var armaUser = _userManager.Users.Where(usr => usr.Email.Equals(currentUser.UserName)).FirstOrDefault();
+                    string token = await _userManager.GeneratePasswordResetTokenAsync(armaUser);
+
+                    var passwordResult = await _userManager.ResetPasswordAsync(armaUser, token, value.Password);
+
+                    if (!passwordResult.Succeeded)
+                    {
+                        List<string> errors = passwordResult.Errors.Select(err =>
+                        {
+                            return err.Description;
+                        }).ToList();
+
+                        throw new Exception(string.Join("; ", errors.ToArray()));
+                    }
+
+                    return new JsonResult(Ok());
+                }
+            }
+            catch (Exception ex)
+            {
+                Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                return Content(ex.Message.ToString());
+            }
+        }
+
+        [HttpPost]
+        [Authorize]
         public IActionResult Logout([FromBody] object empty)
         {
             if (empty != null)
