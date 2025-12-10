@@ -283,6 +283,22 @@ namespace armaradio.Controllers
                         throw new Exception(string.Join("; ", errors.ToArray()));
                     }
 
+                    string emailBody = @$"
+                        Hi,
+                        <br><br>
+                        This is a confirmation that your password has been reset.
+                    ";
+                    List<string> toEmails = new List<string>();
+
+                    toEmails.Add(value.UserName);
+
+                    string emailToken = _dapper.GetFirstOrDefault<string>("radioconn", "ArmaUsers_GetEmailConfirmationTokenByEmail", new
+                    {
+                        email = value.UserName.Trim()
+                    });
+
+                    _email.SendEmail("noreply@armarad.com", "Your password has been reset", toEmails, emailBody, emailToken);
+
                     return new JsonResult(Ok());
                 }
             }
