@@ -41,7 +41,7 @@ namespace armaradio.Repositories
 
                 var options = new OptionSet
                 {
-                    Format = "bestaudio[ext=m4a]/bestaudio", //"bestaudio[ext=m4a]/bestaudio[abr<=128]/bestaudio",
+                    Format = "bestaudio", //"bestaudio[ext=m4a]/bestaudio",
                     Output = endFileName,
                     ExtractAudio = true,
                     AudioFormat = AudioConversionFormat.M4a,
