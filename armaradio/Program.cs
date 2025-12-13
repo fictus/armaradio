@@ -6,6 +6,7 @@ using armaradio.Tools;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Filters;
 using System.Diagnostics;
@@ -118,6 +119,40 @@ builder.Services.AddIdentityApiEndpoints<IdentityUser>()
     .AddEntityFrameworkStores<DataContext>();
 
 var app = builder.Build();
+
+// Initialize cookie file
+var rootPath = app.Environment.ContentRootPath;
+var cookiesDir = Path.Combine(rootPath, "wwwroot", "cookies");
+var cookiesFile = Path.Combine(cookiesDir, "file.txt");
+
+if (!Directory.Exists(cookiesDir))
+{
+    Directory.CreateDirectory(cookiesDir);
+}
+
+if (File.Exists(cookiesFile))
+{
+    File.Delete(cookiesFile);
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+    var connectionString = configuration.GetConnectionString("radioconn");
+
+    using (var connection = new SqlConnection(connectionString))
+    {
+        connection.Open();
+
+        var command = new SqlCommand("select [ConfigValue] from ApplicationConfigurations where [ConfigName] = 'YTCookie'", connection);
+        var cookieValue = command.ExecuteScalar()?.ToString();
+
+        if (!string.IsNullOrEmpty(cookieValue))
+        {
+            File.WriteAllText(cookiesFile, cookieValue);
+        }
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
