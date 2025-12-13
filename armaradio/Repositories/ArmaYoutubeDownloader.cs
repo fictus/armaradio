@@ -28,10 +28,15 @@ namespace armaradio.Repositories
 
         public async Task DownloadAudioFileAsync(string url, string endFileName)
         {
+            string tempCookiesFile = "";
+
             try
             {
                 string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
                 string cookiesFile = (!IsWindows ? $"{rootPath}/cookies/file.txt" : $"{rootPath}\\cookies\\file.txt");
+
+                tempCookiesFile = Path.Combine(Path.GetTempPath(), $"yt-cookies-{Guid.NewGuid()}.txt");
+                File.Copy(cookiesFile, tempCookiesFile, true);
 
                 var retrySleep = new MultiValue<string>();
 
@@ -41,7 +46,7 @@ namespace armaradio.Repositories
 
                 var options = new OptionSet
                 {
-                    Format = "bestaudio", //"bestaudio[ext=m4a]/bestaudio",
+                    Format = "bestaudio[ext=m4a]/bestaudio",
                     Output = endFileName,
                     ExtractAudio = true,
                     AudioFormat = AudioConversionFormat.M4a,
@@ -62,7 +67,7 @@ namespace armaradio.Repositories
                     //DownloaderArgs = "-4"
                     Verbose = true,
                     SleepInterval = 5,
-                    //Cookies = cookiesFile
+                    Cookies = tempCookiesFile
                 };
                 //var options = new OptionSet
                 //{
@@ -76,8 +81,7 @@ namespace armaradio.Repositories
                 //    Downloader = "native"
                 //};
 
-                options.ExtractorArgs = "youtube:player_client=android,ios";
-
+                //options.ExtractorArgs = "--no-cookies-update"; // "youtube:player_client=android,ios";
                 options.AddHeaders = new MultiValue<string>();
 
                 options.AddHeaders.Values.Add("User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
@@ -112,6 +116,21 @@ namespace armaradio.Repositories
                 _logger.LogError(ex, ex.Message.ToString() + "; Stack-Trace: " + ex.StackTrace.ToString());
 
                 throw;
+            }
+            finally
+            {
+                if (File.Exists(tempCookiesFile))
+                {
+                    try
+                    {
+                        File.Delete(tempCookiesFile);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log but don't throw - cleanup failure shouldn't break the download
+                        Console.WriteLine($"Warning: Could not delete temp cookie file: {ex.Message}");
+                    }
+                }
             }
         }
     }
