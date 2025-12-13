@@ -62,7 +62,7 @@ namespace armaradio.Repositories
                     //DownloaderArgs = "-4"
                     Verbose = true,
                     SleepInterval = 5,
-                    Cookies = cookiesFile
+                    //Cookies = cookiesFile
                 };
                 //var options = new OptionSet
                 //{
@@ -75,6 +75,8 @@ namespace armaradio.Repositories
                 //    NoWarnings = true,
                 //    Downloader = "native"
                 //};
+
+                options.ExtractorArgs = "youtube:player_client=android,ios";
 
                 options.AddHeaders = new MultiValue<string>();
 
