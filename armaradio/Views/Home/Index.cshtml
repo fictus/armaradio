@@ -1,4 +1,5 @@
-﻿@inject armaradio.Repositories.IMusicRepo _musicRepo;
+﻿@model armaradio.Models.ArmaAdminControlsDataItem;
+@inject armaradio.Repositories.IMusicRepo _musicRepo;
 @{
     ViewData["Title"] = "Arma Radio";
 
@@ -396,6 +397,33 @@
             </div>
         </div>
     </div>
+
+    @if (Model.ShowAdminControls)
+    {
+        <div class="modal" id="dvPopupUpdateSessionCookie" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 id="lblRefineRadioParameters_Title" class="modal-title">Update Session Cookie</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <div class="col">
+                                <div class="input-group mb-3">
+                                    <textarea id="txtSessionCookie" type="text" class="form-control" rows="8"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btnUpdateSessionCookie" type="button" class="btn btn-primary mr-5">Update</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 }
 
 @* <script src="https://www.youtube.com/iframe_api"></script> *@

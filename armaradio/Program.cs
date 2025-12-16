@@ -151,19 +151,17 @@ using (var scope = app.Services.CreateScope())
         {
             File.WriteAllText(cookiesFile, cookieValue);
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ||
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || 
                 RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 try
                 {
-                    // Using UnixFileMode (available in .NET 6+)
-                    File.SetUnixFileMode(cookiesFile,
-                        UnixFileMode.UserRead | UnixFileMode.UserWrite |
+                    File.SetUnixFileMode(cookiesFile, 
+                        UnixFileMode.UserRead | UnixFileMode.UserWrite | 
                         UnixFileMode.GroupRead | UnixFileMode.OtherRead);
                 }
                 catch (Exception ex)
                 {
-                    // Log the error but don't fail the startup
                     Console.WriteLine($"Warning: Could not set cookie file permissions: {ex.Message}");
                 }
             }

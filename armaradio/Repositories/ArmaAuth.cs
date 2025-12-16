@@ -16,15 +16,18 @@ namespace armaradio.Repositories
         private readonly IHttpContextAccessor _context;
         private readonly IArmaWebRequest _webRequest;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IDapperHelper _dapper;
         public ArmaAuth(
             IHttpContextAccessor context,
             IArmaWebRequest webRequest,
-            UserManager<IdentityUser> userManager
+            UserManager<IdentityUser> userManager,
+            IDapperHelper dapper
         )
         {
             _context = context;
             _webRequest = webRequest;
             _userManager = userManager;
+            _dapper = dapper;
         }
 
         public bool UserIsLoggedIn()
@@ -83,6 +86,23 @@ namespace armaradio.Repositories
                 {
                     returnItem = null;
                 }
+            }
+
+            return returnItem;
+        }
+
+        public bool IsAdminUser()
+        {
+            bool returnItem = false;
+            ArmaUser currentUser = GetCurrentUser();
+
+            if (currentUser != null)
+            {
+                returnItem = _dapper.GetFirstOrDefault<bool>("radioconn", "ArmaUsers_UserIsInRole", new
+                {
+                    user_name = currentUser.UserName,
+                    role_name = "armaAdmin"
+                });
             }
 
             return returnItem;

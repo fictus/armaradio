@@ -7,7 +7,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using System.Net;
+using System.Runtime.InteropServices;
+using System.Security.Claims;
+using YoutubeExplode.Channels;
 
 namespace armaradio.Controllers
 {
@@ -22,6 +27,7 @@ namespace armaradio.Controllers
         private readonly Operations.ArmaUserOperation _operation;
         private readonly IDapperHelper _dapper;
         private readonly ArmaSmtp.IArmaEmail _email;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
         public HomeController(
             ILogger<HomeController> logger,
@@ -31,7 +37,8 @@ namespace armaradio.Controllers
             IMusicRepo musicRepo,
             Operations.ArmaUserOperation operation,
             IDapperHelper dapper,
-            ArmaSmtp.IArmaEmail email
+            ArmaSmtp.IArmaEmail email,
+            IWebHostEnvironment hostEnvironment
         )
         {
             _logger = logger;
@@ -42,6 +49,7 @@ namespace armaradio.Controllers
             _signInManager = signInManager;
             _dapper = dapper;
             _email = email;
+            _hostEnvironment = hostEnvironment;
         }
 
         [HttpGet]
@@ -51,7 +59,21 @@ namespace armaradio.Controllers
             {
                 //await _musicRepo.GetAIRecommendedSongs("Rank1", "Airwaves");
                 //_musicRepo.DuckDuckGo_PerformGeneralSearch("depeche mode - somebody");
-                return View();
+
+                ArmaAdminControlsDataItem adminControls = new ArmaAdminControlsDataItem();
+
+                if (User.Identity.IsAuthenticated)
+                {
+                    ArmaUser currentUser = _authControl.GetCurrentUser();
+
+                    adminControls.ShowAdminControls = _dapper.GetFirstOrDefault<bool>("radioconn", "ArmaUsers_UserIsInRole", new
+                    {
+                        user_name = currentUser.UserName,
+                        role_name = "armaAdmin"
+                    });
+                }
+
+                return View(adminControls);
             }
         }
 
@@ -72,6 +94,94 @@ namespace armaradio.Controllers
             {
                 web_static = userIsLoggedIn
             });
+        }
+
+        [Authorize]
+        [HttpGet]
+        public IActionResult GetSessionCookie()
+        {
+            try
+            {
+                string returnItem = "";
+
+                if (_authControl.IsAdminUser())
+                {
+                    returnItem = _dapper.GetFirstOrDefault<string>("radioconn", "ArmaAdmin_GetSessionCookie");
+                }
+
+                return new JsonResult(new
+                {
+                    cookie = returnItem
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        public IActionResult SaveSessionCookie([FromBody] ArmaCookieRequest value)
+        {
+            try
+            {
+                if (!_authControl.IsAdminUser())
+                {
+                    throw new Exception("invalid request");
+                }
+                if (value == null || string.IsNullOrWhiteSpace(value.Cookie))
+                {
+                    throw new Exception("invalid request");
+                }
+
+                if (_authControl.IsAdminUser())
+                {
+                    int result = _dapper.ExecuteNonQuery("radioconn", "ArmaAdmin_SetSessionCookie", new
+                    {
+                        cookie = value.Cookie
+                    });
+
+                    if (result != 0)
+                    {
+                        var rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
+                        var cookiesDir = Path.Combine(rootPath, "wwwroot", "cookies");
+                        var cookiesFile = Path.Combine(cookiesDir, "file.txt");
+
+                        if (!Directory.Exists(cookiesDir))
+                        {
+                            Directory.CreateDirectory(cookiesDir);
+                        }
+
+                        if (System.IO.File.Exists(cookiesFile))
+                        {
+                            System.IO.File.Delete(cookiesFile);
+                        }
+
+                        System.IO.File.WriteAllText(cookiesFile, value.Cookie);
+
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ||
+                            RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                        {
+                            try
+                            {
+                                System.IO.File.SetUnixFileMode(cookiesFile,
+                                    UnixFileMode.UserRead | UnixFileMode.UserWrite |
+                                    UnixFileMode.GroupRead | UnixFileMode.OtherRead);
+                            }
+                            catch (Exception ex)
+                            {
+                            }
+                        }
+                    }
+                }
+
+                return new JsonResult(Ok());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
+            }
         }
 
         [HttpPost]
