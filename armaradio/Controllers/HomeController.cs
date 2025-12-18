@@ -64,13 +64,7 @@ namespace armaradio.Controllers
 
                 if (User.Identity.IsAuthenticated)
                 {
-                    ArmaUser currentUser = _authControl.GetCurrentUser();
-
-                    adminControls.ShowAdminControls = _dapper.GetFirstOrDefault<bool>("radioconn", "ArmaUsers_UserIsInRole", new
-                    {
-                        user_name = currentUser.UserName,
-                        role_name = "armaAdmin"
-                    });
+                    adminControls.ShowAdminControls = _authControl.IsAdminUser();
                 }
 
                 return View(adminControls);
