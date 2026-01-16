@@ -47,6 +47,8 @@ namespace armaradio.Repositories
                 var options = new OptionSet
                 {
                     //Format = "bestaudio/best",//"bestaudio[ext=m4a]/bestaudio",
+                    //Format = "ba*[ext=m4a]/ba*/b*[ext=m4a]/b*",
+                    Format = "best",
                     Output = endFileName,
                     ExtractAudio = true,
                     AudioFormat = AudioConversionFormat.M4a,
@@ -68,7 +70,11 @@ namespace armaradio.Repositories
                     Verbose = true,
                     SleepInterval = 5,
                     MaxSleepInterval = 10,
-                    Cookies = tempCookiesFile
+                    Cookies = tempCookiesFile,
+                    CustomOptions = new IOption[]
+                    {
+                        new Option<string>("--js-runtimes", "deno")
+                    }
                 };
                 //var options = new OptionSet
                 //{
