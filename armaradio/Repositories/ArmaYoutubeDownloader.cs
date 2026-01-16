@@ -46,7 +46,7 @@ namespace armaradio.Repositories
 
                 var options = new OptionSet
                 {
-                    Format = "bestaudio/best",//"bestaudio[ext=m4a]/bestaudio",
+                    //Format = "bestaudio/best",//"bestaudio[ext=m4a]/bestaudio",
                     Output = endFileName,
                     ExtractAudio = true,
                     AudioFormat = AudioConversionFormat.M4a,
@@ -67,6 +67,7 @@ namespace armaradio.Repositories
                     //DownloaderArgs = "-4"
                     Verbose = true,
                     SleepInterval = 5,
+                    MaxSleepInterval = 10,
                     Cookies = tempCookiesFile
                 };
                 //var options = new OptionSet
@@ -81,15 +82,14 @@ namespace armaradio.Repositories
                 //    Downloader = "native"
                 //};
 
-                options.ExtractorArgs = "youtube:player_client=ios,mweb";
+                options.ExtractorArgs = "youtube:player_client=android";
 
                 //options.ExtractorArgs = "--no-cookies-update"; // "youtube:player_client=android,ios";
                 options.AddHeaders = new MultiValue<string>();
 
                 options.AddHeaders.Values.Clear();
-                options.AddHeaders.Values.Add("User-Agent:Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1");
+                options.AddHeaders.Values.Add("User-Agent:com.google.android.youtube/19.09.37 (Linux; U; Android 13) gzip");
                 options.AddHeaders.Values.Add("Accept-Language:en-US,en;q=0.9");
-                options.AddHeaders.Values.Add("Referer:https://www.youtube.com/");
 
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
