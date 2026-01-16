@@ -40,9 +40,9 @@ namespace armaradio.Repositories
 
                 var retrySleep = new MultiValue<string>();
 
-                retrySleep.Values.Add("http:exp=1:30");
-                retrySleep.Values.Add("fragment:linear=1:10:2");
-                retrySleep.Values.Add("5");
+                retrySleep.Values.Add("http:exp=2:60");
+                retrySleep.Values.Add("fragment:linear=2:10");
+                retrySleep.Values.Add("extractor:exp=1:30");
 
                 var options = new OptionSet
                 {
@@ -55,7 +55,7 @@ namespace armaradio.Repositories
                     NoWarnings = true,
                     Downloader = "native",
                     BufferSize = 1048576, // Increased buffer size
-                    ConcurrentFragments = 8, // Download multiple fragments concurrently
+                    ConcurrentFragments = 2, // Download multiple fragments concurrently
                     Retries = 10,
                     ThrottledRate = 500000,
                     //RetrySleep = retrySleep,
@@ -81,13 +81,15 @@ namespace armaradio.Repositories
                 //    Downloader = "native"
                 //};
 
+                options.ExtractorArgs = "youtube:player_client=ios,mweb";
+
                 //options.ExtractorArgs = "--no-cookies-update"; // "youtube:player_client=android,ios";
                 options.AddHeaders = new MultiValue<string>();
 
-                options.AddHeaders.Values.Add("User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+                options.AddHeaders.Values.Clear();
+                options.AddHeaders.Values.Add("User-Agent:Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1");
                 options.AddHeaders.Values.Add("Accept-Language:en-US,en;q=0.9");
-                options.AddHeaders.Values.Add("Accept-Encoding:gzip, deflate");
-                options.AddHeaders.Values.Add("Accept:text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+                options.AddHeaders.Values.Add("Referer:https://www.youtube.com/");
 
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
