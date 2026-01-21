@@ -48,7 +48,7 @@ namespace armaradio.Repositories
                 {
                     //Format = "bestaudio/best",//"bestaudio[ext=m4a]/bestaudio",
                     //Format = "ba*[ext=m4a]/ba*/b*[ext=m4a]/b*",
-                    Format = "best",
+                    //Format = "bestaudio/best",
                     Output = endFileName,
                     ExtractAudio = true,
                     AudioFormat = AudioConversionFormat.M4a,
@@ -88,7 +88,7 @@ namespace armaradio.Repositories
                 //    Downloader = "native"
                 //};
 
-                options.ExtractorArgs = "youtube:player_client=android";
+                options.ExtractorArgs = "youtube:player_client=android_creator";
 
                 //options.ExtractorArgs = "--no-cookies-update"; // "youtube:player_client=android,ios";
                 options.AddHeaders = new MultiValue<string>();
