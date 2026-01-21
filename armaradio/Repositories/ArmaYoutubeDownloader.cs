@@ -55,26 +55,24 @@ namespace armaradio.Repositories
                     NoPlaylist = true,
                     NoCheckCertificates = true,
                     NoWarnings = true,
-                    Downloader = "native",
-                    BufferSize = 1048576, // Increased buffer size
-                    ConcurrentFragments = 2, // Download multiple fragments concurrently
+                    //Downloader = "native",
+                    //BufferSize = 1048576, // Increased buffer size
+                    //ConcurrentFragments = 2, // Download multiple fragments concurrently
                     Retries = 10,
                     ThrottledRate = 500000,
-                    //RetrySleep = retrySleep,
                     FragmentRetries = 15, // Retry failed fragments
                     ForceIPv4 = true, // Force IPv4 to potentially avoid slow IPv6 connections
                     SocketTimeout = 30,
                     KeepFragments = false,
                     WriteInfoJson = false,
-                    //DownloaderArgs = "-4"
                     Verbose = true,
                     SleepInterval = 5,
                     MaxSleepInterval = 10,
-                    Cookies = tempCookiesFile,
-                    CustomOptions = new IOption[]
-                    {
-                        new Option<string>("--js-runtimes", "deno")
-                    }
+                    Cookies = tempCookiesFile
+                    //CustomOptions = new IOption[]
+                    //{
+                    //    new Option<string>("--js-runtimes", "deno")
+                    //}
                 };
                 //var options = new OptionSet
                 //{
