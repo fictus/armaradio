@@ -97,11 +97,11 @@ namespace armaradio.Repositories
                 options.AddHeaders.Values.Add("User-Agent:com.google.android.youtube/19.09.37 (Linux; U; Android 13) gzip");
                 options.AddHeaders.Values.Add("Accept-Language:en-US,en;q=0.9");
 
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    //options.NoCacheDir = true; // Disable cache directory on Linux
-                    options.DownloaderArgs = "-4 --buffer-size 1M"; // Set native downloader buffer size
-                }
+                //if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                //{
+                //    //options.NoCacheDir = true; // Disable cache directory on Linux
+                //    options.DownloaderArgs = "-4 --buffer-size 1M"; // Set native downloader buffer size
+                //}
 
                 var result = await _youtubeDl.RunAudioDownload(
                     url,
