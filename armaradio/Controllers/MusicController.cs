@@ -1,6 +1,7 @@
 ﻿using armaradio.Attributes;
 using armaradio.Models;
 using armaradio.Models.ArmaAuth;
+using armaradio.Models.Odysee;
 using armaradio.Models.Request;
 using armaradio.Models.Response;
 using armaradio.Models.Youtube;
@@ -1617,6 +1618,7 @@ namespace armaradio.Controllers
                 using (_operation)
                 {
                     List<YTGeneralSearchDataItem> returnItem = await _musicRepo.Youtube_PerformGeneralSearch(SearchText);
+                    //List<OdyseeSearchResult> odyseeResults = await _musicRepo.SearchOdyseeAsync(SearchText);
 
                     return new JsonResult(returnItem);
                 }

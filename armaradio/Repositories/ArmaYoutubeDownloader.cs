@@ -86,7 +86,7 @@ namespace armaradio.Repositories
                 //    Downloader = "native"
                 //};
 
-                options.ExtractorArgs = "youtube:player_client=android_creator";
+                options.ExtractorArgs = "youtube:player_client=android_skdless";
 
                 //options.ExtractorArgs = "--no-cookies-update"; // "youtube:player_client=android,ios";
                 options.AddHeaders = new MultiValue<string>();

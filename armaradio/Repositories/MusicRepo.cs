@@ -3,6 +3,7 @@ using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 using armaradio.Models;
 using armaradio.Models.BeatPort;
+using armaradio.Models.Odysee;
 using armaradio.Models.Request;
 using armaradio.Models.Response;
 using armaradio.Models.Youtube;
@@ -19,11 +20,13 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO.Compression;
 using System.Net;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web;
@@ -1986,6 +1989,63 @@ namespace armaradio.Repositories
             }
 
             return returnItem;
+        }
+
+        public async Task<List<OdyseeSearchResult>> SearchOdyseeAsync(string searchQuery, int pageSize = 20)
+        {
+            var returnItem = new List<OdyseeSearchResult>();
+
+            using (var searcher = new OdyseeSearcher(headless: true))
+            {
+                returnItem = await searcher.SearchAsync(searchQuery, maxResults: pageSize);
+            }
+
+            return returnItem;
+        }        
+
+        private string ExtractArtistFromTitle(string title)
+        {
+            if (string.IsNullOrEmpty(title))
+                return "";
+
+            // Pattern 1: "Artist - Song"
+            var dashMatch = Regex.Match(title, @"^([^-]+)\s*-\s*(.+)$");
+            if (dashMatch.Success)
+            {
+                return dashMatch.Groups[1].Value.Trim();
+            }
+
+            // Pattern 2: "Song by Artist"
+            var byMatch = Regex.Match(title, @"\s+by\s+(.+)$", RegexOptions.IgnoreCase);
+            if (byMatch.Success)
+            {
+                return byMatch.Groups[1].Value.Trim();
+            }
+
+            // Pattern 3: "Artist: Song"
+            var colonMatch = Regex.Match(title, @"^([^:]+):\s*(.+)$");
+            if (colonMatch.Success)
+            {
+                return colonMatch.Groups[1].Value.Trim();
+            }
+
+            // Pattern 4: Artist in parentheses or brackets
+            var bracketMatch = Regex.Match(title, @"[\[\(]([^\]\)]+)[\]\)]");
+            if (bracketMatch.Success)
+            {
+                return bracketMatch.Groups[1].Value.Trim();
+            }
+
+            return "";
+        }
+
+        public string FormatDuration(int seconds)
+        {
+            TimeSpan ts = TimeSpan.FromSeconds(seconds);
+            if (ts.Hours > 0)
+                return $"{ts.Hours}:{ts.Minutes:D2}:{ts.Seconds:D2}";
+            else
+                return $"{ts.Minutes}:{ts.Seconds:D2}";
         }
 
         private string GenerateRandomString(int length)

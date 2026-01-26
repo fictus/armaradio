@@ -1,4 +1,5 @@
 ﻿using armaradio.Models;
+using armaradio.Models.Odysee;
 using armaradio.Models.Request;
 using armaradio.Models.Response;
 using armaradio.Models.Youtube;
@@ -42,6 +43,7 @@ namespace armaradio.Repositories
         void FlagFileForDeletion(string FullDirFIleName);
         Task<YTVideoIdsDataItem> Youtube_GetUrlByArtistNameSongName(string artistName, string songName);
         Task<List<YTGeneralSearchDataItem>> Youtube_PerformGeneralSearch(string searchText);
+        Task<List<OdyseeSearchResult>> SearchOdyseeAsync(string searchQuery, int pageSize = 20);
         Task<List<YTGeneralSearchDataItem>> DuckDuckGo_PerformGeneralSearch(string searchText);
         bool CheckIfPlaylistExists(string PlaylistName, string UserId);
         int? InsertPlaylistName(string PlaylistName, string UserId);
