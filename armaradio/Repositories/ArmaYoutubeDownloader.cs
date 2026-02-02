@@ -49,10 +49,10 @@ namespace armaradio.Repositories
                 var arguments = new List<string>
                 {
                     //"--format", "bestaudio*",
-                    "--format", "bestaudio",
+                    //"--format", "bestaudio",
                     "--output", endFileName,
-                    //"--extract-audio",
-                    //"--audio-format", "m4a",
+                    "--extract-audio",
+                    "--audio-format", "m4a",
                     "--no-playlist",
                     "--no-check-certificates",
                     "--no-warnings",
