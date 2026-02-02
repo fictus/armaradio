@@ -71,8 +71,9 @@ namespace armaradio.Repositories
                 "--retry-sleep", "http:exp=2:60",
                 "--retry-sleep", "fragment:linear=2:10",
                 "--retry-sleep", "extractor:exp=1:30",
-                "--js-runtimes", "node",
-                "--extractor-args", "youtube:player_client=android",
+                "--js-runtimes", "deno",
+                //"--js-runtimes", "node",
+                "--extractor-args", "youtube:player_client=web",
                 url
             };
 
