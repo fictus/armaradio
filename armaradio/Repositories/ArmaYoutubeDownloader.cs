@@ -83,12 +83,14 @@ namespace armaradio.Repositories
                     arguments.Add("--format");
                     arguments.Add("bestaudio");
                     arguments.Add("--extractor-args");
-                    arguments.Add("youtube:player_client=android");
+                    arguments.Add("youtube:player_client=mediaconnect");
                     arguments.Add("--recode-video");
                     arguments.Add("m4a");
                     arguments.Add("--js-runtimes");
                     //arguments.Add("/usr/bin/node");
                     arguments.Add("/home/fictus/.deno/bin/deno");
+                    arguments.Add("--cookies");
+                    arguments.Add(tempCookiesFile);
                 }
                 else
                 {
