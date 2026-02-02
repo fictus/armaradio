@@ -1,6 +1,8 @@
 ﻿using AngleSharp.Dom;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 using YoutubeDLSharp;
 using YoutubeDLSharp.Options;
 
@@ -27,6 +29,126 @@ namespace armaradio.Repositories
         }
 
         public async Task DownloadAudioFileAsync(string url, string endFileName)
+        {
+            string tempCookiesFile = "";
+
+            try
+            {
+                string rootPath = _hostEnvironment.WebRootPath.TrimEnd('/').TrimEnd('\\');
+                string cookiesFile = (!IsWindows ? $"{rootPath}/cookies/file.txt" : $"{rootPath}\\cookies\\file.txt");
+
+                tempCookiesFile = Path.Combine(Path.GetTempPath(), $"yt-cookies-{Guid.NewGuid()}.txt");
+                File.Copy(cookiesFile, tempCookiesFile, true);
+
+                // Determine yt-dlp and ffmpeg paths
+                bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+                string ytdlpPath = isLinux ? "/home/fictus/yt-dlp-env/bin/yt-dlp" : "C:\\YTDL\\yt-dlp.exe";
+                string ffmpegPath = isLinux ? "/usr/bin/ffmpeg" : "C:\\ffmpeg\\ffmpeg.exe";
+
+                // Build yt-dlp arguments
+                var arguments = new List<string>
+            {
+                "--format", "best",
+                "--output", endFileName,
+                "--extract-audio",
+                "--audio-format", "m4a",
+                "--no-playlist",
+                "--no-check-certificates",
+                "--no-warnings",
+                //"--downloader", "native",
+                "--retries", "10",
+                "--throttled-rate", "500K",
+                "--fragment-retries", "15",
+                "--force-ipv4",
+                "--socket-timeout", "30",
+                "--no-keep-fragments",
+                "--no-write-info-json",
+                "--verbose",
+                "--sleep-interval", "5",
+                "--max-sleep-interval", "10",
+                "--cookies", tempCookiesFile,
+                "--ffmpeg-location", ffmpegPath,
+                "--retry-sleep", "http:exp=2:60",
+                "--retry-sleep", "fragment:linear=2:10",
+                "--retry-sleep", "extractor:exp=1:30",
+                "--js-runtimes", "node",
+                "--extractor-args", "youtube:player_client=android",
+                url
+            };
+
+                // Create process start info
+                var processStartInfo = new ProcessStartInfo
+                {
+                    FileName = ytdlpPath,
+                    Arguments = string.Join(" ", arguments.Select(arg =>
+                        arg.Contains(" ") ? $"\"{arg}\"" : arg)),
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var process = new Process { StartInfo = processStartInfo };
+
+                var outputBuilder = new StringBuilder();
+                var errorBuilder = new StringBuilder();
+
+                process.OutputDataReceived += (sender, e) =>
+                {
+                    if (!string.IsNullOrEmpty(e.Data))
+                    {
+                        Console.WriteLine(e.Data);
+                        outputBuilder.AppendLine(e.Data);
+                    }
+                };
+
+                process.ErrorDataReceived += (sender, e) =>
+                {
+                    if (!string.IsNullOrEmpty(e.Data))
+                    {
+                        Console.WriteLine(e.Data);
+                        errorBuilder.AppendLine(e.Data);
+                    }
+                };
+
+                process.Start();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+
+                await process.WaitForExitAsync();
+
+                if (process.ExitCode != 0)
+                {
+                    string errorMsg = errorBuilder.Length > 0
+                        ? errorBuilder.ToString()
+                        : "yt-dlp process failed with unknown error";
+
+                    Console.WriteLine($"yt-dlp failed with exit code {process.ExitCode}: {errorMsg}");
+                    throw new Exception($"yt-dlp failed with exit code {process.ExitCode}: {errorMsg}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message.ToString() + "; Stack-Trace: " + ex.StackTrace.ToString());
+                throw;
+            }
+            finally
+            {
+                if (File.Exists(tempCookiesFile))
+                {
+                    try
+                    {
+                        File.Delete(tempCookiesFile);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Warning: Could not delete temp cookie file: {ex.Message}");
+                    }
+                }
+            }
+        }
+
+        public async Task DownloadAudioFileAsync_V1(string url, string endFileName)
         {
             string tempCookiesFile = "";
 
