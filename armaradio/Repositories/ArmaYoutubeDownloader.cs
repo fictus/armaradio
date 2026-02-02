@@ -79,6 +79,12 @@ namespace armaradio.Repositories
                     url
                 };
 
+                if (isLinux)
+                {
+                    arguments.Add("--exec-js-runtime");
+                    arguments.Add("/usr/bin/node");
+                }
+
                 // Create process start info
                 var processStartInfo = new ProcessStartInfo
                 {
