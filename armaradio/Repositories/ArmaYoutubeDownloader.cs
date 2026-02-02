@@ -69,12 +69,13 @@ namespace armaradio.Repositories
                     Verbose = true,
                     SleepInterval = 5,
                     MaxSleepInterval = 10,
-                    Cookies = tempCookiesFile
-                    //CustomOptions = new IOption[]
-                    //{
-                    //    //new Option<string>("--js-runtimes", "deno")
-                    //    new Option<string>("--remote-components", "ejs:github")
-                    //}
+                    Cookies = tempCookiesFile,
+                    CustomOptions = new IOption[]
+                    {
+                        //new Option<string>("--js-runtimes", "deno")
+                        //new Option<string>("--remote-components", "ejs:github")
+                        new Option<string>("--js-runtimes", "node")
+                    }
                 };
                 //var options = new OptionSet
                 //{
