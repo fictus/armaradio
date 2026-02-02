@@ -87,7 +87,8 @@ namespace armaradio.Repositories
                     arguments.Add("--recode-video");
                     arguments.Add("m4a");
                     arguments.Add("--js-runtimes");
-                    arguments.Add("/home/fictus/.deno/bin/deno");
+                    arguments.Add("/usr/bin/node");
+                    //arguments.Add("/home/fictus/.deno/bin/deno");
                 }
                 else
                 {
@@ -112,7 +113,8 @@ namespace armaradio.Repositories
                 if (isLinux)
                 {
                     var currentPath = Environment.GetEnvironmentVariable("PATH") ?? "";
-                    processStartInfo.EnvironmentVariables["PATH"] = $"/home/fictus/.deno/bin:/usr/bin:{currentPath}";
+                    //processStartInfo.EnvironmentVariables["PATH"] = $"/home/fictus/.deno/bin:/usr/bin:{currentPath}";
+                    processStartInfo.EnvironmentVariables["PATH"] = $"/usr/bin/node:/usr/bin:{currentPath}";
                 }
 
                 using var process = new Process { StartInfo = processStartInfo };
