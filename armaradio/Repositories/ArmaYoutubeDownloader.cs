@@ -56,7 +56,7 @@ namespace armaradio.Repositories
                     NoPlaylist = true,
                     NoCheckCertificates = true,
                     NoWarnings = true,
-                    //Downloader = "native",
+                    Downloader = "native",
                     //BufferSize = 1048576, // Increased buffer size
                     //ConcurrentFragments = 2, // Download multiple fragments concurrently
                     Retries = 10,
