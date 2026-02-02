@@ -75,12 +75,14 @@ namespace armaradio.Repositories
                     //"--js-runtimes", "deno",
                     //"--no-check-formats",
                     //"--js-runtimes", "node",
-                    //"--extractor-args", "youtube:player_client=android",
+                    //"--extractor-args", "youtube:player_client=ios",
                     url
                 };
 
                 if (isLinux)
                 {
+                    arguments.Add("--extractor-args");
+                    arguments.Add("youtube:player_client=ios");
                     arguments.Add("--js-runtimes");
                     arguments.Add("/home/fictus/.deno/bin/deno");
                 }
