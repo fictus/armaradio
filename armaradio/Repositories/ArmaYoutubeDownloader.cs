@@ -72,9 +72,9 @@ namespace armaradio.Repositories
                     Cookies = tempCookiesFile,
                     CustomOptions = new IOption[]
                     {
-                        //new Option<string>("--js-runtimes", "deno")
+                        new Option<string>("--js-runtimes", "deno")
                         //new Option<string>("--remote-components", "ejs:github")
-                        new Option<string>("--js-runtimes", "node")
+                        //new Option<string>("--js-runtimes", "node")
                     }
                 };
                 //var options = new OptionSet
@@ -89,8 +89,10 @@ namespace armaradio.Repositories
                 //    Downloader = "native"
                 //};
 
+                //options.ExtractorArgs = "youtube:player_client=android";
                 //options.ExtractorArgs = "youtube:player_client=android_skdless";
-                options.ExtractorArgs = "youtube:player_client=android_vr";
+                //options.ExtractorArgs = "youtube:player_client=android_vr";
+                //options.ExtractorArgs = "youtube:player_client=android,ios";
                 //options.PostprocessorArgs = "--remote-components ejs:github";
 
                 //options.ExtractorArgs = "--no-cookies-update"; // "youtube:player_client=android,ios";
