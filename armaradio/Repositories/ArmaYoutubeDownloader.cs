@@ -97,6 +97,12 @@ namespace armaradio.Repositories
                     CreateNoWindow = true
                 };
 
+                if (isLinux)
+                {
+                    var currentPath = Environment.GetEnvironmentVariable("PATH") ?? "";
+                    processStartInfo.EnvironmentVariables["PATH"] = $"/home/fictus/.deno/bin:/usr/bin:{currentPath}";
+                }
+
                 using var process = new Process { StartInfo = processStartInfo };
 
                 var outputBuilder = new StringBuilder();
