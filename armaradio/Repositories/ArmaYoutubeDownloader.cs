@@ -93,6 +93,8 @@ namespace armaradio.Repositories
                 {
                     // windows Only
                     arguments.Add("--extract-audio");
+                    arguments.Add("--cookies");
+                    arguments.Add(tempCookiesFile);
                 }
 
                 // Create process start info
