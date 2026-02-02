@@ -66,7 +66,7 @@ namespace armaradio.Repositories
                     "--verbose",
                     "--sleep-interval", "5",
                     "--max-sleep-interval", "10",
-                    "--cookies", tempCookiesFile,
+                    //"--cookies", tempCookiesFile,
                     "--ffmpeg-location", ffmpegPath,
                     "--retry-sleep", "http:exp=2:60",
                     "--retry-sleep", "fragment:linear=2:10",
