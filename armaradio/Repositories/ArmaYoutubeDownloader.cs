@@ -88,15 +88,15 @@ namespace armaradio.Repositories
                 //};
 
                 //options.ExtractorArgs = "youtube:player_client=android_skdless";
-                options.ExtractorArgs = "youtube:player_client=android_music";
-                options.PostprocessorArgs = "'--remote-components', 'ejs:github'";
+                options.ExtractorArgs = "youtube:player_client=ios";
+                options.PostprocessorArgs = "--remote-components ejs:github";
 
                 //options.ExtractorArgs = "--no-cookies-update"; // "youtube:player_client=android,ios";
                 options.AddHeaders = new MultiValue<string>();
 
-                //options.AddHeaders.Values.Clear();
-                //options.AddHeaders.Values.Add("User-Agent:com.google.android.youtube/19.09.37 (Linux; U; Android 13) gzip");
-                //options.AddHeaders.Values.Add("Accept-Language:en-US,en;q=0.9");
+                options.AddHeaders.Values.Clear();
+                options.AddHeaders.Values.Add("User-Agent:com.google.android.youtube/19.09.37 (Linux; U; Android 13) gzip");
+                options.AddHeaders.Values.Add("Accept-Language:en-US,en;q=0.9");
 
                 //if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 //{
