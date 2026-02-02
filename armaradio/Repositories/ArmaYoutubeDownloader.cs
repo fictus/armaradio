@@ -49,7 +49,7 @@ namespace armaradio.Repositories
                     //Format = "bestaudio/best",//"bestaudio[ext=m4a]/bestaudio",
                     //Format = "ba*[ext=m4a]/ba*/b*[ext=m4a]/b*",
                     //Format = "bestaudio/best",
-                    Format = "ba/b",
+                    Format = "best",
                     Output = endFileName,
                     ExtractAudio = true,
                     AudioFormat = AudioConversionFormat.M4a,
