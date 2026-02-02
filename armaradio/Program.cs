@@ -88,7 +88,7 @@ builder.Services.AddSingleton<YoutubeDL>(sp =>
 
     return new YoutubeDL
     {
-        YoutubeDLPath = (isLinux ? "/home/fictus/yt-dlp-wrapper.sh" : "C:\\YTDL\\yt-dlp.exe"), //(isLinux ? "/home/fictus/yt-dlp-env/bin/yt-dlp" : "C:\\YTDL\\yt-dlp.exe"), //"/usr/local/bin/yt-dlp-wrapper"   "/home/fictus/.local/bin/yt-dlp"  "/usr/local/bin/yt-dlp-wrapper"
+        YoutubeDLPath = (isLinux ? "/home/fictus/yt-dlp-node-wrapper.py" : "C:\\YTDL\\yt-dlp.exe"), //(isLinux ? "/home/fictus/yt-dlp-env/bin/yt-dlp" : "C:\\YTDL\\yt-dlp.exe"), //"/usr/local/bin/yt-dlp-wrapper"   "/home/fictus/.local/bin/yt-dlp"  "/usr/local/bin/yt-dlp-wrapper"
         FFmpegPath = (isLinux ? "/usr/bin/ffmpeg" : "C:\\ffmpeg\\ffmpeg.exe")
     };
 });
