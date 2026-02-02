@@ -47,35 +47,37 @@ namespace armaradio.Repositories
 
                 // Build yt-dlp arguments
                 var arguments = new List<string>
-            {
-                "--format", "best",
-                "--output", endFileName,
-                "--extract-audio",
-                "--audio-format", "m4a",
-                "--no-playlist",
-                "--no-check-certificates",
-                "--no-warnings",
-                //"--downloader", "native",
-                "--retries", "10",
-                "--throttled-rate", "500K",
-                "--fragment-retries", "15",
-                "--force-ipv4",
-                "--socket-timeout", "30",
-                "--no-keep-fragments",
-                "--no-write-info-json",
-                "--verbose",
-                "--sleep-interval", "5",
-                "--max-sleep-interval", "10",
-                "--cookies", tempCookiesFile,
-                "--ffmpeg-location", ffmpegPath,
-                "--retry-sleep", "http:exp=2:60",
-                "--retry-sleep", "fragment:linear=2:10",
-                "--retry-sleep", "extractor:exp=1:30",
-                "--js-runtimes", "deno",
-                //"--js-runtimes", "node",
-                "--extractor-args", "youtube:player_client=web",
-                url
-            };
+                {
+                    //"--format", "bestaudio*",
+                    "--format", "bestaudio",
+                    "--output", endFileName,
+                    //"--extract-audio",
+                    //"--audio-format", "m4a",
+                    "--no-playlist",
+                    "--no-check-certificates",
+                    "--no-warnings",
+                    //"--downloader", "native",
+                    "--retries", "10",
+                    "--throttled-rate", "500K",
+                    "--fragment-retries", "15",
+                    "--force-ipv4",
+                    "--socket-timeout", "30",
+                    "--no-keep-fragments",
+                    "--no-write-info-json",
+                    "--verbose",
+                    "--sleep-interval", "5",
+                    "--max-sleep-interval", "10",
+                    "--cookies", tempCookiesFile,
+                    "--ffmpeg-location", ffmpegPath,
+                    "--retry-sleep", "http:exp=2:60",
+                    "--retry-sleep", "fragment:linear=2:10",
+                    "--retry-sleep", "extractor:exp=1:30",
+                    //"--js-runtimes", "deno",
+                    //"--no-check-formats",
+                    //"--js-runtimes", "node",
+                    //"--extractor-args", "youtube:player_client=android",
+                    url
+                };
 
                 // Create process start info
                 var processStartInfo = new ProcessStartInfo
