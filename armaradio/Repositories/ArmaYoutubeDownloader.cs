@@ -81,7 +81,7 @@ namespace armaradio.Repositories
 
                 if (isLinux)
                 {
-                    arguments.Add("--exec-js-runtime");
+                    arguments.Add("--js-runtimes");
                     arguments.Add("/home/fictus/.deno/bin/deno");
                 }
 
