@@ -50,6 +50,7 @@ namespace armaradio.Repositories
                 {
                     //"--format", "bestaudio*",
                     //"--format", "bestaudio",
+                    "--no-cache-dir",
                     "--output", endFileName,
                     "--audio-format", "m4a",
                     "--no-playlist",
@@ -80,6 +81,8 @@ namespace armaradio.Repositories
 
                 if (isLinux)
                 {
+                    arguments.Add("--cache-dir");
+                    arguments.Add("/home/fictus/.cache/yt-dlp");
                     arguments.Add("--format");
                     arguments.Add("ba/b");
                     arguments.Add("--extractor-args");
