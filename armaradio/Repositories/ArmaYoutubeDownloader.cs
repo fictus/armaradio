@@ -68,11 +68,12 @@ namespace armaradio.Repositories
                     Verbose = true,
                     SleepInterval = 5,
                     MaxSleepInterval = 10,
-                    Cookies = tempCookiesFile
-                    //CustomOptions = new IOption[]
-                    //{
-                    //    new Option<string>("--js-runtimes", "deno")
-                    //}
+                    Cookies = tempCookiesFile,
+                    CustomOptions = new IOption[]
+                    {
+                        //new Option<string>("--js-runtimes", "deno")
+                        new Option<string>("--remote-components", "ejs:github")
+                    }
                 };
                 //var options = new OptionSet
                 //{
@@ -86,7 +87,8 @@ namespace armaradio.Repositories
                 //    Downloader = "native"
                 //};
 
-                options.ExtractorArgs = "youtube:player_client=android_skdless";
+                //options.ExtractorArgs = "youtube:player_client=android_skdless";
+                options.ExtractorArgs = "youtube:player_client=web";
 
                 //options.ExtractorArgs = "--no-cookies-update"; // "youtube:player_client=android,ios";
                 options.AddHeaders = new MultiValue<string>();
