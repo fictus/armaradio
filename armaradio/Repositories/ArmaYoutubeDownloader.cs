@@ -89,7 +89,7 @@ namespace armaradio.Repositories
 
                 //options.ExtractorArgs = "youtube:player_client=android_skdless";
                 options.ExtractorArgs = "youtube:player_client=android_music";
-                options.PostprocessorArgs = "--remote-components ejs:github";
+                options.PostprocessorArgs = "'--remote-components', 'ejs:github'";
 
                 //options.ExtractorArgs = "--no-cookies-update"; // "youtube:player_client=android,ios";
                 options.AddHeaders = new MultiValue<string>();
