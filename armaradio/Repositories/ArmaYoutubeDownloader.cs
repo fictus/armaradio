@@ -81,7 +81,7 @@ namespace armaradio.Repositories
                 if (isLinux)
                 {
                     arguments.Add("--format");
-                    arguments.Add("bestaudio");
+                    arguments.Add("ba/b");
                     arguments.Add("--extractor-args");
                     arguments.Add("youtube:player_client=mediaconnect");
                     arguments.Add("--recode-video");
