@@ -51,7 +51,6 @@ namespace armaradio.Repositories
                     //"--format", "bestaudio*",
                     //"--format", "bestaudio",
                     "--output", endFileName,
-                    "--extract-audio",
                     "--audio-format", "m4a",
                     "--no-playlist",
                     "--no-check-certificates",
@@ -81,10 +80,19 @@ namespace armaradio.Repositories
 
                 if (isLinux)
                 {
+                    arguments.Add("--format");
+                    arguments.Add("bestaudio");
                     arguments.Add("--extractor-args");
                     arguments.Add("youtube:player_client=ios");
+                    arguments.Add("--recode-video");
+                    arguments.Add("m4a");
                     arguments.Add("--js-runtimes");
                     arguments.Add("/home/fictus/.deno/bin/deno");
+                }
+                else
+                {
+                    // windows Only
+                    arguments.Add("--extract-audio");
                 }
 
                 // Create process start info
