@@ -92,8 +92,8 @@ namespace armaradio.Repositories
                     arguments.Add("--js-runtimes");
                     //arguments.Add("/usr/bin/node");
                     arguments.Add("/home/fictus/.deno/bin/deno");
-                    arguments.Add("--cookies");
-                    arguments.Add(tempCookiesFile);
+                    //arguments.Add("--cookies");
+                    //arguments.Add(tempCookiesFile);
                 }
                 else
                 {
