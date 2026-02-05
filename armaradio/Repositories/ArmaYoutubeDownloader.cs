@@ -85,7 +85,7 @@ namespace armaradio.Repositories
                     arguments.Add("/home/fictus/.cache/yt-dlp");
                     arguments.Add("--format");
                     arguments.Add("ba/b");
-                    arguments.Add("--extractor-args");
+                    //arguments.Add("--extractor-args");
                     //arguments.Add("youtube:player_client=android_vr");
                     arguments.Add("--recode-video");
                     arguments.Add("m4a");
