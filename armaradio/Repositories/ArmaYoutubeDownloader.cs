@@ -84,7 +84,8 @@ namespace armaradio.Repositories
                     arguments.Add("--cache-dir");
                     arguments.Add("/home/fictus/.cache/yt-dlp");
                     arguments.Add("--format");
-                    arguments.Add("ba/b");
+                    arguments.Add("bestaudio[ext=m4a]/bestaudio");
+                    //arguments.Add("ba/b");
                     //arguments.Add("--extractor-args");
                     //arguments.Add("youtube:player_client=android_vr");
                     //arguments.Add("--recode-video");
@@ -92,6 +93,8 @@ namespace armaradio.Repositories
                     arguments.Add("--extract-audio");
                     arguments.Add("--audio-format");
                     arguments.Add("m4a");
+                    arguments.Add("--audio-quality");
+                    arguments.Add("5");
                     arguments.Add("--js-runtimes");
                     //arguments.Add("/usr/bin/node");
                     arguments.Add("/home/fictus/.deno/bin/deno");
