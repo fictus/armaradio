@@ -87,7 +87,10 @@ namespace armaradio.Repositories
                     arguments.Add("ba/b");
                     //arguments.Add("--extractor-args");
                     //arguments.Add("youtube:player_client=android_vr");
-                    arguments.Add("--recode-video");
+                    //arguments.Add("--recode-video");
+                    //arguments.Add("m4a");
+                    arguments.Add("--extract-audio");
+                    arguments.Add("--audio-format");
                     arguments.Add("m4a");
                     arguments.Add("--js-runtimes");
                     //arguments.Add("/usr/bin/node");
