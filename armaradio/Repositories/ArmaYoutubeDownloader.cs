@@ -67,7 +67,7 @@ namespace armaradio.Repositories
                     "--verbose",
                     "--sleep-interval", "5",
                     "--max-sleep-interval", "10",
-                    //"--cookies", tempCookiesFile,
+                    "--cookies", tempCookiesFile,
                     "--ffmpeg-location", ffmpegPath,
                     "--retry-sleep", "http:exp=2:60",
                     "--retry-sleep", "fragment:linear=2:10",
@@ -75,7 +75,7 @@ namespace armaradio.Repositories
                     //"--js-runtimes", "deno",
                     //"--no-check-formats",
                     //"--js-runtimes", "node",
-                    //"--extractor-args", "youtube:player_client=ios",
+                    "--extractor-args", "youtube:player_client=web_safari",
                     url
                 };
 
@@ -86,7 +86,8 @@ namespace armaradio.Repositories
                     arguments.Add("--format");
                     arguments.Add("bestaudio[ext=m4a]/bestaudio");
                     //arguments.Add("ba/b");
-                    //arguments.Add("--extractor-args");
+                    arguments.Add("--extractor-args");
+                    arguments.Add("youtube:player_client=web_safari");
                     //arguments.Add("youtube:player_client=android_vr");
                     //arguments.Add("youtube:player_client=tv");
                     //arguments.Add("--recode-video");
