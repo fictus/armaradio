@@ -85,8 +85,8 @@ namespace armaradio.Repositories
                     arguments.Add("--format");
                     arguments.Add("bestaudio[ext=m4a]/bestaudio");
                     //arguments.Add("ba/b");
-                    arguments.Add("--extractor-args");
-                    arguments.Add("youtube:player_client=ios,mweb,web");
+                    //arguments.Add("--extractor-args");
+                    //arguments.Add("youtube:player_client=ios,mweb,web");
                     //arguments.Add("youtube:player_client=android_vr");
                     //arguments.Add("youtube:player_client=tv");
                     //arguments.Add("--recode-video");
