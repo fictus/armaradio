@@ -74,7 +74,7 @@ namespace armaradio.Repositories
                     //"--js-runtimes", "deno",
                     //"--no-check-formats",
                     //"--js-runtimes", "node",
-                    "--extractor-args", "youtube:player_client=web_safari",
+                    //"--extractor-args", "youtube:player_client=web_safari",
                     url
                 };
 
