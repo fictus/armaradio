@@ -23,7 +23,7 @@ namespace armaoffline
 
                 builder
                     .UseMauiApp<App>()
-                    .UseMauiCommunityToolkitMediaElement()                   
+                    .UseMauiCommunityToolkitMediaElement(isAndroidForegroundServiceEnabled: true)                   
                     .ConfigureFonts(fonts =>
                     {
                         fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

@@ -92,10 +92,12 @@
     private static Action<double?> _playerPositionAction;
     private static Action _updateUI;
     private static Action _closeDimmedScreen;
+    private List<ArmaPlaylistDataItem> _currentPlaylist = new();
+    private int _currentSongIndex = -1;
 
     private System.Timers.Timer _elapsedTimer;
-    private System.Timers.Timer _dimmedScreenTimer;
-    private int _dimmedScreenTimerSeconds = 0;
+    //private System.Timers.Timer _dimmedScreenTimer;
+    //private int _dimmedScreenTimerSeconds = 0;
     public bool IsPlaying { get; private set; } = false;
     public bool IsRepeat { get; private set; } = false;
     public string ElapsedTime { get; private set; } = "00:00";
@@ -122,8 +124,8 @@
         _elapsedTimer = new System.Timers.Timer(1000);
         _elapsedTimer.Elapsed += UpdateElapsedTime;
 
-        _dimmedScreenTimer = new System.Timers.Timer(1000);
-        _dimmedScreenTimer.Elapsed += DimmedScreenTickEvent;
+        // _dimmedScreenTimer = new System.Timers.Timer(1000);
+        // _dimmedScreenTimer.Elapsed += DimmedScreenTickEvent;
 
         _audioPlayer.MediaEndedEvent += OnPlaybackEnded;
         _audioPlayer.MediaFailedEvent += OnAudioFailed;
@@ -169,14 +171,14 @@
     {
         await InvokeAsync(() =>
         {
-            if (!IsPlaying)
-            {
-                _dimmedScreenTimer.Stop();
-            }
+            // if (!IsPlaying)
+            // {
+            //     _dimmedScreenTimer.Stop();
+            // }
 
             ShowDimmedScreen = "";
 
-            _dimmedScreenTimerSeconds = 0;
+            //_dimmedScreenTimerSeconds = 0;
 
             StateHasChanged();
         });
@@ -201,6 +203,9 @@
     {
         List<ArmaPlaylistDataItem> randomSongs = (UserId.HasValue ? _armaApi.Offline_GetRandomSongs(UserId.Value) : new List<ArmaPlaylistDataItem>());
 
+        _currentPlaylist = randomSongs;
+        _currentSongIndex = -1;
+
         await JS.InvokeVoidAsync("populateSongsToPlayerTable", randomSongs);
     }
 
@@ -209,14 +214,19 @@
         string searchText = e.Value.ToString();
         List<ArmaPlaylistDataItem> randomSongs = (UserId.HasValue ? _armaApi.Offline_SearchSongs(UserId.Value, searchText) : new List<ArmaPlaylistDataItem>());
 
+        _currentPlaylist = randomSongs;
+        _currentSongIndex = -1;
+
         await JS.InvokeVoidAsync("populateSongsToPlayerTable", randomSongs);        
     }
 
     private async void OnChangeOfflinePlaylistsHandler(ChangeEventArgs e)
     {
         int? playlistId = (Int32.TryParse(e.Value.ToString(), out int _idValue) ? _idValue : (int?)null);
-
         List<ArmaPlaylistDataItem> playlist = (playlistId.HasValue ? _armaApi.Offline_GetPlaylistById(playlistId.Value) : new List<ArmaPlaylistDataItem>());
+
+        _currentPlaylist = playlist;
+        _currentSongIndex = -1;
 
         await JS.InvokeVoidAsync("populateSongsToPlayerTable", playlist);
     }
@@ -230,19 +240,27 @@
                 string songWithPath = _armaApi.GetFileWithPath($"{songId}.m4a");
 
                 await InvokeAsync(async () =>
-                //MainThread.BeginInvokeOnMainThread(() =>
+                //await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    await _audioPlayer.SetMediaSource(songWithPath);
+                    _audioPlayer.MediaEndedEvent -= OnPlaybackEnded;
+                    _audioPlayer.MediaFailedEvent -= OnAudioFailed;
+
                     await _audioPlayer.SetMetaData(artistName, songName);
+                    await _audioPlayer.SetMediaSource(songWithPath, artistName, songName);
                     await _audioPlayer.Play();
+                    
+                    _audioPlayer.MediaEndedEvent += OnPlaybackEnded;
+                    _audioPlayer.MediaFailedEvent += OnAudioFailed;
+
+                    _currentSongIndex = _currentPlaylist.FindIndex(s => s.VideoId == songId);
 
                     _elapsedTimer.Start();
                     IsPlaying = true;
 
-                    if (_dimmedScreenTimerSeconds == 0)
-                    {
-                        _dimmedScreenTimer.Start();
-                    }
+                    // if (_dimmedScreenTimerSeconds == 0)
+                    // {
+                    //     _dimmedScreenTimer.Start();
+                    // }
 
                     StateHasChanged();
                 });
@@ -250,18 +268,25 @@
             else
             {
                 await InvokeAsync(async () =>
+                //await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
                     _audioPlayer.MediaEndedEvent -= OnPlaybackEnded;
+                    _audioPlayer.MediaFailedEvent -= OnAudioFailed;
+
                     await _audioPlayer.Stop();
                     _elapsedTimer.Stop();
                     IsPlaying = false;
+
                     _audioPlayer.MediaEndedEvent += OnPlaybackEnded;
+                    _audioPlayer.MediaFailedEvent += OnAudioFailed;
+
+                    _currentSongIndex = -1;
 
                     ElapsedTime = "00:00";
                     TotalTime = "00:00";
 
-                    _dimmedScreenTimer.Stop();
-                    _dimmedScreenTimerSeconds = 0;
+                    // _dimmedScreenTimer.Stop();
+                    // _dimmedScreenTimerSeconds = 0;
 
                     await JS.InvokeVoidAsync("updatePlayerSliderPosition", 0);
 
@@ -276,19 +301,27 @@
                 string songWithPath = _armaApi.GetFileWithPath($"{songId}.m4a");
 
                 await InvokeAsync(async () =>
-                //MainThread.BeginInvokeOnMainThread(() =>
+                //await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    await _audioPlayer.SetMediaSource(songWithPath);
+                    _audioPlayer.MediaEndedEvent -= OnPlaybackEnded;
+                    _audioPlayer.MediaFailedEvent -= OnAudioFailed;
+
                     await _audioPlayer.SetMetaData(artistName, songName);
+                    await _audioPlayer.SetMediaSource(songWithPath, artistName, songName);
                     await _audioPlayer.Play();
+                    
+                    _audioPlayer.MediaEndedEvent += OnPlaybackEnded;
+                    _audioPlayer.MediaFailedEvent += OnAudioFailed;
+
+                    _currentSongIndex = _currentPlaylist.FindIndex(s => s.VideoId == songId);
 
                     _elapsedTimer.Start();
                     IsPlaying = true;
 
-                    if (_dimmedScreenTimerSeconds == 0)
-                    {
-                        _dimmedScreenTimer.Start();
-                    }
+                    // if (_dimmedScreenTimerSeconds == 0)
+                    // {
+                    //     _dimmedScreenTimer.Start();
+                    // }
 
                     StateHasChanged();
                 });
@@ -377,7 +410,45 @@
             StateHasChanged();
         });
 
-        await JS.InvokeVoidAsync("playNextAvailableSong");
+        if (_currentPlaylist == null || _currentPlaylist.Count == 0)
+        {
+            IsPlaying = false;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        int nextIndex = IsRepeat ? _currentSongIndex : _currentSongIndex + 1;
+
+        if (nextIndex >= 0 && nextIndex < _currentPlaylist.Count)
+        {
+            var nextSong = _currentPlaylist[nextIndex];
+
+            PlaySong(nextSong.VideoId, nextSong.Artist, nextSong.Song, false);
+
+            // Best-effort UI sync — fine if this silently does nothing while backgrounded
+            try
+            {
+                await JS.InvokeVoidAsync("highlightNowPlayingRow", nextSong.VideoId);
+            }
+            catch
+            {
+                // WebView likely suspended (app minimized); UI will catch up
+                // via RefreshUIFromOfflineRadio next time the app is foregrounded.
+            }
+        }
+        else
+        {
+            _currentSongIndex = -1;
+            IsPlaying = false;
+
+            await InvokeAsync(() =>
+            {
+                ShowDimmedScreen = "";
+                StateHasChanged();
+            });
+        }
+
+        //await JS.InvokeVoidAsync("playNextAvailableSong");
     }
 
     private string FormatTime(TimeSpan seconds)
@@ -408,20 +479,20 @@
         });
     }
 
-    private async void DimmedScreenTickEvent(object sender, System.Timers.ElapsedEventArgs e)
-    {
-        await InvokeAsync(() =>
-        {
-            if (IsPlaying && _dimmedScreenTimerSeconds > _maxDimScreenSeconds)
-            {
-                ShowDimmedScreen = "show";
+    // private async void DimmedScreenTickEvent(object sender, System.Timers.ElapsedEventArgs e)
+    // {
+    //     await InvokeAsync(() =>
+    //     {
+    //         if (IsPlaying && _dimmedScreenTimerSeconds > _maxDimScreenSeconds)
+    //         {
+    //             ShowDimmedScreen = "show";
 
-                StateHasChanged();
-            }
+    //             StateHasChanged();
+    //         }
 
-            _dimmedScreenTimerSeconds++;
-        });
-    }
+    //         _dimmedScreenTimerSeconds++;
+    //     });
+    // }
 
     private async void OnPlaybackEnded(object sender, EventArgs e)
     {
@@ -431,8 +502,9 @@
         });
     }
 
-    private async void OnAudioFailed(object sender, CommunityToolkit.Maui.Core.Primitives.MediaFailedEventArgs e)
+    private async void OnAudioFailed(object sender, CommunityToolkit.Maui.Core.MediaFailedEventArgs e)
     {
+        System.Diagnostics.Debug.WriteLine($"[OfflinePlayer] OnAudioFailed fired: {e.ErrorMessage} at {DateTime.Now:HH:mm:ss.fff}");
         // Ensure this runs on the UI thread
         await InvokeAsync(async () =>
         {

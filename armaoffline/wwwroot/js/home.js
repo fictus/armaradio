@@ -285,6 +285,15 @@ async function returnSelectedOfflinePlaylistValues(playlistId, name) {
     await DotNet.invokeMethodAsync("armaoffline", "SetSelectedOfflinePlaylistValues", playlistId, name);
 }
 
+function highlightNowPlayingRow(videoId) {
+    $("#tblMainPlayList").find("tr.now-playing").removeClass("now-playing");
+
+    let tr = $("#tblMainPlayList").find("tr[data-videoid='" + videoId + "']");
+    if (tr.length) {
+        tr.addClass("now-playing");
+    }
+}
+
 var armaradio = {
     /************************************************
         masterPageWait

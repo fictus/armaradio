@@ -1,7 +1,13 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 	<application android:allowBackup="true" android:icon="@mipmap/appicon" android:supportsRtl="true">
-		<service android:name="communityToolkit.maui.media.services" android:exported="false" android:enabled="true" android:foregroundServiceType="mediaPlayback" android:stopWithTask="true">
+		<!-- Background media playback service (CommunityToolkit.Maui.MediaElement) -->
+		<service
+			android:name="communityToolkit.maui.media.services"
+			android:exported="false"
+			android:enabled="true"
+			android:foregroundServiceType="mediaPlayback"
+			android:stopWithTask="false">
 			<intent-filter>
 				<action android:name="android.intent.action.MEDIA_BUTTON" />
 			</intent-filter>
@@ -10,15 +16,26 @@
 			</intent-filter>
 		</service>
 	</application>
+
+	<!-- Network -->
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.INTERNET" />
-	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+	<!-- Storage (legacy, still needed for Android < 10) -->
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+
+	<!-- Background audio / foreground service -->
 	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-	<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 	<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
+	<!-- Media session controls (lock screen / notification) -->
+	<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 	<uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
+
+	<!-- Keep CPU alive while audio plays with screen off -->
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
+
+	<!-- Battery optimisation exemption prompt -->
 	<uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-	<!--<uses-permission android:name="android.permission.WAKE_LOCK" />-->
 </manifest>
