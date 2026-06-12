@@ -28,10 +28,10 @@ jobs:
         run: dotnet workload install maui-android
 
       - name: Restore dependencies
-        run: dotnet restore armaradio/armaoffline/armaoffline.csproj -p:TargetFrameworks=net10.0-android
+        run: dotnet restore armaoffline/armaoffline.csproj -p:TargetFrameworks=net10.0-android
 
       - name: Build & publish APK
-        run: dotnet publish armaradio/armaoffline/armaoffline.csproj -f net10.0-android -c Release
+        run: dotnet publish armaoffline/armaoffline.csproj -f net10.0-android -c Release
 
       - name: Upload APK as artifact (manual runs)
         if: github.event_name == 'workflow_dispatch'
