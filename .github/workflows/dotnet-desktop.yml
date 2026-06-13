@@ -30,8 +30,21 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore armaoffline/armaoffline.csproj -p:TargetFrameworks=net10.0-android
 
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > ${{ github.workspace }}/armaoffline.jks
+
       - name: Build & publish APK
-        run: dotnet publish armaoffline/armaoffline.csproj -f net10.0-android -c Release -p:TargetFrameworks=net10.0-android
+        run: |
+          dotnet publish armaoffline/armaoffline.csproj \
+            -f net10.0-android \
+            -c Release \
+            -p:TargetFrameworks=net10.0-android \
+            -p:AndroidKeyStore=true \
+            -p:AndroidSigningKeyStore=${{ github.workspace }}/armaoffline.jks \
+            -p:AndroidSigningKeyAlias=${{ secrets.KEY_ALIAS }} \
+            -p:AndroidSigningKeyPass=${{ secrets.KEY_PASSWORD }} \
+            -p:AndroidSigningStorePass=${{ secrets.STORE_PASSWORD }}
 
       - name: Upload APK as artifact (manual runs)
         if: github.event_name == 'workflow_dispatch'
