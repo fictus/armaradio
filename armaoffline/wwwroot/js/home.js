@@ -291,6 +291,15 @@ function highlightNowPlayingRow(videoId) {
     let tr = $("#tblMainPlayList").find("tr[data-videoid='" + videoId + "']");
     if (tr.length) {
         tr.addClass("now-playing");
+
+        setTimeout(function () {
+            tr[0].scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+
+            refreshOfflinePlayerUI();
+        }, 1);
     }
 }
 
